@@ -53,6 +53,19 @@ int main() {
   cout << "Instance ptrs" << endl;
   for (auto& inst : add4_n->getDef()->getInstances()) {
     cout << inst.first << " = " << inst.second << endl;
+
+    Instance* ist = inst.second;
+    if (ist->hasConfigArgs()) {
+      cout << "--- Config args" << endl;
+      for (auto& arg : ist->getConfigArgs()) {
+      }
+    }
+
+    for (auto& arg : ist->getGenArgs()) {
+      cout << "Gen Arg" << endl;
+      Arg* ag = arg.second;
+      cout << ag->toString() << endl;
+    }
   }
   cout << "My connections printout" << endl;
   for (auto& connection : add4_n->getDef()->getConnections()) {
