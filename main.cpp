@@ -195,7 +195,7 @@ void buildOrderedGraph(Module* mod) {
   for (auto inst_pair : mod->getDef()->getInstances()) {
     vdisc v = g.add_vertex(inst_pair.second);
     Instance* inst = inst_pair.second;
-    //pair<Instance*, vdisc> p(inst, v);
+
     imap.insert({inst, v});
   }
 
@@ -237,45 +237,47 @@ void buildOrderedGraph(Module* mod) {
   boost::topological_sort(g, std::front_inserter(topo_order));
 
   for (auto& vd : topo_order) {
-    bool found = false;
-    for (auto kv : imap) {
-      if (vd == kv.second) {
-	found = true;
 
-	Instance* inst = kv.first;	
-      	//cout << inst->toString() << endl;
+    Instance* inst = get(boost::vertex_name, g, vd);
 
-	cout << "--- IN EDGES" << endl;
-	auto in_edge_pair = boost::in_edges(vd, g);
-	for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
-	  cout << "In edge" << endl;
-	  auto in_edge_desc = *it;
-	  vdisc src = source(in_edge_desc, g);
-	  vdisc dest = target(in_edge_desc, g);
-	}
-	
-	cout << "--- OUT EDGES" << endl;
-	auto out_edge_pair = boost::out_edges(vd, g);
-	for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
-	  cout << "Out edge" << endl;
-	}
+    // bool found = false;
+    // for (auto kv : imap) {
+    //   if (vd == kv.second) {
+    // 	found = true;
 
-	// std::for_each(eit, eend,
-	// 	      [&g](graph::edge_descriptor it)
-	// 	      { std::cout << boost::target(it, g) << '\n'; });	
-	// Print outputs
-	// for (auto& out_d : boost::out_edges(vd, g)) {
-	// }
+    //Instance* inst = kv.first;	
+    //cout << inst->toString() << endl;
 
-	string name = inst->getInstname();
-	cout << name << " was generated ? " << inst->wasGen() << ", is a generator ? " << inst->isGen() << " and has selects ";
-	for (auto& sel : inst->getSelects()) {
-	  cout << sel.first << " : " << sel.second->getType()->toString()  << ", ";
-	}
-	cout << endl;
-      }
+    cout << "--- IN EDGES" << endl;
+    auto in_edge_pair = boost::in_edges(vd, g);
+    for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
+      cout << "In edge" << endl;
+      auto in_edge_desc = *it;
+      vdisc src = source(in_edge_desc, g);
+      vdisc dest = target(in_edge_desc, g);
     }
-    assert(found);
+	
+    cout << "--- OUT EDGES" << endl;
+    auto out_edge_pair = boost::out_edges(vd, g);
+    for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
+      cout << "Out edge" << endl;
+    }
+
+    // std::for_each(eit, eend,
+    // 	      [&g](graph::edge_descriptor it)
+    // 	      { std::cout << boost::target(it, g) << '\n'; });	
+    // Print outputs
+    // for (auto& out_d : boost::out_edges(vd, g)) {
+    // }
+
+    string name = inst->getInstname();
+    cout << name << " was generated ? " << inst->wasGen() << ", is a generator ? " << inst->isGen() << " and has selects ";
+    for (auto& sel : inst->getSelects()) {
+      cout << sel.first << " : " << sel.second->getType()->toString()  << ", ";
+    }
+    cout << endl;
+    //      }
+    //assert(found);
   }
 
 }
