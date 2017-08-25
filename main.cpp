@@ -62,9 +62,9 @@ vector<pair<Wireable*, Wireable*> > build_ordered_connections(Module* mod) {
     Type* snd_tp = snd_select->getType();
 
     if (fst_tp->isInput()) {
-      conns.push_back({fst, snd});
-    } else {
       conns.push_back({snd, fst});
+    } else {
+      conns.push_back({fst, snd});
     }
 
   }
@@ -150,6 +150,17 @@ void print_connections(Module* add4_n) {
 
 }
 
+string selectInfoString(Wireable* w) {
+  assert(isSelect(w));
+
+  Select* s = static_cast<Select*>(w);
+  string ss = s->getSelStr();
+  //Wireable* parent = s->getParent();
+  
+  
+  return ss + " " + s->getType()->toString();
+}
+
 int main() {
   uint n = 32;
   
@@ -196,7 +207,8 @@ int main() {
 
   cout << "Ordered connections" << endl;
   for (auto& conn : ord_conns) {
-    cout << (conn.first)->getType()->toString() << " ---> " << (conn.second)->getType()->toString() << endl;
+    cout << selectInfoString(conn.first) << " --> " << selectInfoString(conn.second) << endl;
+    //cout << (conn.first)->getType()->toString() << " ---> " << (conn.second)->getType()->toString() << endl;
   }
 
   deleteContext(c);
