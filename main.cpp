@@ -194,6 +194,11 @@ int main() {
   //print_ordered_connections(add4_n);
   auto ord_conns = build_ordered_connections(add4_n);
 
+  cout << "Ordered connections" << endl;
+  for (auto& conn : ord_conns) {
+    cout << (conn.first)->getType()->toString() << " ---> " << (conn.second)->getType()->toString() << endl;
+  }
+
   deleteContext(c);
   
   return 0;
