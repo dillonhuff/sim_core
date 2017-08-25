@@ -2,6 +2,11 @@
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"
 
+#include <boost/graph/directed_graph.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/topological_sort.hpp>
+
+
 using namespace CoreIR;
 using namespace CoreIR::Passes;
 
@@ -161,6 +166,27 @@ string selectInfoString(Wireable* w) {
   return ss + " " + s->getType()->toString();
 }
 
+//typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> NGraph;
+typedef boost::directed_graph<> NGraph;
+typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
+
+void buildOrderedGraph(Module* mod) {
+  auto ord_conns = build_ordered_connections(mod);
+
+  
+  NGraph g;
+  for (auto& inst : mod->getDef()->getInstances()) {
+     vdisc v = g.add_vertex();
+  }
+  
+
+  cout << "Ordered connections" << endl;
+  for (auto& conn : ord_conns) {
+    cout << selectInfoString(conn.first) << " --> " << selectInfoString(conn.second) << endl;
+  }
+
+}
+
 int main() {
   uint n = 32;
   
@@ -202,14 +228,7 @@ int main() {
   cout << "After running generators" << endl;
   add4_n->print();
 
-  //print_ordered_connections(add4_n);
-  auto ord_conns = build_ordered_connections(add4_n);
-
-  cout << "Ordered connections" << endl;
-  for (auto& conn : ord_conns) {
-    cout << selectInfoString(conn.first) << " --> " << selectInfoString(conn.second) << endl;
-    //cout << (conn.first)->getType()->toString() << " ---> " << (conn.second)->getType()->toString() << endl;
-  }
+  buildOrderedGraph(add4_n);
 
   deleteContext(c);
   
