@@ -5,6 +5,10 @@
 using namespace CoreIR;
 using namespace CoreIR::Passes;
 
+bool isSelect(Wireable* fst) {
+  return fst->getKind() == Wireable::WK_Select;
+}
+
 int main() {
   uint n = 32;
   
@@ -46,14 +50,28 @@ int main() {
   cout << "After running generators" << endl;
   add4_n->print();
 
+  cout << "Instance ptrs" << endl;
+  for (auto& inst : add4_n->getDef()->getInstances()) {
+    cout << inst.first << " = " << inst.second << endl;
+  }
   cout << "My connections printout" << endl;
   for (auto& connection : add4_n->getDef()->getConnections()) {
+    cout << "---- CONNECTION" << endl;
     Wireable* fst = connection.first;
-    Wireable* snd = connection.second;
     cout << "First wireable kind = " << fst->wireableKind2Str(fst->getKind()) << endl;
     cout << "con first = " << connection.first->toString() << endl;
 
+    Wireable* snd = connection.second;
     cout << "con second = " << connection.second->toString() << endl;
+
+    assert(isSelect(fst));
+    assert(isSelect(snd));
+
+
+    Select* fst_select = static_cast<Select*>(fst);
+    Select* snd_select = static_cast<Select*>(snd);
+    cout << "fst parent ptr = " << fst_select->getParent() << endl;
+    cout << "snd parent ptr = " << snd_select->getParent() << endl;
   }
 
   deleteContext(c);
