@@ -41,7 +41,15 @@ int main() {
   add4_n->print();
 
   RunGenerators rg;
-  
+  rg.runOnNamespace(g);
+
+  cout << "After running generators" << endl;
+  add4_n->print();
+
+  cout << "My connections printout" << endl;
+  for (auto& connection : add4_n->getDef()->getConnections()) {
+    
+  }
 
   deleteContext(c);
   
