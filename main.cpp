@@ -241,10 +241,10 @@ void buildOrderedGraph(Module* mod) {
 
     Instance* inst = get(boost::vertex_name, g, vd);
 
-    cout << "--- IN EDGES" << endl;
+    cout << "--- INPUTS: ";
     auto in_edge_pair = boost::in_edges(vd, g);
     for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
-      cout << "In edge" << endl;
+      //cout << "In edge" << endl;
       auto in_edge_desc = *it;
       pair<Wireable*, Wireable*> edge_conn =
 	boost::get(boost::edge_name, g, in_edge_desc);
@@ -253,22 +253,27 @@ void buildOrderedGraph(Module* mod) {
       Select* sel = static_cast<Select*>(edge_conn.second);
       assert(sel->getParent() == inst);
 
-      //vdisc src = source(in_edge_desc, g);
-      //vdisc dest = target(in_edge_desc, g);
-    }
-	
-    cout << "--- OUT EDGES" << endl;
-    auto out_edge_pair = boost::out_edges(vd, g);
-    for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
-      cout << "Out edge" << endl;
+      assert(isSelect(edge_conn.second));
+      Select* input_sel = static_cast<Select*>(edge_conn.first);
+
+      cout << input_sel->toString() << " , ";
+      
     }
 
-    string name = inst->getInstname();
-    cout << name << " was generated ? " << inst->wasGen() << ", is a generator ? " << inst->isGen() << " and has selects ";
-    for (auto& sel : inst->getSelects()) {
-      cout << sel.first << " : " << sel.second->getType()->toString()  << ", ";
-    }
     cout << endl;
+	
+    // cout << "--- OUT EDGES" << endl;
+    // auto out_edge_pair = boost::out_edges(vd, g);
+    // for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
+    //   cout << "Out edge" << endl;
+    // }
+
+    // string name = inst->getInstname();
+    // cout << name << " was generated ? " << inst->wasGen() << ", is a generator ? " << inst->isGen() << " and has selects ";
+    // for (auto& sel : inst->getSelects()) {
+    //   cout << sel.first << " : " << sel.second->getType()->toString()  << ", ";
+    // }
+    // cout << endl;
 
   }
 
