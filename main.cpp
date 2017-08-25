@@ -41,6 +41,40 @@ bool connection_is_ordered(const Connection& connection) {
   return false;
 }
 
+vector<pair<Wireable*, Wireable*> > build_ordered_connections(Module* mod) {
+  vector<pair<Wireable*, Wireable*> > conns;
+
+  for (auto& connection : mod->getDef()->getConnections()) {
+
+    assert(connection_is_ordered(connection));
+
+
+    Wireable* fst = connection.first;
+    Wireable* snd = connection.second;
+
+    assert(isSelect(fst));
+    assert(isSelect(snd));
+
+    Select* fst_select = static_cast<Select*>(fst);
+    Select* snd_select = static_cast<Select*>(snd);
+
+    Type* fst_tp = fst_select->getType();
+    Type* snd_tp = snd_select->getType();
+
+    if (fst_tp->isInput()) {
+      conns.push_back({fst, snd});
+    } else {
+      conns.push_back({snd, fst});
+    }
+
+  }
+
+  assert(conns.size() == mod->getDef()->getConnections().size());
+
+  return conns;
+  
+}
+
 void print_ordered_connections(Module* add4_n) {
   cout << "Ordered connections" << endl;
   for (auto& connection : add4_n->getDef()->getConnections()) {
@@ -157,7 +191,8 @@ int main() {
   cout << "After running generators" << endl;
   add4_n->print();
 
-  print_ordered_connections(add4_n);
+  //print_ordered_connections(add4_n);
+  auto ord_conns = build_ordered_connections(add4_n);
 
   deleteContext(c);
   
