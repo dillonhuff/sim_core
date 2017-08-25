@@ -181,6 +181,28 @@ Select* toSelect(Wireable* w) {
   return static_cast<Select*>(w);
 }
 
+std::vector<Wireable*> getOutputs(const vdisc vd, const NGraph& g) {
+  vector<Wireable*> outputs;
+
+  auto out_edge_pair = boost::out_edges(vd, g);
+  Wireable* w = boost::get(boost::vertex_name, g, vd);
+
+  for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
+    auto out_edge_desc = *it;
+    pair<Wireable*, Wireable*> edge_conn =
+      boost::get(boost::edge_name, g, out_edge_desc);
+
+    assert(isSelect(edge_conn.first));
+    Select* sel = static_cast<Select*>(edge_conn.first);
+    assert(sel->getParent() == w);
+
+    outputs.push_back(edge_conn.second);
+      
+  }
+
+  return outputs;
+}
+
 std::vector<Wireable*> getInputs(const vdisc vd, const NGraph& g) {
   vector<Wireable*> inputs;
   Wireable* w = boost::get(boost::vertex_name, g, vd);
@@ -281,40 +303,15 @@ void buildOrderedGraph(Module* mod) {
     Wireable* inst = get(boost::vertex_name, g, vd);
 
     cout << "--- INPUTS to " << inst->toString() << ": ";
-    auto in_edge_pair = boost::in_edges(vd, g);
-    for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
-      auto in_edge_desc = *it;
-      pair<Wireable*, Wireable*> edge_conn =
-	boost::get(boost::edge_name, g, in_edge_desc);
-
-      assert(isSelect(edge_conn.second));
-      Select* sel = static_cast<Select*>(edge_conn.second);
-      assert(sel->getParent() == inst);
-
-      assert(isSelect(edge_conn.first));
-      Select* input_sel = static_cast<Select*>(edge_conn.first);
-
-      cout << input_sel->toString() << " , ";
-      
+    for (auto input : getInputs(vd, g)) {
+      cout << input->toString() << " , ";
     }
 
     cout << "--- OUTPUTS from " << inst->toString() << ": ";
-    auto out_edge_pair = boost::out_edges(vd, g);
-    for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
-      auto out_edge_desc = *it;
-      pair<Wireable*, Wireable*> edge_conn =
-	boost::get(boost::edge_name, g, out_edge_desc);
-
-      assert(isSelect(edge_conn.first));
-      Select* sel = static_cast<Select*>(edge_conn.first);
-      assert(sel->getParent() == inst);
-
-      assert(isSelect(edge_conn.second));
-      Select* output_sel = static_cast<Select*>(edge_conn.second);
-
-      cout << output_sel->toString() << " , ";
-      
+    for (auto output : getOutputs(vd, g)) {
+      cout << output->toString() << " , ";
     }
+    
 
     cout << endl;
 	
