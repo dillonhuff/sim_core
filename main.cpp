@@ -181,6 +181,26 @@ Select* toSelect(Wireable* w) {
   return static_cast<Select*>(w);
 }
 
+std::vector<Wireable*> getInputs(const vdisc vd, const NGraph& g) {
+  vector<Wireable*> inputs;
+  Wireable* w = boost::get(boost::vertex_name, g, vd);
+  auto in_edge_pair = boost::in_edges(vd, g);
+  for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
+    auto in_edge_desc = *it;
+    pair<Wireable*, Wireable*> edge_conn =
+      boost::get(boost::edge_name, g, in_edge_desc);
+
+    assert(isSelect(edge_conn.second));
+    Select* sel = static_cast<Select*>(edge_conn.second);
+    assert(sel->getParent() == w);
+
+    inputs.push_back(edge_conn.first);
+      
+  }
+
+  return inputs;
+}
+
 void buildOrderedGraph(Module* mod) {
   auto ord_conns = build_ordered_connections(mod);
 
