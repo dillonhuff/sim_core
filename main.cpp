@@ -171,7 +171,7 @@ string selectInfoString(Wireable* w) {
 }
 
 //typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> NGraph;
-typedef boost::directed_graph<boost::property<boost::vertex_name_t, Instance*>> NGraph;
+typedef boost::directed_graph<boost::property<boost::vertex_name_t, Instance*>, boost::property<boost::vertex_name_t, pair<Wireable*, Wireable*> > > NGraph;
 typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
 
 void buildOrderedGraph(Module* mod) {
@@ -185,17 +185,11 @@ void buildOrderedGraph(Module* mod) {
   
   NGraph g;
 
-  // boost::property_map<NGraph, boost::vertex_name_t>::type
-  //   name = get(vertex_name_t(), g);
-    
-  //boost::put(vertex_name, 0, "Jeremy");
-  // boost::put(name, 1, "Rich");
-  // boost::put(name, 2, "Andrew");  
   unordered_map<Instance*, vdisc> imap;
   for (auto inst_pair : mod->getDef()->getInstances()) {
     vdisc v = g.add_vertex(inst_pair.second);
-    Instance* inst = inst_pair.second;
 
+    Instance* inst = inst_pair.second;
     imap.insert({inst, v});
   }
 
@@ -240,14 +234,6 @@ void buildOrderedGraph(Module* mod) {
 
     Instance* inst = get(boost::vertex_name, g, vd);
 
-    // bool found = false;
-    // for (auto kv : imap) {
-    //   if (vd == kv.second) {
-    // 	found = true;
-
-    //Instance* inst = kv.first;	
-    //cout << inst->toString() << endl;
-
     cout << "--- IN EDGES" << endl;
     auto in_edge_pair = boost::in_edges(vd, g);
     for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
@@ -263,21 +249,13 @@ void buildOrderedGraph(Module* mod) {
       cout << "Out edge" << endl;
     }
 
-    // std::for_each(eit, eend,
-    // 	      [&g](graph::edge_descriptor it)
-    // 	      { std::cout << boost::target(it, g) << '\n'; });	
-    // Print outputs
-    // for (auto& out_d : boost::out_edges(vd, g)) {
-    // }
-
     string name = inst->getInstname();
     cout << name << " was generated ? " << inst->wasGen() << ", is a generator ? " << inst->isGen() << " and has selects ";
     for (auto& sel : inst->getSelects()) {
       cout << sel.first << " : " << sel.second->getType()->toString()  << ", ";
     }
     cout << endl;
-    //      }
-    //assert(found);
+
   }
 
 }
