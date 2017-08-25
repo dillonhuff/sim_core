@@ -14,6 +14,15 @@ bool isSelect(Wireable* fst) {
   return fst->getKind() == Wireable::WK_Select;
 }
 
+bool isSelect(const Wireable& fst) {
+  return fst.getKind() == Wireable::WK_Select;
+}
+
+Select& toSelect(Wireable& fst) {
+  assert(isSelect(fst));
+  return static_cast<Select&>(fst);
+}
+
 bool isInstance(Wireable* fst) {
   return fst->getKind() == Wireable::WK_Instance;
 }
@@ -236,6 +245,15 @@ getOutputSelects(Wireable* inst) {
   return outs;
 }
 
+string cVar(Wireable& w) {
+  if (isSelect(w)) {
+    Select& s = toSelect(w);
+    return cVar(*(s.getParent())) + "_" + s.getSelStr();
+  } else {
+    return w.toString();
+  }
+}
+
 void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
   assert(getInputs(vd, g).size() == 2);
   auto outSelects = getOutputSelects(inst);
@@ -250,7 +268,7 @@ void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
 
   assert(inSelects.size() == 2);
 
-  cout << inSelects[0]->toString() << " + " << inSelects[1]->toString() << ";" << endl;
+  cout << cVar(*(inSelects[0])) << " + " << cVar(*(inSelects[1])) << ";" << endl;
 
   //pair<string, Wireable*> outPair = *std::begin(outSelects);
   
