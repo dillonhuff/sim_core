@@ -225,13 +225,19 @@ void buildOrderedGraph(Module* mod) {
     }
   }
 
-
   cout << "Topological ordering" << endl;
   deque<vdisc> topo_order;
   boost::topological_sort(g, std::front_inserter(topo_order));
 
   for (auto& vd : topo_order) {
-    cout << vd << endl;
+    bool found = false;
+    for (auto kv : imap) {
+      if (vd == kv.second) {
+	found = true;
+      	cout << (kv.first)->toString() << endl;
+      }
+    }
+    assert(found);
   }
 
 }
