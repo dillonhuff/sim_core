@@ -245,6 +245,19 @@ getOutputSelects(Wireable* inst) {
   return outs;
 }
 
+unordered_map<string, Wireable*>
+getInputSelects(Wireable* inst) {
+  unordered_map<string, Wireable*> outs;
+
+  for (auto& select : inst->getSelects()) {
+    if (select.second->getType()->isInput()) {
+      outs.insert(select);
+    }
+  }
+
+  return outs;
+}
+
 string cVar(Wireable& w) {
   if (isSelect(w)) {
     Select& s = toSelect(w);
@@ -357,16 +370,30 @@ void buildOrderedGraph(Module* mod) {
     if (isInstance(inst)) {
       printBinop(static_cast<Instance*>(inst), vd, g);
     } else {
+
+      //auto ins = getInputSelects(inst);
+      auto ins = getInputs(vd, g);
+
+      //assert((ins.size() == 0) || (outs.size() == 0));
+
       cout << inst->toString() << " = ";
-      for (auto input : getInputs(vd, g)) {
-	cout << input->toString() << " + ";
+      for (auto input : ins) {
+	cout << cVar(*input) << ";" << endl;
       }
 
-      cout << " OUTPUTS from " << inst->toString() << ": ";
-      for (auto output : getOutputs(vd, g)) {
-	cout << output->toString() << " , ";
+      cout << endl;
+
+      auto outs = getOutputSelects(inst);      
+      for (auto output : outs) {
+	cout << cVar(*(output.second)) << ";" << endl;
       }
       cout << endl;
+
+      cout << "// inst = " << inst->toString() << endl;
+      cout << "// # of ins = " << ins.size() << endl;
+      cout << "// # of outs = " << outs.size() << endl;
+
+      
     }
 	
   }
