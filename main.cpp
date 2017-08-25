@@ -171,7 +171,7 @@ string selectInfoString(Wireable* w) {
 }
 
 //typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> NGraph;
-typedef boost::directed_graph<boost::property<boost::vertex_name_t, Instance*>, boost::property<boost::vertex_name_t, pair<Wireable*, Wireable*> > > NGraph;
+typedef boost::directed_graph<boost::property<boost::vertex_name_t, Instance*>, boost::property<boost::edge_name_t, pair<Wireable*, Wireable*> > > NGraph;
 typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
 
 void buildOrderedGraph(Module* mod) {
