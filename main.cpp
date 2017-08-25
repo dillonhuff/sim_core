@@ -171,10 +171,15 @@ string selectInfoString(Wireable* w) {
 }
 
 typedef boost::property<boost::edge_name_t, pair<Wireable*, Wireable*> > EdgeProp;
-typedef boost::directed_graph<boost::property<boost::vertex_name_t, Instance*>, EdgeProp > NGraph;
+typedef boost::directed_graph<boost::property<boost::vertex_name_t, Wireable*>, EdgeProp > NGraph;
 
 typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
 typedef boost::graph_traits<NGraph>::edge_descriptor edisc;
+
+Select* toSelect(Wireable* w) {
+  assert(isSelect(w));
+  return static_cast<Select*>(w);
+}
 
 void buildOrderedGraph(Module* mod) {
   auto ord_conns = build_ordered_connections(mod);
@@ -189,11 +194,27 @@ void buildOrderedGraph(Module* mod) {
 
   // Add vertexes for all instances in the graph
   unordered_map<Wireable*, vdisc> imap;
-  for (auto inst_pair : mod->getDef()->getInstances()) {
-    vdisc v = g.add_vertex(inst_pair.second);
+  //for (auto inst_pair : mod->getDef()->getInstances()) {
+  for (auto& conn : ord_conns) {
+    // assert(isSelect(conn.first));
+    // assert(isSelect(conn.second));
 
-    Instance* inst = inst_pair.second;
-    imap.insert({inst, v});
+    Select* sel1 = toSelect(conn.first);
+    Select* sel2 = toSelect(conn.second);
+
+    Wireable* w1 = sel1->getParent();
+    Wireable* w2 = sel2->getParent();
+
+    if (imap.find(w1) == end(imap)) {
+      vdisc v1 = g.add_vertex(w1);
+      imap.insert({w1, v1});
+    }
+
+    if (imap.find(w2) == end(imap)) {
+      vdisc v2 = g.add_vertex(w2);
+      imap.insert({w2, v2});
+    }
+
   }
 
   // Add edges to the graph
@@ -207,34 +228,28 @@ void buildOrderedGraph(Module* mod) {
     cout << "c1 parent = " << c1->getParent()->toString() << endl;
     cout << "c2 parent = " << c2->getParent()->toString() << endl;
 
-    if (isInstance(c1->getParent()) && isInstance(c2->getParent())) {
-      cout << "Input and output are instances" << endl;
+    cout << "Input and output are instances" << endl;
 
-      Instance* p1 = static_cast<Instance*>(c1->getParent());
-      auto c1_disc_it = imap.find(p1);
+    Wireable* p1 = static_cast<Instance*>(c1->getParent());
+    auto c1_disc_it = imap.find(p1);
 
-      assert(c1_disc_it != imap.end());
+    assert(c1_disc_it != imap.end());
 
-      Instance* p2 = static_cast<Instance*>(c2->getParent());
-      auto c2_disc_it = imap.find(p2);
+    Wireable* p2 = static_cast<Instance*>(c2->getParent());
+    auto c2_disc_it = imap.find(p2);
 
-      assert(c2_disc_it != imap.end());
+    assert(c2_disc_it != imap.end());
 
-      vdisc c1_disc = (*c1_disc_it).second;
-      vdisc c2_disc = (*c2_disc_it).second;
+    vdisc c1_disc = (*c1_disc_it).second;
+    vdisc c2_disc = (*c2_disc_it).second;
       
-      pair<edisc, bool> ed = g.add_edge(c1_disc, c2_disc);
+    pair<edisc, bool> ed = g.add_edge(c1_disc, c2_disc);
 
-      cout << "Bool from add_edge = " << ed.second << endl;
-      assert(ed.second);
+    cout << "Bool from add_edge = " << ed.second << endl;
+    assert(ed.second);
 
-      boost::put(boost::edge_name, g, ed.first, conn);
+    boost::put(boost::edge_name, g, ed.first, conn);
       
-    } else {
-      cout << "Non instance connection!" << endl;
-      cout << "c1 = " << c1->toString() << endl;
-      cout << "c2 = " << c2->toString() << endl;
-    }
   }
 
   cout << "Topological ordering" << endl;
@@ -243,7 +258,7 @@ void buildOrderedGraph(Module* mod) {
 
   for (auto& vd : topo_order) {
 
-    Instance* inst = get(boost::vertex_name, g, vd);
+    Wireable* inst = get(boost::vertex_name, g, vd);
 
     cout << "--- INPUTS to " << inst->toString() << ": ";
     auto in_edge_pair = boost::in_edges(vd, g);
@@ -283,19 +298,6 @@ void buildOrderedGraph(Module* mod) {
 
     cout << endl;
 	
-    // cout << "--- OUT EDGES" << endl;
-    // auto out_edge_pair = boost::out_edges(vd, g);
-    // for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
-    //   cout << "Out edge" << endl;
-    // }
-
-    // string name = inst->getInstname();
-    // cout << name << " was generated ? " << inst->wasGen() << ", is a generator ? " << inst->isGen() << " and has selects ";
-    // for (auto& sel : inst->getSelects()) {
-    //   cout << sel.first << " : " << sel.second->getType()->toString()  << ", ";
-    // }
-    // cout << endl;
-
   }
 
 }
