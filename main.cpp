@@ -171,8 +171,11 @@ string selectInfoString(Wireable* w) {
 }
 
 //typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> NGraph;
-typedef boost::directed_graph<boost::property<boost::vertex_name_t, Instance*>, boost::property<boost::edge_name_t, pair<Wireable*, Wireable*> > > NGraph;
+typedef boost::property<boost::edge_name_t, int> EdgeProp;
+typedef boost::directed_graph<boost::property<boost::vertex_name_t, Instance*>, EdgeProp > NGraph;
+
 typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
+typedef boost::graph_traits<NGraph>::edge_descriptor edisc;
 
 void buildOrderedGraph(Module* mod) {
   auto ord_conns = build_ordered_connections(mod);
@@ -189,11 +192,13 @@ void buildOrderedGraph(Module* mod) {
   for (auto inst_pair : mod->getDef()->getInstances()) {
     vdisc v = g.add_vertex(inst_pair.second);
 
+    //boost::put(boost::vertex_name, g, v, inst_pair.second);
     Instance* inst = inst_pair.second;
     imap.insert({inst, v});
   }
 
-  for (auto& conn : ord_conns) {
+  // Add edges to the graph
+  for (pair<Wireable*, Wireable*> conn : ord_conns) {
     assert(isSelect(conn.first));
     assert(isSelect(conn.second));
 
@@ -202,9 +207,6 @@ void buildOrderedGraph(Module* mod) {
 
     cout << "c1 parent = " << c1->getParent()->toString() << endl;
     cout << "c2 parent = " << c2->getParent()->toString() << endl;
-
-    // assert(isInstance(c1->getParent()));
-    // assert(isInstance(c2->getParent()));
 
     if (isInstance(c1->getParent()) && isInstance(c2->getParent())) {
       cout << "Input and output are instances" << endl;
@@ -222,7 +224,13 @@ void buildOrderedGraph(Module* mod) {
       vdisc c1_disc = (*c1_disc_it).second;
       vdisc c2_disc = (*c2_disc_it).second;
       
-      g.add_edge(c1_disc, c2_disc);
+      pair<edisc, bool> ed = g.add_edge(c1_disc, c2_disc);
+
+      cout << "Bool from add_edge = " << ed.second << endl;
+      assert(ed.second);
+
+      boost::put(boost::edge_name, g, ed.first, 1);
+      
     }
   }
 
