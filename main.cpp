@@ -184,9 +184,16 @@ void buildOrderedGraph(Module* mod) {
   
   
   NGraph g;
+
+  // boost::property_map<NGraph, boost::vertex_name_t>::type
+  //   name = get(vertex_name_t(), g);
+    
+  //boost::put(vertex_name, 0, "Jeremy");
+  // boost::put(name, 1, "Rich");
+  // boost::put(name, 2, "Andrew");  
   unordered_map<Instance*, vdisc> imap;
   for (auto inst_pair : mod->getDef()->getInstances()) {
-    vdisc v = g.add_vertex();
+    vdisc v = g.add_vertex(inst_pair.second);
     Instance* inst = inst_pair.second;
     //pair<Instance*, vdisc> p(inst, v);
     imap.insert({inst, v});
