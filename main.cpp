@@ -14,6 +14,10 @@ bool isSelect(Wireable* fst) {
   return fst->getKind() == Wireable::WK_Select;
 }
 
+bool isInstance(Wireable* fst) {
+  return fst->getKind() == Wireable::WK_Instance;
+}
+
 void print_wireable_selects(Wireable* fst_select) {
   cout << "Wireable selects" << endl;
   for (auto& s : fst_select->getSelects()) {
@@ -173,16 +177,61 @@ typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
 void buildOrderedGraph(Module* mod) {
   auto ord_conns = build_ordered_connections(mod);
 
-  
-  NGraph g;
-  for (auto& inst : mod->getDef()->getInstances()) {
-     vdisc v = g.add_vertex();
-  }
-  
-
   cout << "Ordered connections" << endl;
   for (auto& conn : ord_conns) {
     cout << selectInfoString(conn.first) << " --> " << selectInfoString(conn.second) << endl;
+  }
+  
+  
+  NGraph g;
+  unordered_map<Instance*, vdisc> imap;
+  for (auto inst_pair : mod->getDef()->getInstances()) {
+    vdisc v = g.add_vertex();
+    Instance* inst = inst_pair.second;
+    //pair<Instance*, vdisc> p(inst, v);
+    imap.insert({inst, v});
+  }
+
+  for (auto& conn : ord_conns) {
+    assert(isSelect(conn.first));
+    assert(isSelect(conn.second));
+
+    auto c1 = static_cast<Select*>(conn.first);
+    auto c2 = static_cast<Select*>(conn.second);
+
+    cout << "c1 parent = " << c1->getParent()->toString() << endl;
+    cout << "c2 parent = " << c2->getParent()->toString() << endl;
+
+    // assert(isInstance(c1->getParent()));
+    // assert(isInstance(c2->getParent()));
+
+    if (isInstance(c1->getParent()) && isInstance(c2->getParent())) {
+      cout << "Input and output are instances" << endl;
+
+      Instance* p1 = static_cast<Instance*>(c1->getParent());
+      auto c1_disc_it = imap.find(p1);
+
+      assert(c1_disc_it != imap.end());
+
+      Instance* p2 = static_cast<Instance*>(c2->getParent());
+      auto c2_disc_it = imap.find(p2);
+
+      assert(c2_disc_it != imap.end());
+
+      vdisc c1_disc = (*c1_disc_it).second;
+      vdisc c2_disc = (*c2_disc_it).second;
+      
+      g.add_edge(c1_disc, c2_disc);
+    }
+  }
+
+
+  cout << "Topological ordering" << endl;
+  deque<vdisc> topo_order;
+  boost::topological_sort(g, std::front_inserter(topo_order));
+
+  for (auto& vd : topo_order) {
+    cout << vd << endl;
   }
 
 }
