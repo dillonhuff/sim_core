@@ -223,6 +223,40 @@ std::vector<Wireable*> getInputs(const vdisc vd, const NGraph& g) {
   return inputs;
 }
 
+unordered_map<string, Wireable*>
+getOutputSelects(Wireable* inst) {
+  unordered_map<string, Wireable*> outs;
+
+  for (auto& select : inst->getSelects()) {
+    if (select.second->getType()->isOutput()) {
+      outs.insert(select);
+    }
+  }
+
+  return outs;
+}
+
+void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
+  assert(getInputs(vd, g).size() == 2);
+  auto outSelects = getOutputSelects(inst);
+
+  assert(outSelects.size() == 1);
+
+  pair<string, Wireable*> outPair = *std::begin(outSelects);
+
+  cout << inst->getInstname() << "_" << outPair.first << " = ";
+
+  auto inSelects = getInputs(vd, g);
+
+  assert(inSelects.size() == 2);
+
+  cout << inSelects[0]->toString() << " + " << inSelects[1]->toString() << ";" << endl;
+
+  //pair<string, Wireable*> outPair = *std::begin(outSelects);
+  
+  cout << endl;
+}
+
 void buildOrderedGraph(Module* mod) {
   auto ord_conns = build_ordered_connections(mod);
 
@@ -302,18 +336,20 @@ void buildOrderedGraph(Module* mod) {
 
     Wireable* inst = get(boost::vertex_name, g, vd);
 
-    cout << inst->toString() << " = ";
-    for (auto input : getInputs(vd, g)) {
-      cout << input->toString() << " + ";
-    }
+    if (isInstance(inst)) {
+      printBinop(static_cast<Instance*>(inst), vd, g);
+    } else {
+      cout << inst->toString() << " = ";
+      for (auto input : getInputs(vd, g)) {
+	cout << input->toString() << " + ";
+      }
 
-    cout << " OUTPUTS from " << inst->toString() << ": ";
-    for (auto output : getOutputs(vd, g)) {
-      cout << output->toString() << " , ";
+      cout << " OUTPUTS from " << inst->toString() << ": ";
+      for (auto output : getOutputs(vd, g)) {
+	cout << output->toString() << " , ";
+      }
+      cout << endl;
     }
-    
-
-    cout << endl;
 	
   }
 
