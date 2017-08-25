@@ -187,11 +187,11 @@ void buildOrderedGraph(Module* mod) {
   
   NGraph g;
 
-  unordered_map<Instance*, vdisc> imap;
+  // Add vertexes for all instances in the graph
+  unordered_map<Wireable*, vdisc> imap;
   for (auto inst_pair : mod->getDef()->getInstances()) {
     vdisc v = g.add_vertex(inst_pair.second);
 
-    //boost::put(boost::vertex_name, g, v, inst_pair.second);
     Instance* inst = inst_pair.second;
     imap.insert({inst, v});
   }
@@ -230,6 +230,10 @@ void buildOrderedGraph(Module* mod) {
 
       boost::put(boost::edge_name, g, ed.first, conn);
       
+    } else {
+      cout << "Non instance connection!" << endl;
+      cout << "c1 = " << c1->toString() << endl;
+      cout << "c2 = " << c2->toString() << endl;
     }
   }
 
