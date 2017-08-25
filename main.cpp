@@ -302,12 +302,12 @@ void buildOrderedGraph(Module* mod) {
 
     Wireable* inst = get(boost::vertex_name, g, vd);
 
-    cout << "--- INPUTS to " << inst->toString() << ": ";
+    cout << inst->toString() << " = ";
     for (auto input : getInputs(vd, g)) {
-      cout << input->toString() << " , ";
+      cout << input->toString() << " + ";
     }
 
-    cout << "--- OUTPUTS from " << inst->toString() << ": ";
+    cout << " OUTPUTS from " << inst->toString() << ": ";
     for (auto output : getOutputs(vd, g)) {
       cout << output->toString() << " , ";
     }
