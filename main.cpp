@@ -171,7 +171,7 @@ string selectInfoString(Wireable* w) {
 }
 
 //typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> NGraph;
-typedef boost::directed_graph<> NGraph;
+typedef boost::directed_graph<boost::property<boost::vertex_name_t, Instance*>> NGraph;
 typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
 
 void buildOrderedGraph(Module* mod) {
@@ -234,7 +234,38 @@ void buildOrderedGraph(Module* mod) {
     for (auto kv : imap) {
       if (vd == kv.second) {
 	found = true;
-      	cout << (kv.first)->toString() << endl;
+
+	Instance* inst = kv.first;	
+      	//cout << inst->toString() << endl;
+
+	cout << "--- IN EDGES" << endl;
+	auto in_edge_pair = boost::in_edges(vd, g);
+	for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
+	  cout << "In edge" << endl;
+	  auto in_edge_desc = *it;
+	  vdisc src = source(in_edge_desc, g);
+	  vdisc dest = target(in_edge_desc, g);
+	}
+	
+	cout << "--- OUT EDGES" << endl;
+	auto out_edge_pair = boost::out_edges(vd, g);
+	for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
+	  cout << "Out edge" << endl;
+	}
+
+	// std::for_each(eit, eend,
+	// 	      [&g](graph::edge_descriptor it)
+	// 	      { std::cout << boost::target(it, g) << '\n'; });	
+	// Print outputs
+	// for (auto& out_d : boost::out_edges(vd, g)) {
+	// }
+
+	string name = inst->getInstname();
+	cout << name << " was generated ? " << inst->wasGen() << ", is a generator ? " << inst->isGen() << " and has selects ";
+	for (auto& sel : inst->getSelects()) {
+	  cout << sel.first << " : " << sel.second->getType()->toString()  << ", ";
+	}
+	cout << endl;
       }
     }
     assert(found);
@@ -275,13 +306,13 @@ int main() {
 
   def->connect(add_1->sel("out"),self->sel("out"));
   add4_n->setDef(def);
-  add4_n->print();
+  //add4_n->print();
 
   RunGenerators rg;
   rg.runOnNamespace(g);
 
-  cout << "After running generators" << endl;
-  add4_n->print();
+  // cout << "After running generators" << endl;
+  // add4_n->print();
 
   buildOrderedGraph(add4_n);
 
