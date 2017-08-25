@@ -376,9 +376,11 @@ void buildOrderedGraph(Module* mod) {
 
       //assert((ins.size() == 0) || (outs.size() == 0));
 
-      cout << inst->toString() << " = ";
-      for (auto input : ins) {
-	cout << cVar(*input) << ";" << endl;
+      if (ins.size() > 0) {
+	cout << inst->toString() << " = ";
+	for (auto input : ins) {
+	  cout << cVar(*input) << ";" << endl;
+	}
       }
 
       cout << endl;
