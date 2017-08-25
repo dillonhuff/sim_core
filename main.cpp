@@ -170,8 +170,7 @@ string selectInfoString(Wireable* w) {
   return ss + " " + s->getType()->toString();
 }
 
-//typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> NGraph;
-typedef boost::property<boost::edge_name_t, int> EdgeProp;
+typedef boost::property<boost::edge_name_t, pair<Wireable*, Wireable*> > EdgeProp;
 typedef boost::directed_graph<boost::property<boost::vertex_name_t, Instance*>, EdgeProp > NGraph;
 
 typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
@@ -229,7 +228,7 @@ void buildOrderedGraph(Module* mod) {
       cout << "Bool from add_edge = " << ed.second << endl;
       assert(ed.second);
 
-      boost::put(boost::edge_name, g, ed.first, 1);
+      boost::put(boost::edge_name, g, ed.first, conn);
       
     }
   }
@@ -247,8 +246,15 @@ void buildOrderedGraph(Module* mod) {
     for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
       cout << "In edge" << endl;
       auto in_edge_desc = *it;
-      vdisc src = source(in_edge_desc, g);
-      vdisc dest = target(in_edge_desc, g);
+      pair<Wireable*, Wireable*> edge_conn =
+	boost::get(boost::edge_name, g, in_edge_desc);
+
+      assert(isSelect(edge_conn.second));
+      Select* sel = static_cast<Select*>(edge_conn.second);
+      assert(sel->getParent() == inst);
+
+      //vdisc src = source(in_edge_desc, g);
+      //vdisc dest = target(in_edge_desc, g);
     }
 	
     cout << "--- OUT EDGES" << endl;
