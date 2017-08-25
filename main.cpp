@@ -48,7 +48,12 @@ int main() {
 
   cout << "My connections printout" << endl;
   for (auto& connection : add4_n->getDef()->getConnections()) {
-    
+    Wireable* fst = connection.first;
+    Wireable* snd = connection.second;
+    cout << "First wireable kind = " << fst->wireableKind2Str(fst->getKind()) << endl;
+    cout << "con first = " << connection.first->toString() << endl;
+
+    cout << "con second = " << connection.second->toString() << endl;
   }
 
   deleteContext(c);
