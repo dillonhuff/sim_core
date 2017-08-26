@@ -355,41 +355,103 @@ bool fromSelf(Select* w) {
   return parent->toString() == "self";
 }
 
+bool isArray(Type& t) {
+  return t.getKind() == Type::TK_Array;
+}
+
+bool isBitArrayOfLength(Type& t, const uint len) {
+  if (t.getKind() != Type::TK_Array) {
+    return false;
+  }
+
+  ArrayType& tArr = static_cast<ArrayType&>(t);
+
+  Type::TypeKind elemKind = (tArr.getElemType())->getKind();
+  if ((elemKind == Type::TK_Bit || elemKind == Type::TK_BitIn) &&
+      (tArr.getLen() == len)) {
+    return true;
+  }
+
+  return false;
+}
+std::string cTypeString(Type& t) {
+  if (isBitArrayOfLength(t, 32)) {
+    return "uint32_t";
+  }
+
+  if (isArray(t)) {
+    ArrayType& tArr = static_cast<ArrayType&>(t);
+    Type& underlying = *(tArr.getElemType());
+
+    return cTypeString(underlying) + "*";
+  }
+
+  assert(false);
+  // switch (t.getKind()) {
+  // case Type::TK_Array:
+  //   return cTypeString(*(static_cast<ArrayType&>(t).getElemType())) + "*";
+  // case Type::
+  // default:
+  //   assert(false);
+  // }
+  // return t.toString();
+}
+
 void printCode(const std::deque<vdisc>& topo_order,
 	       NGraph& g) {
 
   // Declare all variables
   cout << "// Variable declarations" << endl;
+  vector<Wireable*> self_inputs_outputs;
+  vector<Wireable*> internals;
+
   for (auto& vd : topo_order) {
     Wireable* inst = get(boost::vertex_name, g, vd);
 
-    cout << endl << "// Input variables" << endl;
+    // cout << endl << "// Input variables" << endl;
     auto ins = getInputSelects(inst);
     for (auto& inSel : ins) {
       auto in = inSel.second;
-      cout << in->getType()->toString() << " " << cVar(*in) << ";";
+      //cout << in->getType()->toString() << " " << cVar(*in) << ";";
       if (fromSelf(toSelect(in))) {
-	cout << " // FROM SELF";
+	//cout << " // FROM SELF";
+	self_inputs_outputs.push_back(in);
+      } else {
+	internals.push_back(in);
       }
-      cout << endl;
+      //cout << endl;
     }
 
-    cout << endl << "// Output variables" << endl;
+    //cout << endl << "// Output variables" << endl;
     auto outs = getOutputSelects(inst);
     for (auto& outSel : outs) {
       auto out = outSel.second;
-      cout << out->getType()->toString() << " " << cVar(*out) << ";";
+      //cout << out->getType()->toString() << " " << cVar(*out) << ";";
       if (fromSelf(toSelect(out))) {
-	cout << " // FROM SELF";
+	//cout << " // FROM SELF";
+	self_inputs_outputs.push_back(out);
+      } else {
+	internals.push_back(out);
       }
-      cout << endl;
+      //cout << endl;
       
     }
 
   }
 
+  cout << "// Inputs and outputs" << endl;
+  for (auto& in : self_inputs_outputs) {
+    cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
+  }
+
+  cout << endl << "// Internal variables" << endl;
+  for (auto& in : internals) {
+    cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
+  }
+    
+  
   // Print out operations in topological order
-  cout << "// Simulation code" << endl;
+  cout << endl << "// Simulation code" << endl;
   for (auto& vd : topo_order) {
 
     Wireable* inst = get(boost::vertex_name, g, vd);
@@ -430,22 +492,15 @@ void buildOrderedGraph(Module* mod) {
     Select* sel1 = toSelect(conn.first);
     Select* sel2 = toSelect(conn.second);
 
-    cout << "sel1 = " << sel1->toString() << endl;
-    cout << "sel2 = " << sel2->toString() << endl;
-
     Wireable* w1 = sel1->getParent();
     Wireable* w2 = sel2->getParent();
 
     if (imap.find(w1) == end(imap)) {
-      cout << "Adding vertex " << w1->toString() << endl;
-
       vdisc v1 = g.add_vertex(w1);
       imap.insert({w1, v1});
     }
 
     if (imap.find(w2) == end(imap)) {
-      cout << "Adding vertex " << w2->toString() << endl;
-
       vdisc v2 = g.add_vertex(w2);
       imap.insert({w2, v2});
     }
