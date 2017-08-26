@@ -179,7 +179,8 @@ string selectInfoString(Wireable* w) {
   return ss + " " + s->getType()->toString();
 }
 
-typedef boost::property<boost::edge_name_t, pair<Wireable*, Wireable*> > EdgeProp;
+typedef std::pair<Wireable*, Wireable*> Conn;
+typedef boost::property<boost::edge_name_t, Conn > EdgeProp;
 typedef boost::directed_graph<boost::property<boost::vertex_name_t, Wireable*>, EdgeProp > NGraph;
 
 typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
@@ -188,6 +189,52 @@ typedef boost::graph_traits<NGraph>::edge_descriptor edisc;
 Select* toSelect(Wireable* w) {
   assert(isSelect(w));
   return static_cast<Select*>(w);
+}
+
+std::vector<Conn> getOutputConnections(const vdisc vd, const NGraph& g) {
+  vector<Conn> outConns;
+
+  auto out_edge_pair = boost::out_edges(vd, g);
+  Wireable* w = boost::get(boost::vertex_name, g, vd);
+
+  for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
+    auto out_edge_desc = *it;
+    pair<Wireable*, Wireable*> edge_conn =
+      boost::get(boost::edge_name, g, out_edge_desc);
+
+    assert(isSelect(edge_conn.first));
+    Select* sel = static_cast<Select*>(edge_conn.first);
+    assert(sel->getParent() == w);
+
+    outConns.push_back(edge_conn);
+      
+  }
+  
+  return outConns;
+}
+
+std::vector<Conn> getInputConnections(const vdisc vd, const NGraph& g) {
+  vector<Conn> inConss;
+
+  auto out_edge_pair = boost::in_edges(vd, g);
+  Wireable* w = boost::get(boost::vertex_name, g, vd);
+
+  for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
+    auto out_edge_desc = *it;
+    pair<Wireable*, Wireable*> edge_conn =
+      boost::get(boost::edge_name, g, out_edge_desc);
+
+    assert(isSelect(edge_conn.second));
+
+    Select* sel = static_cast<Select*>(edge_conn.second);
+
+    assert(sel->getParent() == w);
+
+    inConss.push_back(edge_conn);
+      
+  }
+  
+  return inConss;
 }
 
 std::vector<Wireable*> getOutputs(const vdisc vd, const NGraph& g) {
@@ -280,12 +327,12 @@ void printOutput(Wireable* inst, const vdisc vd, const NGraph& g) {
 
 void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
   assert(getInputs(vd, g).size() == 2);
+
   auto outSelects = getOutputSelects(inst);
 
   assert(outSelects.size() == 1);
 
   pair<string, Wireable*> outPair = *std::begin(outSelects);
-
   cout << inst->getInstname() << "_" << outPair.first << " = ";
 
   auto inSelects = getInputs(vd, g);
@@ -313,20 +360,34 @@ void printCode(const std::deque<vdisc>& topo_order,
       auto ins = getInputSelects(inst);
       auto outs = getOutputSelects(inst);
 
-      cout << "// inst = " << inst->toString() << endl;
-      cout << "// # of ins = " << ins.size() << endl;
-      cout << "// # of outs = " << outs.size() << endl;
-
-      for (auto input : ins) {
-	cout << cVar(*(input.second)) << ";" << endl;
-      }
+      auto inConns = getInputConnections(vd, g);
+      auto outConns = getOutputConnections(vd, g);
       
-      for (auto output : outs) {
-	cout << cVar(*(output.second)) << ";" << endl;
+      // cout << "// inst = " << inst->toString() << endl;
+      // cout << "// # of ins = " << ins.size() << endl;
+      // cout << "// # of outs = " << outs.size() << endl;
+
+      // for (auto input : ins) {
+      // 	cout << cVar(*(input.second)) << ";" << endl;
+      // }
+
+      // for (auto output : outs) {
+      // 	cout << cVar(*(output.second)) << ";" << endl;
+      // }
+      // cout << endl;
+
+      cout << "// Input connections" << endl;
+      for (auto inConn : inConns) {
+	cout << cVar(*(inConn.second)) << " = " << cVar(*(inConn.first)) << ";" << endl;
+	//cout << cVar(*(inConn.first)) << " --> " << cVar(*(inConn.second)) << endl;
       }
-      cout << endl;
 
+      // cout << "// Output connections" << endl;
+      // for (auto outConn : outConns) {
 
+      // 	//cout << cVar(*(outConn.first)) << " --> " << cVar(*(outConn.second)) << endl;
+      // }
+      
       
     }
 	
@@ -383,11 +444,6 @@ void buildOrderedGraph(Module* mod) {
     auto c1 = static_cast<Select*>(conn.first);
     auto c2 = static_cast<Select*>(conn.second);
 
-    // cout << "c1 parent = " << c1->getParent()->toString() << endl;
-    // cout << "c2 parent = " << c2->getParent()->toString() << endl;
-
-    // cout << "Input and output are instances" << endl;
-
     Wireable* p1 = static_cast<Instance*>(c1->getParent());
     auto c1_disc_it = imap.find(p1);
 
@@ -403,7 +459,6 @@ void buildOrderedGraph(Module* mod) {
       
     pair<edisc, bool> ed = g.add_edge(c1_disc, c2_disc);
 
-    cout << "Bool from add_edge = " << ed.second << endl;
     assert(ed.second);
 
     boost::put(boost::edge_name, g, ed.first, conn);
