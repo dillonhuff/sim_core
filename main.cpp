@@ -310,33 +310,22 @@ void printCode(const std::deque<vdisc>& topo_order,
       printBinop(static_cast<Instance*>(inst), vd, g);
     } else {
 
-      //printOutput(inst, vd, g);
-
-      //auto ins = getInputSelects(inst);
-      //cout << cVar(ins) << endl;
-      //auto ins = getInputs(vd, g);
-
-      //assert((ins.size() == 0) || (outs.size() == 0));
-
-      // if (ins.size() > 0) {
-      // 	//cout << inst->toString() << " = ";
-      // 	cout << cVar(); << " = ";
-      // 	for (auto input : ins) {
-      // 	  cout << cVar(*input) << ";" << endl;
-      // 	}
-      // }
-
-      cout << endl;
-
+      auto ins = getInputSelects(inst);
       auto outs = getOutputSelects(inst);
+
+      cout << "// inst = " << inst->toString() << endl;
+      cout << "// # of ins = " << ins.size() << endl;
+      cout << "// # of outs = " << outs.size() << endl;
+
+      for (auto input : ins) {
+	cout << cVar(*(input.second)) << ";" << endl;
+      }
+      
       for (auto output : outs) {
 	cout << cVar(*(output.second)) << ";" << endl;
       }
       cout << endl;
 
-      cout << "// inst = " << inst->toString() << endl;
-      //cout << "// # of ins = " << ins.size() << endl;
-      cout << "// # of outs = " << outs.size() << endl;
 
       
     }
@@ -462,13 +451,9 @@ int main() {
 
   def->connect(add_1->sel("out"),self->sel("out"));
   add4_n->setDef(def);
-  //add4_n->print();
 
   RunGenerators rg;
   rg.runOnNamespace(g);
-
-  // cout << "After running generators" << endl;
-  // add4_n->print();
 
   buildOrderedGraph(add4_n);
 
