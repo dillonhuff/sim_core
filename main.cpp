@@ -267,6 +267,17 @@ string cVar(Wireable& w) {
   }
 }
 
+void printOutput(Wireable* inst, const vdisc vd, const NGraph& g) {
+  auto outSelects = getOutputSelects(inst);
+
+  //assert(outSelects.size() == 1);
+
+  pair<string, Wireable*> outPair = *std::begin(outSelects);
+
+  //cout << inst->getInstname() << "_" << outPair.first << " = ";
+
+}
+
 void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
   assert(getInputs(vd, g).size() == 2);
   auto outSelects = getOutputSelects(inst);
@@ -288,6 +299,52 @@ void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
   cout << endl;
 }
 
+void printCode(const std::deque<vdisc>& topo_order,
+	       NGraph& g) {
+
+  for (auto& vd : topo_order) {
+
+    Wireable* inst = get(boost::vertex_name, g, vd);
+
+    if (isInstance(inst)) {
+      printBinop(static_cast<Instance*>(inst), vd, g);
+    } else {
+
+      //printOutput(inst, vd, g);
+
+      //auto ins = getInputSelects(inst);
+      //cout << cVar(ins) << endl;
+      //auto ins = getInputs(vd, g);
+
+      //assert((ins.size() == 0) || (outs.size() == 0));
+
+      // if (ins.size() > 0) {
+      // 	//cout << inst->toString() << " = ";
+      // 	cout << cVar(); << " = ";
+      // 	for (auto input : ins) {
+      // 	  cout << cVar(*input) << ";" << endl;
+      // 	}
+      // }
+
+      cout << endl;
+
+      auto outs = getOutputSelects(inst);
+      for (auto output : outs) {
+	cout << cVar(*(output.second)) << ";" << endl;
+      }
+      cout << endl;
+
+      cout << "// inst = " << inst->toString() << endl;
+      //cout << "// # of ins = " << ins.size() << endl;
+      cout << "// # of outs = " << outs.size() << endl;
+
+      
+    }
+	
+  }
+
+}
+
 void buildOrderedGraph(Module* mod) {
   auto ord_conns = build_ordered_connections(mod);
 
@@ -301,23 +358,28 @@ void buildOrderedGraph(Module* mod) {
 
   // Add vertexes for all instances in the graph
   unordered_map<Wireable*, vdisc> imap;
-  //for (auto inst_pair : mod->getDef()->getInstances()) {
+
   for (auto& conn : ord_conns) {
-    // assert(isSelect(conn.first));
-    // assert(isSelect(conn.second));
 
     Select* sel1 = toSelect(conn.first);
     Select* sel2 = toSelect(conn.second);
+
+    cout << "sel1 = " << sel1->toString() << endl;
+    cout << "sel2 = " << sel2->toString() << endl;
 
     Wireable* w1 = sel1->getParent();
     Wireable* w2 = sel2->getParent();
 
     if (imap.find(w1) == end(imap)) {
+      cout << "Adding vertex " << w1->toString() << endl;
+
       vdisc v1 = g.add_vertex(w1);
       imap.insert({w1, v1});
     }
 
     if (imap.find(w2) == end(imap)) {
+      cout << "Adding vertex " << w2->toString() << endl;
+
       vdisc v2 = g.add_vertex(w2);
       imap.insert({w2, v2});
     }
@@ -332,10 +394,10 @@ void buildOrderedGraph(Module* mod) {
     auto c1 = static_cast<Select*>(conn.first);
     auto c2 = static_cast<Select*>(conn.second);
 
-    cout << "c1 parent = " << c1->getParent()->toString() << endl;
-    cout << "c2 parent = " << c2->getParent()->toString() << endl;
+    // cout << "c1 parent = " << c1->getParent()->toString() << endl;
+    // cout << "c2 parent = " << c2->getParent()->toString() << endl;
 
-    cout << "Input and output are instances" << endl;
+    // cout << "Input and output are instances" << endl;
 
     Wireable* p1 = static_cast<Instance*>(c1->getParent());
     auto c1_disc_it = imap.find(p1);
@@ -356,49 +418,14 @@ void buildOrderedGraph(Module* mod) {
     assert(ed.second);
 
     boost::put(boost::edge_name, g, ed.first, conn);
-      
   }
 
   cout << "Topological ordering" << endl;
   deque<vdisc> topo_order;
   boost::topological_sort(g, std::front_inserter(topo_order));
 
-  for (auto& vd : topo_order) {
+  printCode(topo_order, g);
 
-    Wireable* inst = get(boost::vertex_name, g, vd);
-
-    if (isInstance(inst)) {
-      printBinop(static_cast<Instance*>(inst), vd, g);
-    } else {
-
-      //auto ins = getInputSelects(inst);
-      auto ins = getInputs(vd, g);
-
-      //assert((ins.size() == 0) || (outs.size() == 0));
-
-      if (ins.size() > 0) {
-	cout << inst->toString() << " = ";
-	for (auto input : ins) {
-	  cout << cVar(*input) << ";" << endl;
-	}
-      }
-
-      cout << endl;
-
-      auto outs = getOutputSelects(inst);      
-      for (auto output : outs) {
-	cout << cVar(*(output.second)) << ";" << endl;
-      }
-      cout << endl;
-
-      cout << "// inst = " << inst->toString() << endl;
-      cout << "// # of ins = " << ins.size() << endl;
-      cout << "// # of outs = " << outs.size() << endl;
-
-      
-    }
-	
-  }
 
 }
 
