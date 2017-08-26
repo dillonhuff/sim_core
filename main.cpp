@@ -357,38 +357,17 @@ void printCode(const std::deque<vdisc>& topo_order,
       printBinop(static_cast<Instance*>(inst), vd, g);
     } else {
 
-      auto ins = getInputSelects(inst);
-      auto outs = getOutputSelects(inst);
+      // auto ins = getInputSelects(inst);
+      // auto outs = getOutputSelects(inst);
 
       auto inConns = getInputConnections(vd, g);
-      auto outConns = getOutputConnections(vd, g);
+      //auto outConns = getOutputConnections(vd, g);
       
-      // cout << "// inst = " << inst->toString() << endl;
-      // cout << "// # of ins = " << ins.size() << endl;
-      // cout << "// # of outs = " << outs.size() << endl;
-
-      // for (auto input : ins) {
-      // 	cout << cVar(*(input.second)) << ";" << endl;
-      // }
-
-      // for (auto output : outs) {
-      // 	cout << cVar(*(output.second)) << ";" << endl;
-      // }
-      // cout << endl;
-
       cout << "// Input connections" << endl;
       for (auto inConn : inConns) {
 	cout << cVar(*(inConn.second)) << " = " << cVar(*(inConn.first)) << ";" << endl;
-	//cout << cVar(*(inConn.first)) << " --> " << cVar(*(inConn.second)) << endl;
       }
 
-      // cout << "// Output connections" << endl;
-      // for (auto outConn : outConns) {
-
-      // 	//cout << cVar(*(outConn.first)) << " --> " << cVar(*(outConn.second)) << endl;
-      // }
-      
-      
     }
 	
   }
