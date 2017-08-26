@@ -346,9 +346,50 @@ void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
   cout << endl;
 }
 
+bool fromSelf(Select* w) {
+  Wireable* parent = w->getParent();
+  if (isSelect(parent)) {
+    return fromSelf(toSelect(parent));
+  }
+
+  return parent->toString() == "self";
+}
+
 void printCode(const std::deque<vdisc>& topo_order,
 	       NGraph& g) {
 
+  // Declare all variables
+  cout << "// Variable declarations" << endl;
+  for (auto& vd : topo_order) {
+    Wireable* inst = get(boost::vertex_name, g, vd);
+
+    cout << endl << "// Input variables" << endl;
+    auto ins = getInputSelects(inst);
+    for (auto& inSel : ins) {
+      auto in = inSel.second;
+      cout << in->getType()->toString() << " " << cVar(*in) << ";";
+      if (fromSelf(toSelect(in))) {
+	cout << " // FROM SELF";
+      }
+      cout << endl;
+    }
+
+    cout << endl << "// Output variables" << endl;
+    auto outs = getOutputSelects(inst);
+    for (auto& outSel : outs) {
+      auto out = outSel.second;
+      cout << out->getType()->toString() << " " << cVar(*out) << ";";
+      if (fromSelf(toSelect(out))) {
+	cout << " // FROM SELF";
+      }
+      cout << endl;
+      
+    }
+
+  }
+
+  // Print out operations in topological order
+  cout << "// Simulation code" << endl;
   for (auto& vd : topo_order) {
 
     Wireable* inst = get(boost::vertex_name, g, vd);
@@ -357,13 +398,9 @@ void printCode(const std::deque<vdisc>& topo_order,
       printBinop(static_cast<Instance*>(inst), vd, g);
     } else {
 
-      // auto ins = getInputSelects(inst);
-      // auto outs = getOutputSelects(inst);
-
+      // If not an instance copy the input values
       auto inConns = getInputConnections(vd, g);
-      //auto outConns = getOutputConnections(vd, g);
       
-      cout << "// Input connections" << endl;
       for (auto inConn : inConns) {
 	cout << cVar(*(inConn.second)) << " = " << cVar(*(inConn.first)) << ";" << endl;
       }
