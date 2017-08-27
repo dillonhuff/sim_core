@@ -57,8 +57,19 @@ namespace sim_core {
       deque<vdisc> topo_order = topologicalSort(g);
 
       auto str = printCode(topo_order, g);
-      cout << "CODE STRING" << endl;
-      cout << str << endl;
+
+      string outFile = "./gencode/add4.c";
+      std::ofstream out(outFile);
+      out << str;
+      out.close();
+
+      string runCmd = "clang -c " + outFile;
+      int s = system(runCmd.c_str());
+
+      cout << "Command result = " << s << endl;
+
+      REQUIRE(s == 0);
+
     }
 
     SECTION("64 bit subtract") {
