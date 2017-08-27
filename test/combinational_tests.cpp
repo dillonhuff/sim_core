@@ -102,9 +102,17 @@ namespace sim_core {
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
-      std::ofstream out("./gencode/sub4.c");
+      string outFile = "./gencode/sub4.c";
+      std::ofstream out(outFile);
       out << str;
       out.close();
+
+      string runCmd = "clang -c " + outFile;
+      int s = system(runCmd.c_str());
+
+      cout << "Command result = " << s << endl;
+
+      REQUIRE(s == 0);
     }
 	      
 
