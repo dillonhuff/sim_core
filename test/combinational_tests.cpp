@@ -13,13 +13,14 @@ using namespace CoreIR::Passes;
 namespace sim_core {
 
   TEST_CASE("Combinational logic simulation") {
+
+    // New context
+    Context* c = newContext();
+  
+    Namespace* g = c->getGlobal();
+    
     SECTION("32 bit add 4") {
       uint n = 32;
-  
-      // New context
-      Context* c = newContext();
-  
-      Namespace* g = c->getGlobal();
   
       Generator* add2 = c->getGenerator("coreir.add");
 
@@ -52,9 +53,10 @@ namespace sim_core {
 
       buildOrderedGraph(add4_n);
 
-      deleteContext(c);
-
     }
+
+    deleteContext(c);
+    
   }
 
 }
