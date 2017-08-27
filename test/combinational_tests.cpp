@@ -57,8 +57,49 @@ namespace sim_core {
       deque<vdisc> topo_order = topologicalSort(g);
 
       printCode(topo_order, g);
-      
     }
+
+    SECTION("64 bit subtract") {
+      uint n = 64;
+  
+      Generator* sub2 = c->getGenerator("coreir.sub");
+
+      // Define Add4 Module
+      Type* sub4Type = c->Record({
+	  {"in",c->Array(4,c->Array(n,c->BitIn()))},
+	    {"out",c->Array(n,c->Bit())}
+	});
+
+      Module* sub4_n = g->newModuleDecl("Sub4",sub4Type);
+      ModuleDef* def = sub4_n->newModuleDef();
+      Wireable* self = def->sel("self");
+      Wireable* sub_00 = def->addInstance("sub00",sub2,{{"width",c->argInt(n)}});
+      Wireable* sub_01 = def->addInstance("sub01",sub2,{{"width",c->argInt(n)}});
+      Wireable* sub_1 = def->addInstance("sub1",sub2,{{"width",c->argInt(n)}});
+    
+      def->connect(self->sel("in")->sel(0),sub_00->sel("in0"));
+      def->connect(self->sel("in")->sel(1),sub_00->sel("in1"));
+      def->connect(self->sel("in")->sel(2),sub_01->sel("in0"));
+      def->connect(self->sel("in")->sel(3),sub_01->sel("in1"));
+
+      def->connect(sub_00->sel("out"),sub_1->sel("in0"));
+      def->connect(sub_01->sel("out"),sub_1->sel("in1"));
+
+      def->connect(sub_1->sel("out"),self->sel("out"));
+      sub4_n->setDef(def);
+
+      RunGenerators rg;
+      rg.runOnNamespace(g);
+
+      NGraph g;
+      buildOrderedGraph(sub4_n, g);
+
+      deque<vdisc> topo_order = topologicalSort(g);
+
+      printCode(topo_order, g);
+
+    }
+	      
 
     deleteContext(c);
 

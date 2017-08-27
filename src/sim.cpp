@@ -320,14 +320,23 @@ namespace sim_core {
 
   }
 
+  std::string getOpString(Instance& inst) {
+    string genRefName = inst.getGeneratorRef()->getName();
+
+    if (genRefName == "add") {
+      return " + ";
+    } else if (genRefName == "sub") {
+      return " - ";
+    }
+
+    assert(false);
+
+  }
+
   void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
     assert(getInputs(vd, g).size() == 2);
 
     //cout << "Instance generator ref = " << inst->getGeneratorRef()->toString() << endl;
-    string genRefName = inst->getGeneratorRef()->getName();
-
-    //cout << "genRefName = " << genRefName << endl;
-    assert(genRefName == "add");
 
     auto outSelects = getOutputSelects(inst);
 
@@ -340,10 +349,9 @@ namespace sim_core {
 
     assert(inSelects.size() == 2);
 
-    cout << cVar(*(inSelects[0])) << " + " << cVar(*(inSelects[1])) << ";" << endl;
+    string opString = getOpString(*inst);
 
-    //pair<string, Wireable*> outPair = *std::begin(outSelects);
-  
+    cout << cVar(*(inSelects[0])) << opString << cVar(*(inSelects[1])) << ";" << endl;
     cout << endl;
   }
 
@@ -419,6 +427,10 @@ namespace sim_core {
       return "uint32_t";
     }
 
+    if (isBitArrayOfLength(t, 64)) {
+      return "uint64_t";
+    }
+    
     if (isArray(t)) {
       ArrayType& tArr = static_cast<ArrayType&>(t);
       Type& underlying = *(tArr.getElemType());
