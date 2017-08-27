@@ -308,7 +308,11 @@ getInputSelects(Wireable* inst) {
 string cVar(Wireable& w) {
   if (isSelect(w)) {
     Select& s = toSelect(w);
-    return cVar(*(s.getParent())) + "_" + s.getSelStr();
+    if (isNumber(s.getSelStr())) {
+      return cVar(*(s.getParent())) + "[" + s.getSelStr() + "]";
+    } else {
+      return cVar(*(s.getParent())) + "_" + s.getSelStr();
+    }
   } else {
     return w.toString();
   }
