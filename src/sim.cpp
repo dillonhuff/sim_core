@@ -324,13 +324,15 @@ namespace sim_core {
 
   }
 
-  void printSub(Instance* inst, const vdisc vd, const NGraph& g) {
+  string printSub(Instance* inst, const vdisc vd, const NGraph& g) {
     auto outSelects = getOutputSelects(inst);
 
     assert(outSelects.size() == 1);
 
+    string res = "";
+
     pair<string, Wireable*> outPair = *std::begin(outSelects);
-    cout << inst->getInstname() << "_" << outPair.first << " = ";
+    res += inst->getInstname() + "_" + outPair.first + " = ";
 
     //auto inSelects = getInputs(vd, g);
     auto inConns = getInputConnections(vd, g);
@@ -356,11 +358,13 @@ namespace sim_core {
 
     string opString = getOpString(*inst);
 
-    cout << cVar(*arg1) << opString << cVar(*arg2) << ";" << endl;
-    cout << endl;
+    res += cVar(*arg1) + opString + cVar(*arg2) + ";\n";
+    res += "\n";
+
+    return res;
   }
 
-  void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
+  string printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
     assert(getInputs(vd, g).size() == 2);
 
     return printSub(inst, vd, g);
@@ -540,39 +544,40 @@ namespace sim_core {
     return DeclaredWireables{self_inputs, self_outputs, internals};
   }
 
-  void printSimFunctionBody(const std::deque<vdisc>& topo_order,
-			    NGraph& g) {
+  string printSimFunctionBody(const std::deque<vdisc>& topo_order,
+			      NGraph& g) {
+    string str = "";
     // Declare all variables
-    cout << "// Variable declarations" << endl;
+    str += "// Variable declarations\n";
 
     auto dw = getDeclaredWireables(topo_order, g);
 
-    cout << "// Outputs" << endl;
+    str += "// Outputs\n";
     for (auto& in : dw.selfOutputs) {
-      cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
+      str += cTypeString(*(in->getType())) + " " + cVar(*in) + ";\n";
     }
   
-    cout << endl << "// Internal variables" << endl;
+    str += "// Internal variables\n";
     for (auto& in : dw.internals) {
-      cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
+      str += cTypeString(*(in->getType())) + " " + cVar(*in) + ";\n";
     }
     
   
     // Print out operations in topological order
-    cout << endl << "// Simulation code" << endl;
+    str += "// Simulation code\n";
     for (auto& vd : topo_order) {
 
       Wireable* inst = get(boost::vertex_name, g, vd);
 
       if (isInstance(inst)) {
-	printBinop(static_cast<Instance*>(inst), vd, g);
+	str += printBinop(static_cast<Instance*>(inst), vd, g);
       } else {
 
 	// If not an instance copy the input values
 	auto inConns = getInputConnections(vd, g);
       
 	for (auto inConn : inConns) {
-	  cout << cVar(*(inConn.second)) << " = " << cVar(*(inConn.first)) << ";" << endl;
+	  str += cVar(*(inConn.second)) + " = " + cVar(*(inConn.first)) + ";\n";
 	}
 
       }
@@ -580,48 +585,56 @@ namespace sim_core {
     }
 
     // Copy outputs over to corresponding output pointers
-    cout << endl << "// Copy results to output parameters" << endl;
+    str += "// Copy results to output parameters\n";
     for (auto& out : dw.selfOutputs) {
-      cout << "*" << cVar(*out) << "_ptr = " << cVar(*out) << ";" << endl;
+      str += "*" + cVar(*out) + "_ptr = " + cVar(*out) + ";\n";
     }
 
+    return str;
   }
 
-  void printSimArguments(const DeclaredWireables& dw) {
+  string printSimArguments(const DeclaredWireables& dw) {
+    string res;
     // Print input list
     for (auto& in : dw.selfInputs) {
-      cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ", ";
+      res += cTypeString(*(in->getType())) + " " + cVar(*in) + ", ";
     }
 
     assert(dw.selfOutputs.size() > 0);
 
     for (int i = 0; i < dw.selfOutputs.size(); i++) {
       auto out = dw.selfOutputs[i];
-      cout << cTypeString(*(out->getType())) << "*" << " " << cVar(*out) << "_ptr";
+      res += cTypeString(*(out->getType())) + "*" + " " + cVar(*out) + "_ptr";
 
       if (i < dw.selfOutputs.size() - 1) {
-	cout << ", ";
+	res += ", ";
       }
     }
+
+    return res;
   }
 
-  void printCode(const std::deque<vdisc>& topoOrder,
-		 NGraph& g) {
+  string printCode(const std::deque<vdisc>& topoOrder,
+		   NGraph& g) {
 
     auto dw = getDeclaredWireables(topoOrder, g);
 
-    cout << "#include <stdint.h>" << endl;
-    cout << "#include <stdio.h>" << endl;
-    cout << "#include <stdlib.h>" << endl;
-    cout << "void simulate( ";
+    string code = "";
 
-    printSimArguments(dw);
+    code += "#include <stdint.h>\n";
+    code += "#include <stdio.h>\n";
+    code += "#include <stdlib.h>\n";
+    code += "void simulate( ";
 
-    cout << " ) {" << endl;
+    code += printSimArguments(dw);
 
-    printSimFunctionBody(topoOrder, g);
+    code += + " ) {\n";
 
-    cout << "}" << endl;
+    code += printSimFunctionBody(topoOrder, g);
+
+    code += "}\n";
+
+    return code;
   }
 
   void buildOrderedGraph(Module* mod, NGraph& g) {

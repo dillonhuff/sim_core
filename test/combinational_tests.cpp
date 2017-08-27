@@ -56,7 +56,9 @@ namespace sim_core {
 
       deque<vdisc> topo_order = topologicalSort(g);
 
-      printCode(topo_order, g);
+      auto str = printCode(topo_order, g);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
     }
 
     SECTION("64 bit subtract") {
@@ -96,7 +98,9 @@ namespace sim_core {
 
       deque<vdisc> topo_order = topologicalSort(g);
 
-      printCode(topo_order, g);
+      auto str = printCode(topo_order, g);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
 
     }
 	      
