@@ -433,12 +433,46 @@ std::string cTypeString(Type& t) {
 
 }
 
+bool arrayAccess(Select* in) {
+  return isNumber(in->getSelStr());
+}
+
+vector<Wireable*> collectInputVars(const std::deque<vdisc>& topo_order,
+				 NGraph& g) {
+
+  vector<Wireable*> self_inputs;
+  
+  for (auto& vd : topo_order) {
+    Wireable* inst = get(boost::vertex_name, g, vd);
+
+    auto ins = getInputSelects(inst);
+    for (auto& inSel : ins) {
+      auto in = inSel.second;
+      if (fromSelfInput(toSelect(in)) && !arrayAccess(toSelect(in))) {
+	self_inputs.push_back(in);
+      }
+    }
+
+
+    auto outs = getOutputSelects(inst);
+    for (auto& outSel : outs) {
+      auto out = outSel.second;
+      if (fromSelfInput(toSelect(out)) && !arrayAccess(toSelect(out))) {
+	self_inputs.push_back(out);
+      } 
+    }
+
+  }
+  
+  return self_inputs;
+}
+
 void printCode(const std::deque<vdisc>& topo_order,
 	       NGraph& g) {
 
   // Declare all variables
   cout << "// Variable declarations" << endl;
-  vector<Wireable*> self_inputs;
+  vector<Wireable*> self_inputs = collectInputVars(topo_order, g);
   vector<Wireable*> self_outputs;
   vector<Wireable*> internals;
 
@@ -448,12 +482,10 @@ void printCode(const std::deque<vdisc>& topo_order,
     auto ins = getInputSelects(inst);
     for (auto& inSel : ins) {
       auto in = inSel.second;
-      if (fromSelfInput(toSelect(in))) {
-	self_inputs.push_back(in);
-      } else if (fromSelfOutput(toSelect(in))) {
-	self_outputs.push_back(in);
+      if (fromSelfOutput(toSelect(in))) {
+    	self_outputs.push_back(in);
       } else {
-	internals.push_back(in);
+    	internals.push_back(in);
       }
 
     }
@@ -463,8 +495,6 @@ void printCode(const std::deque<vdisc>& topo_order,
       auto out = outSel.second;
       if (fromSelfOutput(toSelect(out))) {
 	self_outputs.push_back(out);
-      } else if (fromSelfInput(toSelect(out))) {
-	self_inputs.push_back(out);
       } else {
 	internals.push_back(out);
       }
