@@ -470,10 +470,14 @@ vector<Wireable*> collectInputVars(const std::deque<vdisc>& topo_order,
   return self_inputs;
 }
 
-void printSimFunctionBody(const std::deque<vdisc>& topo_order,
-	       NGraph& g) {
-  // Declare all variables
-  cout << "// Variable declarations" << endl;
+struct DeclaredWireables {
+  vector<Wireable*> selfInputs;
+  vector<Wireable*> selfOutputs;
+  vector<Wireable*> internals;
+};
+
+DeclaredWireables getDeclaredWireables(const std::deque<vdisc>& topo_order,
+				       NGraph& g) {
   vector<Wireable*> self_inputs;
   vector<Wireable*> self_outputs;
   vector<Wireable*> internals;
@@ -512,18 +516,28 @@ void printSimFunctionBody(const std::deque<vdisc>& topo_order,
 
   }
 
+  return DeclaredWireables{self_inputs, self_outputs, internals};
+}
+
+void printSimFunctionBody(const std::deque<vdisc>& topo_order,
+			  NGraph& g) {
+  // Declare all variables
+  cout << "// Variable declarations" << endl;
+
+  auto dw = getDeclaredWireables(topo_order, g);
+
   cout << "// Inputs" << endl;
-  for (auto& in : self_inputs) {
+  for (auto& in : dw.selfInputs) {
     cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
   }
 
   cout << "// Outputs" << endl;
-  for (auto& in : self_outputs) {
+  for (auto& in : dw.selfOutputs) {
     cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
   }
   
   cout << endl << "// Internal variables" << endl;
-  for (auto& in : internals) {
+  for (auto& in : dw.internals) {
     cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
   }
     
@@ -551,13 +565,29 @@ void printSimFunctionBody(const std::deque<vdisc>& topo_order,
 
 }
 
+void printSimArguments(const DeclaredWireables& dw) {
+  // Print input list
+  for (auto& in : dw.selfInputs) {
+    cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ", ";
+  }
+
+  assert(dw.selfOutputs.size() > 0);
+
+  for (int i = 0; i < dw.selfOutputs.size(); i++) {
+    auto out = dw.selfOutputs[i];
+    cout << cTypeString(*(out->getType())) << "*" << " " << cVar(*out) << "_ptr" << ", x";
+  }
+}
+
 void printCode(const std::deque<vdisc>& topoOrder,
 	       NGraph& g) {
 
-  cout << "#include <stdint.h>" << endl;
-  cout << "int simulate( ";
+  auto dw = getDeclaredWireables(topoOrder, g);
 
-  
+  cout << "#include <stdint.h>" << endl;
+  cout << "void simulate( ";
+
+  printSimArguments(dw);
 
   cout << " ) {" << endl;
 
