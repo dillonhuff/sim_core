@@ -102,6 +102,9 @@ namespace sim_core {
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
+      std::ofstream out("./gencode/sub4.c");
+      out << str;
+      out.close();
     }
 	      
 
