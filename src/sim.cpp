@@ -116,10 +116,6 @@ namespace sim_core {
 
       assert(connection_is_ordered(connection));
 
-      // cout << "fst parent ptr = " << fst_select->getParent() << endl;
-      // print_wireable_selects(fst_select->getParent());
-      // cout << "snd parent ptr = " << snd_select->getParent() << endl;
-      // print_wireable_selects(snd_select->getParent());
     }
   
   }
@@ -130,11 +126,6 @@ namespace sim_core {
       cout << inst.first << " = " << inst.second << endl;
 
       Instance* ist = inst.second;
-      // if (ist->hasConfigArgs()) {
-      //   cout << "--- Config args" << endl;
-      //   for (auto& arg : ist->getConfigArgs()) {
-      //   }
-      // }
 
       for (auto& arg : ist->getGenArgs()) {
 	cout << "Gen Arg" << endl;
