@@ -640,8 +640,6 @@ namespace sim_core {
   void buildOrderedGraph(Module* mod, NGraph& g) {
     auto ord_conns = build_ordered_connections(mod);
 
-    //NGraph g;
-
     // Add vertexes for all instances in the graph
     unordered_map<Wireable*, vdisc> imap;
 
