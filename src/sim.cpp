@@ -74,10 +74,10 @@ vector<pair<Wireable*, Wireable*> > build_ordered_connections(Module* mod) {
     assert(isSelect(snd));
 
     Select* fst_select = static_cast<Select*>(fst);
-    Select* snd_select = static_cast<Select*>(snd);
+    //Select* snd_select = static_cast<Select*>(snd);
 
     Type* fst_tp = fst_select->getType();
-    Type* snd_tp = snd_select->getType();
+    //Type* snd_tp = snd_select->getType();
 
     if (fst_tp->isInput()) {
       conns.push_back({snd, fst});
@@ -132,11 +132,11 @@ void print_connections(Module* add4_n) {
     cout << inst.first << " = " << inst.second << endl;
 
     Instance* ist = inst.second;
-    if (ist->hasConfigArgs()) {
-      cout << "--- Config args" << endl;
-      for (auto& arg : ist->getConfigArgs()) {
-      }
-    }
+    // if (ist->hasConfigArgs()) {
+    //   cout << "--- Config args" << endl;
+    //   for (auto& arg : ist->getConfigArgs()) {
+    //   }
+    // }
 
     for (auto& arg : ist->getGenArgs()) {
       cout << "Gen Arg" << endl;
@@ -672,48 +672,4 @@ void buildOrderedGraph(Module* mod) {
   printCode(topo_order, g);
 
 
-}
-
-int main() {
-  uint n = 32;
-  
-  // New context
-  Context* c = newContext();
-  
-  Namespace* g = c->getGlobal();
-  
-  Generator* add2 = c->getGenerator("coreir.add");
-
-  // Define Add4 Module
-  Type* add4Type = c->Record({
-      {"in",c->Array(4,c->Array(n,c->BitIn()))},
-	{"out",c->Array(n,c->Bit())}
-    });
-
-  Module* add4_n = g->newModuleDecl("Add4",add4Type);
-  ModuleDef* def = add4_n->newModuleDef();
-  Wireable* self = def->sel("self");
-  Wireable* add_00 = def->addInstance("add00",add2,{{"width",c->argInt(n)}});
-  Wireable* add_01 = def->addInstance("add01",add2,{{"width",c->argInt(n)}});
-  Wireable* add_1 = def->addInstance("add1",add2,{{"width",c->argInt(n)}});
-    
-  def->connect(self->sel("in")->sel(0),add_00->sel("in0"));
-  def->connect(self->sel("in")->sel(1),add_00->sel("in1"));
-  def->connect(self->sel("in")->sel(2),add_01->sel("in0"));
-  def->connect(self->sel("in")->sel(3),add_01->sel("in1"));
-
-  def->connect(add_00->sel("out"),add_1->sel("in0"));
-  def->connect(add_01->sel("out"),add_1->sel("in1"));
-
-  def->connect(add_1->sel("out"),self->sel("out"));
-  add4_n->setDef(def);
-
-  RunGenerators rg;
-  rg.runOnNamespace(g);
-
-  buildOrderedGraph(add4_n);
-
-  deleteContext(c);
-  
-  return 0;
 }
