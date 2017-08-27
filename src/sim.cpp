@@ -650,13 +650,6 @@ namespace sim_core {
       boost::put(boost::edge_name, g, ed.first, conn);
     }
 
-    //return g;
-
-    // deque<vdisc> topo_order;
-    // boost::topological_sort(g, std::front_inserter(topo_order));
-
-    // printCode(topo_order, g);
-
   }
 
   std::deque<vdisc> topologicalSort(const NGraph& g) {
