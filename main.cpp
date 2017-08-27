@@ -554,8 +554,12 @@ void printSimFunctionBody(const std::deque<vdisc>& topo_order,
 void printCode(const std::deque<vdisc>& topoOrder,
 	       NGraph& g) {
 
-  cout << "#include  <stdint.h>" << endl;
-  cout << "int main() {" << endl;
+  cout << "#include <stdint.h>" << endl;
+  cout << "int simulate( ";
+
+  
+
+  cout << " ) {" << endl;
 
   printSimFunctionBody(topoOrder, g);
 
