@@ -323,6 +323,12 @@ namespace sim_core {
   void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
     assert(getInputs(vd, g).size() == 2);
 
+    //cout << "Instance generator ref = " << inst->getGeneratorRef()->toString() << endl;
+    string genRefName = inst->getGeneratorRef()->getName();
+
+    //cout << "genRefName = " << genRefName << endl;
+    assert(genRefName == "add");
+
     auto outSelects = getOutputSelects(inst);
 
     assert(outSelects.size() == 1);
