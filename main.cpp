@@ -526,10 +526,10 @@ void printSimFunctionBody(const std::deque<vdisc>& topo_order,
 
   auto dw = getDeclaredWireables(topo_order, g);
 
-  cout << "// Inputs" << endl;
-  for (auto& in : dw.selfInputs) {
-    cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
-  }
+  // cout << "// Inputs" << endl;
+  // for (auto& in : dw.selfInputs) {
+  //   cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
+  // }
 
   cout << "// Outputs" << endl;
   for (auto& in : dw.selfOutputs) {
@@ -575,7 +575,11 @@ void printSimArguments(const DeclaredWireables& dw) {
 
   for (int i = 0; i < dw.selfOutputs.size(); i++) {
     auto out = dw.selfOutputs[i];
-    cout << cTypeString(*(out->getType())) << "*" << " " << cVar(*out) << "_ptr" << ", x";
+    cout << cTypeString(*(out->getType())) << "*" << " " << cVar(*out) << "_ptr";
+
+    if (i < dw.selfOutputs.size() - 1) {
+      cout << ", ";
+    }
   }
 }
 
