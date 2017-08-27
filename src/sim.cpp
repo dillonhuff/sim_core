@@ -336,8 +336,6 @@ namespace sim_core {
   void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
     assert(getInputs(vd, g).size() == 2);
 
-    //cout << "Instance generator ref = " << inst->getGeneratorRef()->toString() << endl;
-
     auto outSelects = getOutputSelects(inst);
 
     assert(outSelects.size() == 1);
@@ -351,6 +349,7 @@ namespace sim_core {
 
     string opString = getOpString(*inst);
 
+    // Q: How to order the different selects?
     cout << cVar(*(inSelects[0])) << opString << cVar(*(inSelects[1])) << ";" << endl;
     cout << endl;
   }
