@@ -365,10 +365,8 @@ namespace sim_core {
 
     string opString = getOpString(*inst);
 
-    // Q: How to order the different selects?
     cout << cVar(*arg1) << opString << cVar(*arg2) << ";" << endl;
     cout << endl;
-    
   }
 
   void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
