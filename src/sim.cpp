@@ -370,37 +370,11 @@ namespace sim_core {
     cout << endl;
     
   }
-  
-  void printAdd(Instance* inst, const vdisc vd, const NGraph& g) {
-    auto outSelects = getOutputSelects(inst);
-
-    assert(outSelects.size() == 1);
-
-    pair<string, Wireable*> outPair = *std::begin(outSelects);
-    cout << inst->getInstname() << "_" << outPair.first << " = ";
-
-    auto inSelects = getInputs(vd, g);
-
-    assert(inSelects.size() == 2);
-
-    string opString = getOpString(*inst);
-
-    // Q: How to order the different selects?
-    cout << cVar(*(inSelects[0])) << opString << cVar(*(inSelects[1])) << ";" << endl;
-    cout << endl;
-  }
 
   void printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
     assert(getInputs(vd, g).size() == 2);
 
-    string genRefName = inst->getGeneratorRef()->getName();
-    if (genRefName == "sub") {
-      printSub(inst, vd, g);
-    } else if (genRefName == "add") {
-      printAdd(inst, vd, g);
-    } else {
-      assert(false);
-    }
+    return printSub(inst, vd, g);
 
   }
 
