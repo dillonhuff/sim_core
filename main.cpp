@@ -355,6 +355,44 @@ bool fromSelf(Select* w) {
   return parent->toString() == "self";
 }
 
+bool fromSelfInput(Select* w) {
+
+  if (!fromSelf(w)) {
+    return false;
+  }
+
+  if (w->getSelStr() == "in") {
+    return true;
+  }
+
+  Wireable* parent = w->getParent();
+
+  if (!isSelect(parent)) {
+    return false;
+  }
+
+  return fromSelfInput(toSelect(parent));
+
+}
+
+bool fromSelfOutput(Select* w) {
+  if (!fromSelf(w)) {
+    return false;
+  }
+
+  if (w->getSelStr() == "out") {
+    return true;
+  }
+
+  Wireable* parent = w->getParent();
+  if (!isSelect(parent)) {
+    return false;
+  }
+
+  return fromSelfOutput(toSelect(parent));
+
+}
+
 bool isArray(Type& t) {
   return t.getKind() == Type::TK_Array;
 }
@@ -374,6 +412,7 @@ bool isBitArrayOfLength(Type& t, const uint len) {
 
   return false;
 }
+
 std::string cTypeString(Type& t) {
   if (isBitArrayOfLength(t, 32)) {
     return "uint32_t";
@@ -387,14 +426,7 @@ std::string cTypeString(Type& t) {
   }
 
   assert(false);
-  // switch (t.getKind()) {
-  // case Type::TK_Array:
-  //   return cTypeString(*(static_cast<ArrayType&>(t).getElemType())) + "*";
-  // case Type::
-  // default:
-  //   assert(false);
-  // }
-  // return t.toString();
+
 }
 
 void printCode(const std::deque<vdisc>& topo_order,
@@ -402,48 +434,50 @@ void printCode(const std::deque<vdisc>& topo_order,
 
   // Declare all variables
   cout << "// Variable declarations" << endl;
-  vector<Wireable*> self_inputs_outputs;
+  vector<Wireable*> self_inputs;
+  vector<Wireable*> self_outputs;
   vector<Wireable*> internals;
 
   for (auto& vd : topo_order) {
     Wireable* inst = get(boost::vertex_name, g, vd);
 
-    // cout << endl << "// Input variables" << endl;
     auto ins = getInputSelects(inst);
     for (auto& inSel : ins) {
       auto in = inSel.second;
-      //cout << in->getType()->toString() << " " << cVar(*in) << ";";
-      if (fromSelf(toSelect(in))) {
-	//cout << " // FROM SELF";
-	self_inputs_outputs.push_back(in);
+      if (fromSelfInput(toSelect(in))) {
+	self_inputs.push_back(in);
+      } else if (fromSelfOutput(toSelect(in))) {
+	self_outputs.push_back(in);
       } else {
 	internals.push_back(in);
       }
-      //cout << endl;
+
     }
 
-    //cout << endl << "// Output variables" << endl;
     auto outs = getOutputSelects(inst);
     for (auto& outSel : outs) {
       auto out = outSel.second;
-      //cout << out->getType()->toString() << " " << cVar(*out) << ";";
-      if (fromSelf(toSelect(out))) {
-	//cout << " // FROM SELF";
-	self_inputs_outputs.push_back(out);
+      if (fromSelfOutput(toSelect(out))) {
+	self_outputs.push_back(out);
+      } else if (fromSelfInput(toSelect(out))) {
+	self_inputs.push_back(out);
       } else {
 	internals.push_back(out);
       }
-      //cout << endl;
-      
     }
 
   }
 
-  cout << "// Inputs and outputs" << endl;
-  for (auto& in : self_inputs_outputs) {
+  cout << "// Inputs" << endl;
+  for (auto& in : self_inputs) {
     cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
   }
 
+  cout << "// Outputs" << endl;
+  for (auto& in : self_outputs) {
+    cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
+  }
+  
   cout << endl << "// Internal variables" << endl;
   for (auto& in : internals) {
     cout << cTypeString(*(in->getType())) << " " << cVar(*in) << ";" << endl;
