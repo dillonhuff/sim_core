@@ -609,10 +609,10 @@ namespace sim_core {
   void buildOrderedGraph(Module* mod) {
     auto ord_conns = build_ordered_connections(mod);
 
-    cout << "Ordered connections" << endl;
-    for (auto& conn : ord_conns) {
-      cout << selectInfoString(conn.first) << " --> " << selectInfoString(conn.second) << endl;
-    }
+    // cout << "Ordered connections" << endl;
+    // for (auto& conn : ord_conns) {
+    //   cout << selectInfoString(conn.first) << " --> " << selectInfoString(conn.second) << endl;
+    // }
   
   
     NGraph g;
@@ -668,7 +668,6 @@ namespace sim_core {
       boost::put(boost::edge_name, g, ed.first, conn);
     }
 
-    cout << "Topological ordering" << endl;
     deque<vdisc> topo_order;
     boost::topological_sort(g, std::front_inserter(topo_order));
 

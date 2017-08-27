@@ -56,7 +56,7 @@ namespace sim_core {
     }
 
     deleteContext(c);
-    
+
   }
 
 }
