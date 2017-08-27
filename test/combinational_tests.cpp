@@ -125,6 +125,56 @@ namespace sim_core {
 
       REQUIRE(s == 0);
     }
+
+    SECTION("Multiply 8 bits") {
+
+      uint n = 8;
+  
+      Generator* mul2 = c->getGenerator("coreir.mul");
+
+      // Define Add4 Module
+      Type* mul2Type = c->Record({
+	  {"in",c->Array(2,c->Array(n,c->BitIn()))},
+	    {"out",c->Array(n,c->Bit())}
+	});
+
+      Module* mul_n = g->newModuleDecl("Mul4", mul2Type);
+      ModuleDef* def = mul_n->newModuleDef();
+
+      Wireable* self = def->sel("self");
+      Wireable* mul = def->addInstance("mul1", mul2, {{"width", c->argInt(n)}});
+    
+      def->connect(self->sel("in")->sel(0), mul->sel("in0"));
+      def->connect(self->sel("in")->sel(1), mul->sel("in1"));
+
+      def->connect(mul->sel("out"), self->sel("out"));
+      mul_n->setDef(def);
+
+      RunGenerators rg;
+      rg.runOnNamespace(g);
+
+      NGraph g;
+      buildOrderedGraph(mul_n, g);
+
+      deque<vdisc> topo_order = topologicalSort(g);
+
+      auto str = printCode(topo_order, g);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
+
+      string outFile = "./gencode/sub4.c";
+      std::ofstream out(outFile);
+      out << str;
+      out.close();
+
+      string runCmd = "clang -c " + outFile;
+      int s = system(runCmd.c_str());
+
+      cout << "Command result = " << s << endl;
+
+      REQUIRE(s == 0);
+
+    }
 	      
 
     deleteContext(c);

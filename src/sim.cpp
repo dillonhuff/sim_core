@@ -318,6 +318,8 @@ namespace sim_core {
       return " + ";
     } else if (genRefName == "sub") {
       return " - ";
+    } else if (genRefName == "mul") {
+      return " * ";
     }
 
     assert(false);
@@ -439,6 +441,10 @@ namespace sim_core {
   }
 
   std::string cTypeString(Type& t) {
+    if (isBitArrayOfLength(t, 8)) {
+      return "uint8_t";
+    }
+
     if (isBitArrayOfLength(t, 32)) {
       return "uint32_t";
     }
