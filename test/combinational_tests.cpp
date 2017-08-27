@@ -51,8 +51,13 @@ namespace sim_core {
       RunGenerators rg;
       rg.runOnNamespace(g);
 
-      buildOrderedGraph(add4_n);
+      NGraph g;
+      buildOrderedGraph(add4_n, g);
 
+      deque<vdisc> topo_order = topologicalSort(g);
+
+      printCode(topo_order, g);
+      
     }
 
     deleteContext(c);

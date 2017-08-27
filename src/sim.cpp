@@ -3,11 +3,6 @@
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"
 
-#include <boost/graph/directed_graph.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/topological_sort.hpp>
-
-
 using namespace CoreIR;
 using namespace CoreIR::Passes;
 
@@ -181,13 +176,6 @@ namespace sim_core {
   
     return ss + " " + s->getType()->toString();
   }
-
-  typedef std::pair<Wireable*, Wireable*> Conn;
-  typedef boost::property<boost::edge_name_t, Conn > EdgeProp;
-  typedef boost::directed_graph<boost::property<boost::vertex_name_t, Wireable*>, EdgeProp > NGraph;
-
-  typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
-  typedef boost::graph_traits<NGraph>::edge_descriptor edisc;
 
   Select* toSelect(Wireable* w) {
     assert(isSelect(w));
@@ -606,16 +594,10 @@ namespace sim_core {
     cout << "}" << endl;
   }
 
-  void buildOrderedGraph(Module* mod) {
+  void buildOrderedGraph(Module* mod, NGraph& g) {
     auto ord_conns = build_ordered_connections(mod);
 
-    // cout << "Ordered connections" << endl;
-    // for (auto& conn : ord_conns) {
-    //   cout << selectInfoString(conn.first) << " --> " << selectInfoString(conn.second) << endl;
-    // }
-  
-  
-    NGraph g;
+    //NGraph g;
 
     // Add vertexes for all instances in the graph
     unordered_map<Wireable*, vdisc> imap;
@@ -668,12 +650,20 @@ namespace sim_core {
       boost::put(boost::edge_name, g, ed.first, conn);
     }
 
+    //return g;
+
+    // deque<vdisc> topo_order;
+    // boost::topological_sort(g, std::front_inserter(topo_order));
+
+    // printCode(topo_order, g);
+
+  }
+
+  std::deque<vdisc> topologicalSort(const NGraph& g) {
     deque<vdisc> topo_order;
     boost::topological_sort(g, std::front_inserter(topo_order));
 
-    printCode(topo_order, g);
-
-
+    return topo_order;
   }
 
 }
