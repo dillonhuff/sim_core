@@ -470,9 +470,8 @@ vector<Wireable*> collectInputVars(const std::deque<vdisc>& topo_order,
   return self_inputs;
 }
 
-void printCode(const std::deque<vdisc>& topo_order,
+void printSimFunctionBody(const std::deque<vdisc>& topo_order,
 	       NGraph& g) {
-
   // Declare all variables
   cout << "// Variable declarations" << endl;
   vector<Wireable*> self_inputs;
@@ -550,6 +549,17 @@ void printCode(const std::deque<vdisc>& topo_order,
 	
   }
 
+}
+
+void printCode(const std::deque<vdisc>& topoOrder,
+	       NGraph& g) {
+
+  cout << "#include  <stdint.h>" << endl;
+  cout << "int main() {" << endl;
+
+  printSimFunctionBody(topoOrder, g);
+
+  cout << "}" << endl;
 }
 
 void buildOrderedGraph(Module* mod) {
