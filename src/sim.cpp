@@ -516,6 +516,31 @@ namespace sim_core {
 
   }
 
+  bool isPrimitiveType(Type& t) {
+
+    if (t.getKind() == Type::TK_BitIn) {
+      return true;
+    }
+    
+    if (isBitArrayOfLength(t, 8)) {
+      return true;
+    }
+
+    if (isBitArrayOfLength(t, 16)) {
+      return true;
+    }
+    
+    if (isBitArrayOfLength(t, 32)) {
+      return true;
+    }
+
+    if (isBitArrayOfLength(t, 64)) {
+      return true;
+    }
+
+    return false;
+  }
+
   std::string cArrayTypeDecl(Type& t, const std::string& varName) {
     if (isBitArrayOfLength(t, 8)) {
       return "uint8_t " + varName;
@@ -654,6 +679,20 @@ namespace sim_core {
     
   }
 
+  string copyTypeFromInternal(Type* tp,
+			      const std::string& field_name) {
+    if (isPrimitiveType(*tp)) {
+      return "*self_" + field_name + "_ptr = self_" + field_name + ";\n";
+    }
+
+    if (isArray(*tp)) {
+      assert(false);
+    }
+
+    assert(false);
+
+  }
+
   string printSimFunctionBody(const std::deque<vdisc>& topo_order,
 			      NGraph& g,
 			      Module& mod) {
@@ -699,14 +738,14 @@ namespace sim_core {
 
     // Copy outputs over to corresponding output pointers
     str += "// Copy results to output parameters\n";
-    // for (auto& name_type_pair : outputs(mod)) {
-    //   Type* tp = name_type_pair.second;
-    //   str += 
-    // }
-
-    for (auto& out : dw.selfOutputs) {
-      str += "*" + cVar(*out) + "_ptr = " + cVar(*out) + ";\n";
+    for (auto& name_type_pair : outputs(mod)) {
+      Type* tp = name_type_pair.second;
+      str += copyTypeFromInternal(tp, name_type_pair.first);
     }
+
+    // for (auto& out : dw.selfOutputs) {
+    //   str += "*" + cVar(*out) + "_ptr = " + cVar(*out) + ";\n";
+    // }
 
     return str;
   }
@@ -739,22 +778,6 @@ namespace sim_core {
 	res += ", ";
       }
     }
-
-    // Print input list
-    // for (auto& in : dw.selfInputs) {
-    //   res += cTypeString(*(in->getType())) + " " + cVar(*in) + ", ";
-    // }
-
-    // assert(dw.selfOutputs.size() > 0);
-
-    // for (int i = 0; i < dw.selfOutputs.size(); i++) {
-    //   auto out = dw.selfOutputs[i];
-    //   res += cTypeString(*(out->getType())) + "*" + " " + cVar(*out) + "_ptr";
-
-    //   if (i < dw.selfOutputs.size() - 1) {
-    // 	res += ", ";
-    //   }
-    // }
 
     return res;
   }
