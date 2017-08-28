@@ -605,7 +605,8 @@ namespace sim_core {
 
 
   string printSimFunctionBody(const std::deque<vdisc>& topo_order,
-			      NGraph& g) {
+			      NGraph& g,
+			      Module& mod) {
     string str = "";
     // Declare all variables
     str += "// Variable declarations\n";
@@ -613,9 +614,25 @@ namespace sim_core {
     auto dw = getDeclaredWireables(topo_order, g);
 
     str += "// Outputs\n";
-    for (auto& in : dw.selfOutputs) {
-      str += cTypeString(*(in->getType())) + " " + cVar(*in) + ";\n";
+
+    Type* tp = mod.getType();
+
+    cout << "module type = " << tp->toString() << endl;
+
+    assert(tp->getKind() == Type::TK_Record);
+
+    RecordType* modRec = static_cast<RecordType*>(tp);
+    vector<string> declStrs;
+    for (auto& name_type_pair : modRec->getRecord()) {
+      Type* tp = name_type_pair.second;
+      if (tp->isOutput()) {
+	str += cTypeString(*tp) + " self_" + name_type_pair.first + ";\n";
+      }
     }
+    
+    // for (auto& in : dw.selfOutputs) {
+    //   str += cTypeString(*(in->getType())) + " " + cVar(*in) + ";\n";
+    // }
   
     str += "// Internal variables\n";
     for (auto& in : dw.internals) {
@@ -667,12 +684,9 @@ namespace sim_core {
       Type* tp = name_type_pair.second;
 
       if (tp->isInput()) {
-	//cout << "Input: " << name_type_pair.first << " : " << tp->toString() << endl;
 	declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
       } else {
 	assert(tp->isOutput());
-
-	//cout << "Output: " << name_type_pair.first << " : " << tp->toString() << endl;
 	declStrs.push_back(cTypeString(*tp) + "*" + " self_" + name_type_pair.first + "_ptr");
       }
     }
@@ -721,7 +735,7 @@ namespace sim_core {
 
     code += + " ) {\n";
 
-    code += printSimFunctionBody(topoOrder, g);
+    code += printSimFunctionBody(topoOrder, g, *mod);
 
     code += "}\n";
 
