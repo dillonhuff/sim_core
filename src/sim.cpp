@@ -683,7 +683,7 @@ namespace sim_core {
 			      const std::string& toName,
 			      const std::string& fromName) {
     if (isPrimitiveType(*tp)) {
-      return toName + "= " + fromName + ";\n";
+      return toName + " = " + fromName + ";\n";
     }
 
     if (isArray(*tp)) {
