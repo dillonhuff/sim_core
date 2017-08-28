@@ -77,7 +77,6 @@ namespace sim_core {
   
       Generator* sub2 = c->getGenerator("coreir.sub");
 
-      // Define Add4 Module
       Type* sub4Type = c->Record({
 	  {"in",c->Array(4,c->Array(n,c->BitIn()))},
 	    {"out",c->Array(n,c->Bit())}
@@ -132,7 +131,6 @@ namespace sim_core {
   
       Generator* mul2 = c->getGenerator("coreir.mul");
 
-      // Define Add4 Module
       Type* mul2Type = c->Record({
 	  {"in",c->Array(2,c->Array(n,c->BitIn()))},
 	    {"out",c->Array(n,c->Bit())}
@@ -174,6 +172,58 @@ namespace sim_core {
 
       REQUIRE(s == 0);
 
+    }
+
+    SECTION("Two 16 bit negs") {
+      uint n = 16;
+  
+      Generator* neg = c->getGenerator("coreir.neg");
+
+      Type* neg2Type = c->Record({
+	  {"in",    c->Array(2, c->Array(n,c->BitIn()))},
+	    {"out", c->Array(2, c->Array(n,c->Bit()))}
+	});
+
+      Module* neg_n = g->newModuleDecl("two_negs", neg2Type);
+
+      ModuleDef* def = neg_n->newModuleDef();
+
+      Wireable* self = def->sel("self");
+      Wireable* neg0 = def->addInstance("neg0", neg, {{"width", c->argInt(n)}});
+      Wireable* neg1 = def->addInstance("neg1", neg, {{"width", c->argInt(n)}});
+
+      def->connect(self->sel("in")->sel(0), neg0->sel("in"));
+      def->connect(self->sel("in")->sel(1), neg1->sel("in"));
+
+      def->connect(neg0->sel("out"), self->sel("out")->sel(0));
+      def->connect(neg1->sel("out"), self->sel("out")->sel(1));
+
+      neg_n->setDef(def);
+
+      RunGenerators rg;
+      rg.runOnNamespace(g);
+
+      NGraph g;
+      buildOrderedGraph(neg_n, g);
+
+      deque<vdisc> topo_order = topologicalSort(g);
+
+      auto str = printCode(topo_order, g);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
+
+      string outFile = "./gencode/sub4.c";
+      std::ofstream out(outFile);
+      out << str;
+      out.close();
+
+      string runCmd = "clang -c " + outFile;
+      int s = system(runCmd.c_str());
+
+      cout << "Command result = " << s << endl;
+
+      REQUIRE(s == 0);
+      
     }
 	      
 
