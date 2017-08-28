@@ -680,17 +680,34 @@ namespace sim_core {
   }
 
   string copyTypeFromInternal(Type* tp,
-			      const std::string& field_name) {
+			      const std::string& toName,
+			      const std::string& fromName) {
     if (isPrimitiveType(*tp)) {
-      return "*self_" + field_name + "_ptr = self_" + field_name + ";\n";
+      return toName + "= " + fromName + ";\n";
     }
 
     if (isArray(*tp)) {
-      assert(false);
+      ArrayType* arr = static_cast<ArrayType*>(tp);
+
+      string res = "";
+      for (uint i = 0; i < arr->getLen(); i++) {
+	string acc = "[ " + std::to_string(i) + " ]";
+	string accName = toName + acc;
+	string accFrom = fromName + acc;
+	res += copyTypeFromInternal(arr->getElemType(), accName, accFrom) + "\n";
+      }
+
+      return res;
     }
 
     assert(false);
+  }  
 
+  string copyTypeFromInternal(Type* tp,
+			      const std::string& field_name) {
+    return copyTypeFromInternal(tp,
+				"(*self_" + field_name + "_ptr)",
+				"self_" + field_name);
   }
 
   string printSimFunctionBody(const std::deque<vdisc>& topo_order,
