@@ -445,6 +445,10 @@ namespace sim_core {
       return "uint8_t";
     }
 
+    if (isBitArrayOfLength(t, 16)) {
+      return "uint16_t";
+    }
+    
     if (isBitArrayOfLength(t, 32)) {
       return "uint32_t";
     }
@@ -600,29 +604,60 @@ namespace sim_core {
     return str;
   }
 
-  string printSimArguments(const DeclaredWireables& dw) {
-    string res;
-    // Print input list
-    for (auto& in : dw.selfInputs) {
-      res += cTypeString(*(in->getType())) + " " + cVar(*in) + ", ";
+  string printSimArguments(Module& mod,
+			   const DeclaredWireables& dw) {
+    Type* tp = mod.getType();
+
+    cout << "module type = " << tp->toString() << endl;
+
+    assert(tp->getKind() == Type::TK_Record);
+
+    RecordType* modRec = static_cast<RecordType*>(tp);
+    vector<string> declStrs;
+    for (auto& name_type_pair : modRec->getRecord()) {
+      Type* tp = name_type_pair.second;
+
+      if (tp->isInput()) {
+	//cout << "Input: " << name_type_pair.first << " : " << tp->toString() << endl;
+	declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
+      } else {
+	assert(tp->isOutput());
+
+	//cout << "Output: " << name_type_pair.first << " : " << tp->toString() << endl;
+	declStrs.push_back(cTypeString(*tp) + "*" + " self_" + name_type_pair.first + "_ptr");
+      }
     }
 
-    assert(dw.selfOutputs.size() > 0);
-
-    for (int i = 0; i < dw.selfOutputs.size(); i++) {
-      auto out = dw.selfOutputs[i];
-      res += cTypeString(*(out->getType())) + "*" + " " + cVar(*out) + "_ptr";
-
-      if (i < dw.selfOutputs.size() - 1) {
+    string res;
+    for (int i = 0; i < declStrs.size(); i++) {
+      res += declStrs[i];
+      if (i < declStrs.size() - 1) {
 	res += ", ";
       }
     }
+
+    // Print input list
+    // for (auto& in : dw.selfInputs) {
+    //   res += cTypeString(*(in->getType())) + " " + cVar(*in) + ", ";
+    // }
+
+    // assert(dw.selfOutputs.size() > 0);
+
+    // for (int i = 0; i < dw.selfOutputs.size(); i++) {
+    //   auto out = dw.selfOutputs[i];
+    //   res += cTypeString(*(out->getType())) + "*" + " " + cVar(*out) + "_ptr";
+
+    //   if (i < dw.selfOutputs.size() - 1) {
+    // 	res += ", ";
+    //   }
+    // }
 
     return res;
   }
 
   string printCode(const std::deque<vdisc>& topoOrder,
-		   NGraph& g) {
+		   NGraph& g,
+		   CoreIR::Module* mod) {
 
     auto dw = getDeclaredWireables(topoOrder, g);
 
@@ -633,7 +668,7 @@ namespace sim_core {
     code += "#include <stdlib.h>\n";
     code += "void simulate( ";
 
-    code += printSimArguments(dw);
+    code += printSimArguments(*mod, dw);
 
     code += + " ) {\n";
 

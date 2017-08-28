@@ -18,6 +18,7 @@ namespace sim_core {
   std::deque<vdisc> topologicalSort(const NGraph& g);
 
   std::string printCode(const std::deque<vdisc>& topoOrder,
-			NGraph& g);
+			NGraph& g,
+			CoreIR::Module* mod);
   
 }

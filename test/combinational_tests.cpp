@@ -56,7 +56,7 @@ namespace sim_core {
 
       deque<vdisc> topo_order = topologicalSort(g);
 
-      auto str = printCode(topo_order, g);
+      auto str = printCode(topo_order, g, add4_n);
 
       string outFile = "./gencode/add4.c";
       std::ofstream out(outFile);
@@ -108,7 +108,7 @@ namespace sim_core {
 
       deque<vdisc> topo_order = topologicalSort(g);
 
-      auto str = printCode(topo_order, g);
+      auto str = printCode(topo_order, g, sub4_n);
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
@@ -156,7 +156,7 @@ namespace sim_core {
 
       deque<vdisc> topo_order = topologicalSort(g);
 
-      auto str = printCode(topo_order, g);
+      auto str = printCode(topo_order, g, mul_n);
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
@@ -203,12 +203,15 @@ namespace sim_core {
       RunGenerators rg;
       rg.runOnNamespace(g);
 
+      Type* t = neg_n->getType();
+      cout << "Module type = " << t->toString() << endl;
+      
       NGraph g;
       buildOrderedGraph(neg_n, g);
 
       deque<vdisc> topo_order = topologicalSort(g);
 
-      auto str = printCode(topo_order, g);
+      auto str = printCode(topo_order, g, neg_n);
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
