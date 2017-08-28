@@ -16,6 +16,7 @@ INCLUDE_DIRECTORIES(./src/)
 
 SET(SRC_FILES ./src/sim.cpp)
 
-SET(TEST_FILES ./test/combinational_tests.cpp)
+SET(TEST_FILES ./test/combinational_tests.cpp
+	       ./test/sequential_tests.cpp)
 
 add_executable(all-tests ${TEST_FILES} ${SRC_FILES})

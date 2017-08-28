@@ -177,6 +177,33 @@ test/combinational_tests.cpp.s:
 	$(MAKE) -f CMakeFiles/all-tests.dir/build.make CMakeFiles/all-tests.dir/test/combinational_tests.cpp.s
 .PHONY : test/combinational_tests.cpp.s
 
+test/sequential_tests.o: test/sequential_tests.cpp.o
+
+.PHONY : test/sequential_tests.o
+
+# target to build an object file
+test/sequential_tests.cpp.o:
+	$(MAKE) -f CMakeFiles/all-tests.dir/build.make CMakeFiles/all-tests.dir/test/sequential_tests.cpp.o
+.PHONY : test/sequential_tests.cpp.o
+
+test/sequential_tests.i: test/sequential_tests.cpp.i
+
+.PHONY : test/sequential_tests.i
+
+# target to preprocess a source file
+test/sequential_tests.cpp.i:
+	$(MAKE) -f CMakeFiles/all-tests.dir/build.make CMakeFiles/all-tests.dir/test/sequential_tests.cpp.i
+.PHONY : test/sequential_tests.cpp.i
+
+test/sequential_tests.s: test/sequential_tests.cpp.s
+
+.PHONY : test/sequential_tests.s
+
+# target to generate assembly for a file
+test/sequential_tests.cpp.s:
+	$(MAKE) -f CMakeFiles/all-tests.dir/build.make CMakeFiles/all-tests.dir/test/sequential_tests.cpp.s
+.PHONY : test/sequential_tests.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -192,6 +219,9 @@ help:
 	@echo "... test/combinational_tests.o"
 	@echo "... test/combinational_tests.i"
 	@echo "... test/combinational_tests.s"
+	@echo "... test/sequential_tests.o"
+	@echo "... test/sequential_tests.i"
+	@echo "... test/sequential_tests.s"
 .PHONY : help
 
 

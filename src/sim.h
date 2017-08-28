@@ -1,3 +1,5 @@
+#pragma once
+
 #include "coreir.h"
 
 #include <boost/graph/directed_graph.hpp>
