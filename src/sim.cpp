@@ -632,6 +632,28 @@ namespace sim_core {
   }
 
 
+  std::unordered_map<string, Type*>
+  outputs(Module& mod) {
+    Type* tp = mod.getType();
+
+    assert(tp->getKind() == Type::TK_Record);
+
+    unordered_map<string, Type*> outs;
+
+    RecordType* modRec = static_cast<RecordType*>(tp);
+    vector<string> declStrs;
+    for (auto& name_type_pair : modRec->getRecord()) {
+      Type* tp = name_type_pair.second;
+
+      if (tp->isOutput()) {
+	outs.insert(name_type_pair);
+      }
+    }
+
+    return outs;
+    
+  }
+
   string printSimFunctionBody(const std::deque<vdisc>& topo_order,
 			      NGraph& g,
 			      Module& mod) {
@@ -643,24 +665,10 @@ namespace sim_core {
 
     str += "// Outputs\n";
 
-    Type* tp = mod.getType();
-
-    cout << "module type = " << tp->toString() << endl;
-
-    assert(tp->getKind() == Type::TK_Record);
-
-    RecordType* modRec = static_cast<RecordType*>(tp);
-    vector<string> declStrs;
-    for (auto& name_type_pair : modRec->getRecord()) {
+    for (auto& name_type_pair : outputs(mod)) {
       Type* tp = name_type_pair.second;
-      if (tp->isOutput()) {
-	str += cArrayTypeDecl(*tp, "self_" + name_type_pair.first) + ";\n";
-      }
+      str += cArrayTypeDecl(*tp, "self_" + name_type_pair.first) + ";\n";
     }
-    
-    // for (auto& in : dw.selfOutputs) {
-    //   str += cTypeString(*(in->getType())) + " " + cVar(*in) + ";\n";
-    // }
   
     str += "// Internal variables\n";
     for (auto& in : dw.internals) {
@@ -691,6 +699,11 @@ namespace sim_core {
 
     // Copy outputs over to corresponding output pointers
     str += "// Copy results to output parameters\n";
+    // for (auto& name_type_pair : outputs(mod)) {
+    //   Type* tp = name_type_pair.second;
+    //   str += 
+    // }
+
     for (auto& out : dw.selfOutputs) {
       str += "*" + cVar(*out) + "_ptr = " + cVar(*out) + ";\n";
     }
