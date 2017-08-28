@@ -507,6 +507,7 @@ namespace sim_core {
     vector<Wireable*> internals;
   };
 
+  
   DeclaredWireables getDeclaredWireables(const std::deque<vdisc>& topo_order,
 					 NGraph& g) {
     vector<Wireable*> self_inputs;
