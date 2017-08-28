@@ -516,6 +516,34 @@ namespace sim_core {
 
   }
 
+  std::string cArrayTypeDecl(Type& t, const std::string& varName) {
+    if (isBitArrayOfLength(t, 8)) {
+      return "uint8_t " + varName;
+    }
+
+    if (isBitArrayOfLength(t, 16)) {
+      return "uint16_t " + varName;
+    }
+    
+    if (isBitArrayOfLength(t, 32)) {
+      return "uint32_t " + varName;
+    }
+
+    if (isBitArrayOfLength(t, 64)) {
+      return "uint64_t " + varName;
+    }
+    
+    if (isArray(t)) {
+      ArrayType& tArr = static_cast<ArrayType&>(t);
+      Type& underlying = *(tArr.getElemType());
+
+      return cArrayTypeDecl(underlying, varName) + "[ " + std::to_string(tArr.getLen()) + " ]";
+    }
+
+    assert(false);
+
+  }
+  
   bool arrayAccess(Select* in) {
     return isNumber(in->getSelStr());
   }
@@ -626,7 +654,7 @@ namespace sim_core {
     for (auto& name_type_pair : modRec->getRecord()) {
       Type* tp = name_type_pair.second;
       if (tp->isOutput()) {
-	str += cTypeString(*tp) + " self_" + name_type_pair.first + ";\n";
+	str += cArrayTypeDecl(*tp, "self_" + name_type_pair.first) + ";\n";
       }
     }
     
