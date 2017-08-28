@@ -160,7 +160,7 @@ namespace sim_core {
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
-      string outFile = "./gencode/sub4.c";
+      string outFile = "./gencode/mul2.c";
       std::ofstream out(outFile);
       out << str;
       out.close();

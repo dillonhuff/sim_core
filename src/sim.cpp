@@ -320,12 +320,46 @@ namespace sim_core {
       return " - ";
     } else if (genRefName == "mul") {
       return " * ";
+    } else if (genRefName == "neg") {
+      return "~";
     }
 
     assert(false);
 
   }
 
+  string printUnop(Instance* inst, const vdisc vd, const NGraph& g) {
+    auto outSelects = getOutputSelects(inst);
+
+    assert(outSelects.size() == 1);
+
+    string res = "";
+
+    pair<string, Wireable*> outPair = *std::begin(outSelects);
+    res += inst->getInstname() + "_" + outPair.first + " = ";
+
+    //auto inSelects = getInputs(vd, g);
+    auto inConns = getInputConnections(vd, g);
+
+    assert(inConns.size() == 1);
+
+    Conn cn = (*std::begin(inConns));
+    Wireable* arg = cn.first;
+    
+    auto dest = inConns[0].second;
+    assert(isSelect(dest));
+
+    Select* destSel = toSelect(dest);
+    assert(destSel->getParent() == inst);
+
+    string opString = getOpString(*inst);
+
+    res += opString + cVar(*arg) + ";\n";
+    res += "\n";
+
+    return res;
+  }
+  
   string printSub(Instance* inst, const vdisc vd, const NGraph& g) {
     auto outSelects = getOutputSelects(inst);
 
@@ -371,6 +405,20 @@ namespace sim_core {
 
     return printSub(inst, vd, g);
 
+  }
+
+  string printOp(Instance* inst, const vdisc vd, const NGraph& g) {
+    auto ins = getInputs(vd, g);
+
+    if (ins.size() == 2) {
+      return printBinop(inst, vd, g);
+    }
+
+    if (ins.size() == 1) {
+      return printUnop(inst, vd, g);
+    }
+
+    assert(false);
   }
 
   bool fromSelf(Select* w) {
@@ -555,6 +603,7 @@ namespace sim_core {
     return DeclaredWireables{self_inputs, self_outputs, internals};
   }
 
+
   string printSimFunctionBody(const std::deque<vdisc>& topo_order,
 			      NGraph& g) {
     string str = "";
@@ -581,7 +630,7 @@ namespace sim_core {
       Wireable* inst = get(boost::vertex_name, g, vd);
 
       if (isInstance(inst)) {
-	str += printBinop(static_cast<Instance*>(inst), vd, g);
+	str += printOp(static_cast<Instance*>(inst), vd, g);
       } else {
 
 	// If not an instance copy the input values
