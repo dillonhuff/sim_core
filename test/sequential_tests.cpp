@@ -93,17 +93,28 @@ namespace sim_core {
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
-      string outFile = "./gencode/counter.c";
-      std::ofstream out(outFile);
-      out << str;
-      out.close();
+      SECTION("Compile and run") {      
+	string outFile = "./gencode/counter.c";
+	std::ofstream out(outFile);
+	out << str;
+	out.close();
 
-      string runCmd = "clang -c " + outFile;
-      int s = system(runCmd.c_str());
 
-      cout << "Command result = " << s << endl;
+	string runCmd = "clang " + outFile + " gencode/test_counter.c";
+	int s = system(runCmd.c_str());
 
-      REQUIRE(s == 0);
+	cout << "Command result = " << s << endl;
+
+	REQUIRE(s == 0);
+
+
+	string runTest = "./a.out";
+	s = system(runTest.c_str());
+
+	cout << "Test result = " << s << endl;
+
+	REQUIRE(s == 0);
+      }
       
       //Always remember to delete your context!
       deleteContext(c);
