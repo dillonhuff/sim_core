@@ -129,43 +129,59 @@ namespace sim_core {
 
     SECTION("Register chain") {
 
-      Type* CounterType = c->Record({
-	  {"en",c->BitIn()}, 
+      Type* regChainType = c->Record({
+	  {"en",c->BitIn()},
+	    {"ap", c->BitIn()->Arr(16)},
+	    {"bp", c->BitIn()->Arr(16)},
 	    {"out",c->Bit()->Arr(16)}, //Convenient Arr Type Constructor
 	      {"clk",c->Named("coreir.clkIn")}, //Named Ref constructor 
 		});
 
-      //Now lets create a module declaration. Declarations are specified separately from the definition
-      Module* counter = c->getGlobal()->newModuleDecl("counter",CounterType); //use getGlobalFunction
-      ModuleDef* def = counter->newModuleDef();
+      Module* regChain = c->getGlobal()->newModuleDecl("regChain", regChainType);
+      ModuleDef* def = regChain->newModuleDef();
       Args wArg({{"width",c->argInt(16)}});
-      def->addInstance("ai","coreir.add",wArg); // using <namespace>.<module> notation 
-      def->addInstance("ci","coreir.const",wArg,{{"value",c->argInt(1)}});
 
-      //Reg has default arguments. en/clr/rst are False by default. Init is also 0 by default
-      def->addInstance("ri","coreir.reg",{{"width",c->argInt(16)},{"en",c->argBool(true)}});
+      def->addInstance("ai", "coreir.add", wArg);
+      def->addInstance("r0","coreir.reg",{{"width",c->argInt(16)},{"en",c->argBool(true)}});
+      def->addInstance("r1","coreir.reg",{{"width",c->argInt(16)},{"en",c->argBool(true)}});
+      def->addInstance("r2","coreir.reg",{{"width",c->argInt(16)},{"en",c->argBool(true)}});
     
       //Connections
-      def->connect("self.clk","ri.clk");
-      def->connect("self.en","ri.en");
-      def->connect("ci.out","ai.in0");
-      def->connect("ai.out","ri.in");
-      def->connect("ri.out","ai.in1");
-      def->connect("ri.out","self.out");
+      def->connect("self.clk", "r0.clk");
+      def->connect("self.clk", "r1.clk");
+      def->connect("self.clk", "r2.clk");
+      
+      def->connect("self.en", "r0.en");
+      def->connect("self.en", "r1.en");
+      def->connect("self.en", "r2.en");
 
-      counter->setDef(def);
-      counter->print();
+      def->connect("self.ap", "r0.in");
+      def->connect("r0.out","r1.in");
+      def->connect("r1.out","r2.in");
+      def->connect("r2.out","ai.in0");
+
+      //def->connect("self.bp", "ai.in1");
+      def->connect("r2.out", "ai.in1");
+
+      def->connect("ai.out","self.out");
+
+      regChain->setDef(def);
+      regChain->print();
   
       RunGenerators rg;
       rg.runOnNamespace(c->getGlobal());
 
       NGraph g;
-      buildOrderedGraph(counter, g);
+      buildOrderedGraph(regChain, g);
 
       SECTION("Checking number of vertices") {
-      	// self, ai, ci, ri_in, ri_out
-      	REQUIRE(numVertices(g) == 5);
+	REQUIRE(splitNodeEdgesCorrect(g));	
+
+      	// self, ai, r0_in, r0_out, r1_in, r1_out, r2_in, r2_out
+      	REQUIRE(numVertices(g) == 8);
       }
+
+
 
       cout << "About to topological sort" << endl;
       deque<vdisc> topoOrder = topologicalSort(g);
@@ -177,9 +193,7 @@ namespace sim_core {
 	cout << wd.getWire()->toString() << endl;
       }
 
-      REQUIRE(splitNodeEdgesCorrect(g));
-
-      auto str = printCode(topoOrder, g, counter);
+      auto str = printCode(topoOrder, g, regChain);
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
