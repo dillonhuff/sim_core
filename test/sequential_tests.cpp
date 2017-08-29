@@ -177,7 +177,7 @@ namespace sim_core {
       SECTION("Checking number of vertices") {
 	REQUIRE(splitNodeEdgesCorrect(g));	
 
-      	// self, ai, r0_in, r0_out, r1_in, r1_out, r2_in, r2_out
+      	// clk, en, ap, bp, out, ai, r0_in, r0_out, r1_in, r1_out, r2_in, r2_out
       	REQUIRE(numVertices(g) == 12);
       }
 
