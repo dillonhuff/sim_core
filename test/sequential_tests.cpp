@@ -15,9 +15,9 @@ namespace sim_core {
 
   TEST_CASE("Sequential logic") {
 
-    SECTION("Counter") {
+    Context* c = newContext();
 
-      Context* c = newContext();
+    SECTION("Counter") {
 
       Type* CounterType = c->Record({
 	  {"en",c->BitIn()}, 
@@ -116,10 +116,11 @@ namespace sim_core {
 	REQUIRE(s == 0);
       }
       
-      //Always remember to delete your context!
-      deleteContext(c);
-      
     }
+
+    //Always remember to delete your context!
+    deleteContext(c);
+
   }
 
 }
