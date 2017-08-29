@@ -56,9 +56,9 @@ namespace sim_core {
       	REQUIRE(numVertices(g) == 5);
       }
 
-      // cout << "About to topological sort" << endl;
-      // deque<vdisc> topo_order = topologicalSort(g);
-      // cout << "Done topological sorting" << endl;
+      cout << "About to topological sort" << endl;
+      deque<vdisc> topo_order = topologicalSort(g);
+      cout << "Done topological sorting" << endl;
 
       // auto str = printCode(topo_order, g, counter);
       // cout << "CODE STRING" << endl;
