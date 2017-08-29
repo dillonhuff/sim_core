@@ -27,6 +27,12 @@ int main() {
 
 
   uint64_t C[2][3];
+  C[0][0] = 0;
+  C[0][1] = 0;
+  C[0][2] = 0;
+  C[1][0] = 0;
+  C[1][1] = 0;
+  C[1][2] = 0;
 
   printf("About to simulate\n");
 
@@ -35,9 +41,14 @@ int main() {
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j < 3; j++) {
       printf("C[%d][%d] = %llu\n", i, j, C[i][j]);
+      uint64_t expected = A[i][j] + B[i][j];
+      printf("Expected[%d][%d] = %llu\n", i, j, C[i][j]);      
+      if (expected != C[i][j]) {
+	return 1;
+      }
     }
   }
 
-  return 1;
+  return 0;
 
 }
