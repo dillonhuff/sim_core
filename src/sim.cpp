@@ -407,7 +407,16 @@ namespace sim_core {
   }
 
   string printConstant(Instance* inst, const vdisc vd, const NGraph& g) {
-    return "CONSTANT!!\n";
+    auto outSelects = getOutputSelects(inst);
+
+    assert(outSelects.size() == 1);
+
+    string res = "";
+
+    pair<string, Wireable*> outPair = *std::begin(outSelects);
+    res += inst->getInstname() + "_" + outPair.first + " = CONSTVALUE;\n";
+
+    return res;
   }
   
   string printSub(Instance* inst, const vdisc vd, const NGraph& g) {
