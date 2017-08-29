@@ -409,9 +409,28 @@ namespace sim_core {
 
     string res = "";
 
+    bool foundValue = false;
+    cout << "Args" << endl;
+
+    string argStr = "";
+    for (auto& arg : inst->getConfigArgs()) {
+      if (arg.first == "value") {
+	foundValue = true;
+	Arg* valArg = arg.second;
+
+	assert(valArg->getKind() == AINT);
+
+	ArgInt* valInt = static_cast<ArgInt*>(valArg);
+	argStr = valInt->toString();
+      }
+      cout << arg.first << endl;
+    }
+
+    assert(foundValue);
+
     pair<string, Wireable*> outPair = *std::begin(outSelects);
     // TODO: Actuall set constant value
-    res += inst->getInstname() + "_" + outPair.first + " = 1;\n";
+    res += inst->getInstname() + "_" + outPair.first + " = " + argStr + ";\n";
 
     return res;
   }
