@@ -23,6 +23,10 @@ namespace sim_core {
 	(isReceiver == other.isReceiver);
     }
 
+    std::string toString() const {
+      return getWire()->toString() + ", sequential ? " + std::to_string(isSequential) + ", isReceiver ? " + std::to_string(isReceiver);
+    }
+
   };
 
   //typedef CoreIR::Wireable* WireableNode;

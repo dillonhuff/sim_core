@@ -60,9 +60,19 @@ namespace sim_core {
       deque<vdisc> topoOrder = topologicalSort(g);
       cout << "Done topological sorting" << endl;
 
+      cout << "Vertices" << endl;
       for (auto& vd : topoOrder) {
 	WireNode wd = boost::get(boost::vertex_name, g, vd);
 	cout << wd.getWire()->toString() << endl;
+      }
+
+      cout << "Edges" << endl;
+      auto edge_pair = boost::edges(g);
+      for (auto it = edge_pair.first; it != edge_pair.second; it++) {
+	Conn c = boost::get(boost::edge_name, g, *it);
+
+	//cout << (c.first).getWire()->toString() << " ---> " << (c.second).getWire()->toString() << endl;
+	cout << (c.first).toString() << " ---> " << (c.second).toString() << endl;
       }
 
       // auto str = printCode(topo_order, g, counter);
