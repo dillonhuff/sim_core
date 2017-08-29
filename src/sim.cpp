@@ -42,8 +42,10 @@ namespace sim_core {
     return false;
   }
 
-  vector<pair<Wireable*, Wireable*> > build_ordered_connections(Module* mod) {
-    vector<pair<Wireable*, Wireable*> > conns;
+  //vector<pair<Wireable*, Wireable*> > build_ordered_connections(Module* mod) {
+  vector<Conn> build_ordered_connections(Module* mod) {
+    //vector<pair<Wireable*, Wireable*> > conns;
+    vector<Conn> conns;
 
     for (auto& connection : mod->getDef()->getConnections()) {
 
@@ -63,9 +65,9 @@ namespace sim_core {
       //Type* snd_tp = snd_select->getType();
 
       if (fst_tp->isInput()) {
-	conns.push_back({snd, fst});
+	conns.push_back({{snd, false, false}, {fst, false, false}});
       } else {
-	conns.push_back({fst, snd});
+	conns.push_back({{fst, false, false}, {snd, false, false}});
       }
 
     }
@@ -336,7 +338,6 @@ namespace sim_core {
     pair<string, Wireable*> outPair = *std::begin(outSelects);
     res += inst->getInstname() + "_" + outPair.first + " = ";
 
-    //auto inSelects = getInputs(vd, g);
     auto inConns = getInputConnections(vd, g);
 
     assert(inConns.size() == 1);
@@ -368,7 +369,6 @@ namespace sim_core {
     pair<string, Wireable*> outPair = *std::begin(outSelects);
     res += inst->getInstname() + "_" + outPair.first + " = ";
 
-    //auto inSelects = getInputs(vd, g);
     auto inConns = getInputConnections(vd, g);
 
     assert(inConns.size() == 2);
@@ -825,18 +825,22 @@ namespace sim_core {
 
     for (auto& conn : ord_conns) {
 
-      Select* sel1 = toSelect(conn.first);
-      Select* sel2 = toSelect(conn.second);
+      Select* sel1 = toSelect(conn.first.getWire());
+      Select* sel2 = toSelect(conn.second.getWire());
 
       Wireable* w1 = sel1->getParent();
       Wireable* w2 = sel2->getParent();
 
       if (imap.find(w1) == end(imap)) {
-	//vdisc v1 = g.add_vertex({w1, false, false});
-	//imap.insert({w1, v1});
+	WireNode w{w1, false, false};
+	vdisc v1 = g.add_vertex(w); //{w1, false, false});
+	imap.insert({w1, v1});
       }
 
       if (imap.find(w2) == end(imap)) {
+	WireNode w{w2, false, false};
+	vdisc v1 = g.add_vertex(w); //{w1, false, false});
+	imap.insert({w2, v1});
 	//vdisc v2 = g.add_vertex({w2, false, false});
 	//imap.insert({w2, v2});
       }
@@ -844,12 +848,12 @@ namespace sim_core {
     }
 
     // Add edges to the graph
-    for (pair<Wireable*, Wireable*> conn : ord_conns) {
-      assert(isSelect(conn.first));
-      assert(isSelect(conn.second));
+    for (Conn conn : ord_conns) {
+      assert(isSelect(conn.first.getWire()));
+      assert(isSelect(conn.second.getWire()));
 
-      auto c1 = static_cast<Select*>(conn.first);
-      auto c2 = static_cast<Select*>(conn.second);
+      auto c1 = static_cast<Select*>(conn.first.getWire());
+      auto c2 = static_cast<Select*>(conn.second.getWire());
 
       Wireable* p1 = static_cast<Instance*>(c1->getParent());
       auto c1_disc_it = imap.find(p1);
@@ -868,7 +872,7 @@ namespace sim_core {
 
       assert(ed.second);
 
-      //boost::put(boost::edge_name, g, ed.first, conn);
+      boost::put(boost::edge_name, g, ed.first, conn);
     }
 
   }
