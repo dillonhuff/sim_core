@@ -430,8 +430,11 @@ namespace sim_core {
 
     assert(inConns.size() == 2);
 
-    Wireable* arg1;
-    Wireable* arg2;
+    // Wireable* arg1;
+    // Wireable* arg2;
+
+    WireNode arg1;
+    WireNode arg2;
     
     auto dest = inConns[0].second.getWire();
     assert(isSelect(dest));
@@ -440,16 +443,16 @@ namespace sim_core {
     assert(destSel->getParent() == inst);
 
     if (destSel->getSelStr() == "in0") {
-      arg1 = inConns[0].first.getWire();
-      arg2 = inConns[1].first.getWire();
+      arg1 = inConns[0].first;//.getWire();
+      arg2 = inConns[1].first;//.getWire();
     } else {
-      arg1 = inConns[1].first.getWire();
-      arg2 = inConns[0].first.getWire();
+      arg1 = inConns[1].first;//.getWire();
+      arg2 = inConns[0].first;//.getWire();
     }
 
     string opString = getOpString(*inst);
 
-    res += cVar(*arg1) + opString + cVar(*arg2) + ";\n";
+    res += cVar(arg1) + opString + cVar(arg2) + ";\n";
     res += "\n";
 
     return res;
@@ -833,7 +836,7 @@ namespace sim_core {
       //auto inSelects = getInputSelects(w);
       for (auto inSel : w->getSelects()) { //inSelects) {
 	Select* in = toSelect(inSel.second);
-	//if (!fromSelfOutput(in) && !fromSelfInput(in)) {
+
 	if (!fromSelfInterface(in)) {
 	  if (!arrayAccess(in)) {
 
