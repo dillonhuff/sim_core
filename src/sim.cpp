@@ -23,10 +23,9 @@ using namespace CoreIR::Passes;
       // second and third and combine them using XOR
       // and bit shifting:
 
-      //return 0;
-      return ((hash<Wireable*>()(k.getWire())));
-               // ^ (hash<string>()(k.second) << 1)) >> 1)
-               // ^ (hash<int>()(k.third) << 1);
+      return ((hash<Wireable*>()(k.getWire())) ^
+	      hash<bool>()(k.isSequential) ^
+	      hash<bool>()(k.isReceiver));
     }
   };
 
@@ -841,11 +840,99 @@ namespace sim_core {
     return code;
   }
 
+
+  void addWireableToGraph(Wireable* w1,
+			  unordered_map<WireNode, vdisc>& imap,
+			  NGraph& g) {
+
+    if (isInstance(w1)) {
+      Instance* inst = toInstance(w1);
+      string genRefName = inst->getGeneratorRef()->getName();
+      cout << "INSTANCE " << genRefName << " TYPE = " << w1->getType()->toString() << endl;
+      if (genRefName == "reg") {
+	WireNode wOutput{w1, true, false};
+	WireNode wInput{w1, true, true};
+
+	if (imap.find(wOutput) == end(imap)) {
+	  g.add_vertex(wOutput);
+	}
+
+	if (imap.find(wInput) == end(imap)) {
+	  g.add_vertex(wInput);
+	}
+
+	return;
+      }
+    }
+
+    if (imap.find({w1, false, false}) == end(imap)) {
+      WireNode w{w1, false, false};
+      vdisc v1 = g.add_vertex(w); //{w1, false, false});
+      imap.insert({w, v1});
+    }
+
+    
+  }
+
+
+  void addConnection(unordered_map<WireNode, vdisc>& imap,
+		     Conn& conn,
+		     NGraph& g) {
+
+    assert(isSelect(conn.first.getWire()));
+    assert(isSelect(conn.second.getWire()));
+
+    auto c1 = static_cast<Select*>(conn.first.getWire());
+    auto c2 = static_cast<Select*>(conn.second.getWire());
+
+    // Need to handle 4 cases:
+    // 1. p1 and p2 are registers
+    // 2. just p2 is a register
+    // 3. just p3 is a register
+    // 4. just p4 is a register
+    Wireable* p1 = static_cast<Instance*>(c1->getParent());
+
+    assert(!isRegisterInstance(p1));
+
+    auto c1_disc_it = imap.find({p1, false, false});
+
+    assert(c1_disc_it != imap.end());
+
+    vdisc c1_disc = (*c1_disc_it).second;
+      
+    Wireable* p2 = static_cast<Instance*>(c2->getParent());
+
+    vdisc c2_disc;
+    if (isRegisterInstance(p2)) {
+      auto c2_disc_it = imap.find({p2, true, false});
+
+      assert(c2_disc_it != imap.end());
+
+      //vdisc c2_disc = (*c2_disc_it).second;
+      c2_disc = (*c2_disc_it).second;
+    } else {
+      assert(!isRegisterInstance(p2));
+
+      auto c2_disc_it = imap.find({p2, false, false});
+
+      assert(c2_disc_it != imap.end());
+
+      //vdisc c2_disc = (*c2_disc_it).second;
+      c2_disc = (*c2_disc_it).second;
+    }
+      
+    pair<edisc, bool> ed = g.add_edge(c1_disc, c2_disc);
+
+    assert(ed.second);
+
+    boost::put(boost::edge_name, g, ed.first, conn);
+    
+  }
+
   void buildOrderedGraph(Module* mod, NGraph& g) {
     auto ord_conns = build_ordered_connections(mod);
 
     // Add vertexes for all instances in the graph
-    //unordered_map<Wireable*, vdisc> imap;
     unordered_map<WireNode, vdisc> imap;
 
     for (auto& conn : ord_conns) {
@@ -856,48 +943,14 @@ namespace sim_core {
       Wireable* w1 = sel1->getParent();
       Wireable* w2 = sel2->getParent();
 
-      if (imap.find({w1, false, false}) == end(imap)) {
-	WireNode w{w1, false, false};
-	vdisc v1 = g.add_vertex(w); //{w1, false, false});
-	imap.insert({w, v1});
-      }
-
-      if (imap.find({w2, false, false}) == end(imap)) {
-	WireNode w{w2, false, false};
-	vdisc v1 = g.add_vertex(w); //{w1, false, false});
-	imap.insert({w, v1});
-	//vdisc v2 = g.add_vertex({w2, false, false});
-	//imap.insert({w2, v2});
-      }
+      addWireableToGraph(w1, imap, g);
+      addWireableToGraph(w2, imap, g);
 
     }
 
     // Add edges to the graph
     for (Conn conn : ord_conns) {
-      assert(isSelect(conn.first.getWire()));
-      assert(isSelect(conn.second.getWire()));
-
-      auto c1 = static_cast<Select*>(conn.first.getWire());
-      auto c2 = static_cast<Select*>(conn.second.getWire());
-
-      Wireable* p1 = static_cast<Instance*>(c1->getParent());
-      auto c1_disc_it = imap.find({p1, false, false});
-
-      assert(c1_disc_it != imap.end());
-
-      Wireable* p2 = static_cast<Instance*>(c2->getParent());
-      auto c2_disc_it = imap.find({p2, false, false});
-
-      assert(c2_disc_it != imap.end());
-
-      vdisc c1_disc = (*c1_disc_it).second;
-      vdisc c2_disc = (*c2_disc_it).second;
-      
-      pair<edisc, bool> ed = g.add_edge(c1_disc, c2_disc);
-
-      assert(ed.second);
-
-      boost::put(boost::edge_name, g, ed.first, conn);
+      addConnection(imap, conn, g);
     }
 
   }

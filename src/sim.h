@@ -13,14 +13,14 @@ namespace sim_core {
     CoreIR::Wireable* wire;
 
     bool isSequential;
-    bool isInput;
+    bool isReceiver;
 
     CoreIR::Wireable* getWire() const { return wire; }
 
     bool operator==(const WireNode& other) const {
       return (wire == other.wire) &&
 	(isSequential == other.isSequential) &&
-	(isInput == other.isInput);
+	(isReceiver == other.isReceiver);
     }
 
   };
