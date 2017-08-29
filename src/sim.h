@@ -15,7 +15,7 @@ namespace sim_core {
     bool isSequential;
     bool isInput;
 
-    CoreIR::Wireable* getWire() { return wire; }
+    CoreIR::Wireable* getWire() const { return wire; }
 
     bool operator==(const WireNode& other) const {
       return (wire == other.wire) &&

@@ -23,10 +23,10 @@ using namespace CoreIR::Passes;
       // second and third and combine them using XOR
       // and bit shifting:
 
-      return 0;
-      // return ((hash<string>()(k.first)
-      //          ^ (hash<string>()(k.second) << 1)) >> 1)
-      //          ^ (hash<int>()(k.third) << 1);
+      //return 0;
+      return ((hash<Wireable*>()(k.getWire())));
+               // ^ (hash<string>()(k.second) << 1)) >> 1)
+               // ^ (hash<int>()(k.third) << 1);
     }
   };
 
