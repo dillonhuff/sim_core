@@ -51,18 +51,18 @@ namespace sim_core {
       NGraph g;
       buildOrderedGraph(counter, g);
 
-      SECTION("Checking number of vertices") {
-	// self, ai, ci, ri_in, ri_out
-	REQUIRE(numVertices(g) == 5);
-      }
+      // SECTION("Checking number of vertices") {
+      // 	// self, ai, ci, ri_in, ri_out
+      // 	REQUIRE(numVertices(g) == 5);
+      // }
 
-      cout << "About to topological sort" << endl;
-      deque<vdisc> topo_order = topologicalSort(g);
-      cout << "Done topological sorting" << endl;
+      // cout << "About to topological sort" << endl;
+      // deque<vdisc> topo_order = topologicalSort(g);
+      // cout << "Done topological sorting" << endl;
 
-      auto str = printCode(topo_order, g, counter);
-      cout << "CODE STRING" << endl;
-      cout << str << endl;
+      // auto str = printCode(topo_order, g, counter);
+      // cout << "CODE STRING" << endl;
+      // cout << str << endl;
 
       // string outFile = "./gencode/two_negs.c";
       // std::ofstream out(outFile);
