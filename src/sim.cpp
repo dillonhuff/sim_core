@@ -513,6 +513,78 @@ namespace sim_core {
     return "";
   }
 
+  bool recordTypeHasField(const std::string& fieldName, Type* t) {
+    cout << "Target type = " << t->toString() << endl;
+    assert(t->getKind() == Type::TK_Record);
+
+    RecordType* rt = static_cast<RecordType*>(t);
+
+    for (auto& rec : rt->getRecord()) {
+      if (rec.first == fieldName) {
+	return true;
+      }
+    }
+    
+    return false;
+  }
+
+  bool hasEnable(Wireable* w) {
+    assert(isRegisterInstance(w));
+
+    return recordTypeHasField("en", w->getType());
+
+    // Instance* iw = toInstance(w);
+    // auto args = iw->getConfigArgs();
+
+    // cout << "Instance type = " << iw->getType()->toString() << endl;
+    // cout << "Instance args" << endl;
+    // for (auto& arg : iw->getConfigArgs()) {
+    //   cout << arg.first << endl;
+    // }
+
+    // return args.find("en") != end(args);
+  }
+
+  string enableRegReceiver(const WireNode& wd, const vdisc vd, const NGraph& g) {
+
+    auto outSel = getOutputSelects(wd.getWire());
+
+    assert(outSel.size() == 1);
+    Select* sl = toSelect((*(begin(outSel))).second);
+
+    assert(isInstance(sl->getParent()));
+
+    Instance* r = toInstance(sl->getParent());
+    string rName = r->getInstname();
+
+    auto ins = getInputConnections(vd, g);
+
+    assert(ins.size() == 3);
+
+    string s = "*" + rName + "_new_value = ";
+    WireNode clk;
+    WireNode en;
+    WireNode add;
+
+    for (auto& conn : ins) {
+      WireNode arg = conn.first;
+      WireNode placement = conn.second;
+      string selName = toSelect(placement.getWire())->getSelStr();
+      if (selName == "en") {
+	en = arg;
+      } else if (selName == "clk") {
+	clk = arg;
+      } else {
+	add = arg;
+      }
+    }
+
+    string oldValName = rName + "_old_value";
+    s += "(((" + cVar(clk) + "_last == 0) && (" + cVar(clk) + " == 1)) && " + cVar(en) + ") ? " + cVar(add) + " : " + oldValName + ";\n";
+
+    return s;
+  }
+
   string printOp(const WireNode& wd, const vdisc vd, const NGraph& g) {
     Instance* inst = toInstance(wd.getWire());
     auto ins = getInputs(vd, g);
@@ -533,35 +605,11 @@ namespace sim_core {
       if (!wd.isReceiver) {
 	return cVar(*s) + varSuffix(wd) + " = " + rName + "_old_value" + " ;\n";
       } else {
-	auto ins = getInputConnections(vd, g);
-
-	assert(ins.size() == 3);
-	// Select* en;
-	// Select* clk;
-	// Select* in;
-
-	string s = "*" + rName + "_new_value = ";
-	WireNode clk;
-	WireNode en;
-	WireNode add;
-
-	for (auto& conn : ins) {
-	  WireNode arg = conn.first;
-	  WireNode placement = conn.second;
-	  string selName = toSelect(placement.getWire())->getSelStr();
-	  if (selName == "en") {
-	    en = arg;
-	  } else if (selName == "clk") {
-	    clk = arg;
-	  } else {
-	    add = arg;
-	  }
+	if (hasEnable(wd.getWire())) {
+	  return enableRegReceiver(wd, vd, g);
+	} else {
+	  assert(false);
 	}
-
-	string oldValName = rName + "_old_value";
-	s += "(((" + cVar(clk) + "_last == 0) && (" + cVar(clk) + " == 1)) && " + cVar(en) + ") ? " + cVar(add) + " : " + oldValName + ";\n";
-
-	return s;
       }
 
     }

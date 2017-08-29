@@ -13,6 +13,21 @@ using namespace CoreIR::Passes;
 
 namespace sim_core {
 
+  int compileCode(const std::string& code, const std::string& outFile) {
+    std::ofstream out(outFile);
+    out << code;
+    out.close();
+
+
+    string runCmd = "clang -c " + outFile;
+    int s = system(runCmd.c_str());
+
+    cout << "Command result = " << s << endl;
+
+    return s;
+
+  }
+
   bool splitNodeEdgesCorrect(const NGraph& g) {
 
     cout << "Edges" << endl;
@@ -199,30 +214,71 @@ namespace sim_core {
 
       SECTION("Compile and run") {      
 	string outFile = "./gencode/register_chain.c";
-	std::ofstream out(outFile);
-	out << str;
-	out.close();
-
-
-	string runCmd = "clang -c " + outFile;
-	int s = system(runCmd.c_str());
-
-	cout << "Command result = " << s << endl;
+	int s = compileCode(str, outFile);
 
 	REQUIRE(s == 0);
 
-
-	// string runTest = "./a.out";
-	// s = system(runTest.c_str());
-
-	// cout << "Test result = " << s << endl;
-
-	// REQUIRE(s == 0);
       }
       
     }
+
+    SECTION("Register withoug enable") {
+
+      Type* regChainType = c->Record({
+	  {"a", c->BitIn()->Arr(8)},
+	    {"cout",c->Bit()->Arr(8)},
+	      {"clk",c->Named("coreir.clkIn")},
+		});
+
+      Module* regChain = c->getGlobal()->newModuleDecl("regChain", regChainType);
+      ModuleDef* def = regChain->newModuleDef();
+      Args wArg({{"width",c->argInt(8)}});
+
+      def->addInstance("r0","coreir.reg",{{"width",c->argInt(8)},{"en",c->argBool(false)}});
     
-    //Always remember to delete your context!
+      //Connections
+      def->connect("self.clk", "r0.clk");
+      def->connect("self.a", "r0.in");
+      def->connect("r0.out","self.cout");
+
+      regChain->setDef(def);
+  
+      RunGenerators rg;
+      rg.runOnNamespace(c->getGlobal());
+
+      NGraph g;
+      buildOrderedGraph(regChain, g);
+
+      SECTION("Checking number of vertices") {
+	REQUIRE(splitNodeEdgesCorrect(g));	
+
+      	REQUIRE(numVertices(g) == 5);
+      }
+
+
+
+      cout << "About to topological sort" << endl;
+      deque<vdisc> topoOrder = topologicalSort(g);
+      cout << "Done topological sorting" << endl;
+
+      cout << "Vertices" << endl;
+      for (auto& vd : topoOrder) {
+	WireNode wd = boost::get(boost::vertex_name, g, vd);
+	cout << wd.getWire()->toString() << endl;
+      }
+
+      auto str = printCode(topoOrder, g, regChain);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
+      
+      SECTION("Compile and run") {
+	string outFile = "./gencode/register_no_enable.c";
+	int s = compileCode(str, outFile);
+
+	REQUIRE(s == 0);
+      }
+    }
+    
     deleteContext(c);
 
   }
