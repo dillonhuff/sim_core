@@ -899,11 +899,6 @@ namespace sim_core {
     if (isRegisterInstance(p1)) {
       auto c1_disc_it = imap.find({p1, true, false});
 
-      // if (c1_disc_it == imap.end()) {
-      // 	cout << "p2 = " << p2->toString() << " not found" << endl;
-      // 	cout << "imap size == " << imap.size() << endl;
-      // }
-
       assert(c1_disc_it != imap.end());
 
       c1_disc = (*c1_disc_it).second;
@@ -924,14 +919,8 @@ namespace sim_core {
     if (isRegisterInstance(p2)) {
       auto c2_disc_it = imap.find({p2, true, true});
 
-      // if (c2_disc_it == imap.end()) {
-      // 	cout << "p2 = " << p2->toString() << " not found" << endl;
-      // 	cout << "imap size == " << imap.size() << endl;
-      // }
-
       assert(c2_disc_it != imap.end());
 
-      //vdisc c2_disc = (*c2_disc_it).second;
       c2_disc = (*c2_disc_it).second;
     } else {
       assert(!isRegisterInstance(p2));
@@ -940,7 +929,6 @@ namespace sim_core {
 
       assert(c2_disc_it != imap.end());
 
-      //vdisc c2_disc = (*c2_disc_it).second;
       c2_disc = (*c2_disc_it).second;
     }
       
