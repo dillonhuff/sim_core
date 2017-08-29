@@ -162,15 +162,16 @@ namespace sim_core {
     vector<Conn> outConns;
 
     auto out_edge_pair = boost::out_edges(vd, g);
-    Wireable* w = boost::get(boost::vertex_name, g, vd);
+    Wireable* w = boost::get(boost::vertex_name, g, vd).getWire();
 
     for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
       auto out_edge_desc = *it;
-      pair<Wireable*, Wireable*> edge_conn =
+      //pair<Wireable*, Wireable*> edge_conn =
+      Conn edge_conn =
 	boost::get(boost::edge_name, g, out_edge_desc);
 
-      assert(isSelect(edge_conn.first));
-      Select* sel = static_cast<Select*>(edge_conn.first);
+      assert(isSelect(edge_conn.first.getWire()));
+      Select* sel = static_cast<Select*>(edge_conn.first.getWire());
       assert(sel->getParent() == w);
 
       outConns.push_back(edge_conn);
@@ -194,16 +195,17 @@ namespace sim_core {
     vector<Conn> inConss;
 
     auto out_edge_pair = boost::in_edges(vd, g);
-    Wireable* w = boost::get(boost::vertex_name, g, vd);
+    Wireable* w = boost::get(boost::vertex_name, g, vd).getWire();
 
     for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
       auto out_edge_desc = *it;
-      pair<Wireable*, Wireable*> edge_conn =
+      //pair<Wireable*, Wireable*> edge_conn =
+      Conn edge_conn =
 	boost::get(boost::edge_name, g, out_edge_desc);
 
-      assert(isSelect(edge_conn.second));
+      assert(isSelect(edge_conn.second.getWire()));
 
-      Select* sel = static_cast<Select*>(edge_conn.second);
+      Select* sel = static_cast<Select*>(edge_conn.second.getWire());
 
       assert(sel->getParent() == w);
 
@@ -217,18 +219,19 @@ namespace sim_core {
     vector<Wireable*> outputs;
 
     auto out_edge_pair = boost::out_edges(vd, g);
-    Wireable* w = boost::get(boost::vertex_name, g, vd);
+    Wireable* w = boost::get(boost::vertex_name, g, vd).getWire();
 
     for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
       auto out_edge_desc = *it;
-      pair<Wireable*, Wireable*> edge_conn =
+      //pair<Wireable*, Wireable*> edge_conn =
+      Conn edge_conn =
 	boost::get(boost::edge_name, g, out_edge_desc);
 
-      assert(isSelect(edge_conn.first));
-      Select* sel = static_cast<Select*>(edge_conn.first);
+      assert(isSelect(edge_conn.first.getWire()));
+      Select* sel = static_cast<Select*>(edge_conn.first.getWire());
       assert(sel->getParent() == w);
 
-      outputs.push_back(edge_conn.second);
+      outputs.push_back(edge_conn.second.getWire());
       
     }
 
@@ -237,18 +240,19 @@ namespace sim_core {
 
   std::vector<Wireable*> getInputs(const vdisc vd, const NGraph& g) {
     vector<Wireable*> inputs;
-    Wireable* w = boost::get(boost::vertex_name, g, vd);
+    Wireable* w = boost::get(boost::vertex_name, g, vd).getWire();
     auto in_edge_pair = boost::in_edges(vd, g);
     for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
       auto in_edge_desc = *it;
-      pair<Wireable*, Wireable*> edge_conn =
+      //pair<Wireable*, Wireable*> edge_conn =
+      Conn edge_conn =
 	boost::get(boost::edge_name, g, in_edge_desc);
 
-      assert(isSelect(edge_conn.second));
-      Select* sel = static_cast<Select*>(edge_conn.second);
+      assert(isSelect(edge_conn.second.getWire()));
+      Select* sel = static_cast<Select*>(edge_conn.second.getWire());
       assert(sel->getParent() == w);
 
-      inputs.push_back(edge_conn.first);
+      inputs.push_back(edge_conn.first.getWire());
       
     }
 
@@ -338,9 +342,9 @@ namespace sim_core {
     assert(inConns.size() == 1);
 
     Conn cn = (*std::begin(inConns));
-    Wireable* arg = cn.first;
+    Wireable* arg = cn.first.getWire();
     
-    auto dest = inConns[0].second;
+    Wireable* dest = inConns[0].second.getWire();
     assert(isSelect(dest));
 
     Select* destSel = toSelect(dest);
@@ -372,18 +376,18 @@ namespace sim_core {
     Wireable* arg1;
     Wireable* arg2;
     
-    auto dest = inConns[0].second;
+    auto dest = inConns[0].second.getWire();
     assert(isSelect(dest));
 
     Select* destSel = toSelect(dest);
     assert(destSel->getParent() == inst);
 
     if (destSel->getSelStr() == "in0") {
-      arg1 = inConns[0].first;
-      arg2 = inConns[1].first;
+      arg1 = inConns[0].first.getWire();
+      arg2 = inConns[1].first.getWire();
     } else {
-      arg1 = inConns[1].first;
-      arg2 = inConns[0].first;
+      arg1 = inConns[1].first.getWire();
+      arg2 = inConns[0].first.getWire();
     }
 
     string opString = getOpString(*inst);
@@ -573,7 +577,7 @@ namespace sim_core {
     vector<Wireable*> self_inputs;
   
     for (auto& vd : topo_order) {
-      Wireable* inst = get(boost::vertex_name, g, vd);
+      Wireable* inst = get(boost::vertex_name, g, vd).getWire();
 
       auto ins = getInputSelects(inst);
       for (auto& inSel : ins) {
@@ -614,7 +618,7 @@ namespace sim_core {
     vector<Wireable*> internals;
 
     for (auto& vd : topo_order) {
-      Wireable* inst = get(boost::vertex_name, g, vd);
+      Wireable* inst = get(boost::vertex_name, g, vd).getWire();
 
       auto ins = getInputSelects(inst);
       for (auto& inSel : ins) {
@@ -730,7 +734,7 @@ namespace sim_core {
     str += "// Simulation code\n";
     for (auto& vd : topo_order) {
 
-      Wireable* inst = get(boost::vertex_name, g, vd);
+      Wireable* inst = get(boost::vertex_name, g, vd).getWire();
 
       if (isInstance(inst)) {
 	str += printOp(static_cast<Instance*>(inst), vd, g);
@@ -740,7 +744,7 @@ namespace sim_core {
 	auto inConns = getInputConnections(vd, g);
       
 	for (auto inConn : inConns) {
-	  str += cVar(*(inConn.second)) + " = " + cVar(*(inConn.first)) + ";\n";
+	  str += cVar(*(inConn.second.getWire())) + " = " + cVar(*(inConn.first.getWire())) + ";\n";
 	}
 
       }
@@ -828,13 +832,13 @@ namespace sim_core {
       Wireable* w2 = sel2->getParent();
 
       if (imap.find(w1) == end(imap)) {
-	vdisc v1 = g.add_vertex(w1);
-	imap.insert({w1, v1});
+	//vdisc v1 = g.add_vertex({w1, false, false});
+	//imap.insert({w1, v1});
       }
 
       if (imap.find(w2) == end(imap)) {
-	vdisc v2 = g.add_vertex(w2);
-	imap.insert({w2, v2});
+	//vdisc v2 = g.add_vertex({w2, false, false});
+	//imap.insert({w2, v2});
       }
 
     }
@@ -864,7 +868,7 @@ namespace sim_core {
 
       assert(ed.second);
 
-      boost::put(boost::edge_name, g, ed.first, conn);
+      //boost::put(boost::edge_name, g, ed.first, conn);
     }
 
   }

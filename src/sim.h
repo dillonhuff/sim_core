@@ -8,7 +8,19 @@
 
 namespace sim_core {
 
-  typedef CoreIR::Wireable* WireableNode;
+  class WireNode {
+  public:
+    CoreIR::Wireable* wire;
+
+    bool isSequential;
+    bool isInput;
+
+    CoreIR::Wireable* getWire() { return wire; }
+  };
+
+  //typedef CoreIR::Wireable* WireableNode;
+
+  typedef WireNode WireableNode;
 
   typedef std::pair<WireableNode, WireableNode> Conn;
   typedef boost::property<boost::edge_name_t, Conn > EdgeProp;
