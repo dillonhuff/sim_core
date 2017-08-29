@@ -19,10 +19,6 @@ using namespace CoreIR::Passes;
       using std::hash;
       using std::string;
 
-      // Compute individual hash values for first,
-      // second and third and combine them using XOR
-      // and bit shifting:
-
       return ((hash<Wireable*>()(k.getWire())) ^
 	      hash<bool>()(k.isSequential) ^
 	      hash<bool>()(k.isReceiver));
@@ -414,7 +410,8 @@ namespace sim_core {
     string res = "";
 
     pair<string, Wireable*> outPair = *std::begin(outSelects);
-    res += inst->getInstname() + "_" + outPair.first + " = CONSTVALUE;\n";
+    // TODO: Actuall set constant value
+    res += inst->getInstname() + "_" + outPair.first + " = 0;\n";
 
     return res;
   }
@@ -465,7 +462,8 @@ namespace sim_core {
 
   }
 
-  string printOp(Instance* inst, const vdisc vd, const NGraph& g) {
+  string printOp(const WireNode& wd, const vdisc vd, const NGraph& g) {
+    Instance* inst = toInstance(wd.getWire());
     auto ins = getInputs(vd, g);
 
     if (isRegisterInstance(inst)) {
@@ -831,10 +829,11 @@ namespace sim_core {
     str += "// Simulation code\n";
     for (auto& vd : topo_order) {
 
-      Wireable* inst = get(boost::vertex_name, g, vd).getWire();
+      WireNode wd = get(boost::vertex_name, g, vd);
+      Wireable* inst = wd.getWire();
 
       if (isInstance(inst)) {
-	str += printOp(static_cast<Instance*>(inst), vd, g);
+	str += printOp(wd, vd, g);
       } else {
 
 	// If not an instance copy the input values
