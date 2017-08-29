@@ -223,7 +223,6 @@ namespace sim_core {
       assert(sel->getParent() == w);
 
       inConss.push_back(edge_conn);
-      
     }
   
     return inConss;
