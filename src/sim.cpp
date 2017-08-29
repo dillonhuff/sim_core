@@ -405,6 +405,10 @@ namespace sim_core {
 
     return res;
   }
+
+  string printConstant(Instance* inst, const vdisc vd, const NGraph& g) {
+    return "CONSTANT!!\n";
+  }
   
   string printSub(Instance* inst, const vdisc vd, const NGraph& g) {
     auto outSelects = getOutputSelects(inst);
@@ -455,12 +459,20 @@ namespace sim_core {
   string printOp(Instance* inst, const vdisc vd, const NGraph& g) {
     auto ins = getInputs(vd, g);
 
+    if (isRegisterInstance(inst)) {
+      return "REGISTER!!\n";
+    }
+
     if (ins.size() == 2) {
       return printBinop(inst, vd, g);
     }
 
     if (ins.size() == 1) {
       return printUnop(inst, vd, g);
+    }
+
+    if (ins.size() == 0) {
+      return printConstant(inst, vd, g);
     }
 
     cout << "Unsupported instance = " << inst->toString() << endl;
