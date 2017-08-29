@@ -300,10 +300,18 @@ namespace sim_core {
       out << str;
       out.close();
 
-      string runCmd = "clang -c " + outFile;
+      string runCmd = "clang " + outFile + " gencode/test_mat2_3_add.c";
       int s = system(runCmd.c_str());
 
       cout << "Command result = " << s << endl;
+
+      REQUIRE(s == 0);
+
+
+      string runTest = "./a.out";
+      s = system(runTest.c_str());
+
+      cout << "Test result = " << s << endl;
 
       REQUIRE(s == 0);
     }
