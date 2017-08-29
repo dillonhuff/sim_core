@@ -6,7 +6,7 @@
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"
 
-#include <ostream>
+#include <fstream>
 
 using namespace CoreIR;
 using namespace CoreIR::Passes;
@@ -93,17 +93,17 @@ namespace sim_core {
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
-      // string outFile = "./gencode/two_negs.c";
-      // std::ofstream out(outFile);
-      // out << str;
-      // out.close();
+      string outFile = "./gencode/counter.c";
+      std::ofstream out(outFile);
+      out << str;
+      out.close();
 
-      // string runCmd = "clang -c " + outFile;
-      // int s = system(runCmd.c_str());
+      string runCmd = "clang -c " + outFile;
+      int s = system(runCmd.c_str());
 
-      // cout << "Command result = " << s << endl;
+      cout << "Command result = " << s << endl;
 
-      // REQUIRE(s == 0);
+      REQUIRE(s == 0);
       
       //Always remember to delete your context!
       deleteContext(c);
