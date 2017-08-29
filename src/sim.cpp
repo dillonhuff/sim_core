@@ -8,6 +8,30 @@
 using namespace CoreIR;
 using namespace CoreIR::Passes;
 
+  namespace std {
+
+  template <>
+  struct hash<sim_core::WireNode>
+  {
+    std::size_t operator()(const sim_core::WireNode& k) const
+    {
+      using std::size_t;
+      using std::hash;
+      using std::string;
+
+      // Compute individual hash values for first,
+      // second and third and combine them using XOR
+      // and bit shifting:
+
+      return 0;
+      // return ((hash<string>()(k.first)
+      //          ^ (hash<string>()(k.second) << 1)) >> 1)
+      //          ^ (hash<int>()(k.third) << 1);
+    }
+  };
+
+}  
+
 namespace sim_core {
 
   void print_wireable_selects(Wireable* fst_select) {
@@ -821,7 +845,8 @@ namespace sim_core {
     auto ord_conns = build_ordered_connections(mod);
 
     // Add vertexes for all instances in the graph
-    unordered_map<Wireable*, vdisc> imap;
+    //unordered_map<Wireable*, vdisc> imap;
+    unordered_map<WireNode, vdisc> imap;
 
     for (auto& conn : ord_conns) {
 
@@ -831,16 +856,16 @@ namespace sim_core {
       Wireable* w1 = sel1->getParent();
       Wireable* w2 = sel2->getParent();
 
-      if (imap.find(w1) == end(imap)) {
+      if (imap.find({w1, false, false}) == end(imap)) {
 	WireNode w{w1, false, false};
 	vdisc v1 = g.add_vertex(w); //{w1, false, false});
-	imap.insert({w1, v1});
+	imap.insert({w, v1});
       }
 
-      if (imap.find(w2) == end(imap)) {
+      if (imap.find({w2, false, false}) == end(imap)) {
 	WireNode w{w2, false, false};
 	vdisc v1 = g.add_vertex(w); //{w1, false, false});
-	imap.insert({w2, v1});
+	imap.insert({w, v1});
 	//vdisc v2 = g.add_vertex({w2, false, false});
 	//imap.insert({w2, v2});
       }
@@ -856,12 +881,12 @@ namespace sim_core {
       auto c2 = static_cast<Select*>(conn.second.getWire());
 
       Wireable* p1 = static_cast<Instance*>(c1->getParent());
-      auto c1_disc_it = imap.find(p1);
+      auto c1_disc_it = imap.find({p1, false, false});
 
       assert(c1_disc_it != imap.end());
 
       Wireable* p2 = static_cast<Instance*>(c2->getParent());
-      auto c2_disc_it = imap.find(p2);
+      auto c2_disc_it = imap.find({p2, false, false});
 
       assert(c2_disc_it != imap.end());
 

@@ -51,10 +51,10 @@ namespace sim_core {
       NGraph g;
       buildOrderedGraph(counter, g);
 
-      // SECTION("Checking number of vertices") {
-      // 	// self, ai, ci, ri_in, ri_out
-      // 	REQUIRE(numVertices(g) == 5);
-      // }
+      SECTION("Checking number of vertices") {
+      	// self, ai, ci, ri_in, ri_out
+      	REQUIRE(numVertices(g) == 5);
+      }
 
       // cout << "About to topological sort" << endl;
       // deque<vdisc> topo_order = topologicalSort(g);
