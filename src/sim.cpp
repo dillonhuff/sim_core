@@ -465,6 +465,18 @@ namespace sim_core {
 
   }
 
+  string varSuffix(const WireNode& wd) {
+    if (wd.isSequential) {
+      if (wd.isReceiver) {
+	return "_receiver";
+      } else {
+	return "_source";
+      }
+    }
+
+    return "";
+  }
+
   string printOp(const WireNode& wd, const vdisc vd, const NGraph& g) {
     Instance* inst = toInstance(wd.getWire());
     auto ins = getInputs(vd, g);
@@ -472,7 +484,12 @@ namespace sim_core {
     if (isRegisterInstance(inst)) {
       assert(wd.isSequential);
 
-      return cVar(wd) + " = 0;\n";
+      auto outSel = getOutputSelects(wd.getWire());
+
+      assert(outSel.size() == 1);
+      Select* s = toSelect((*(begin(outSel))).second);
+
+      return cVar(*s) + varSuffix(wd) + " = 0;\n";
 
     }
 
@@ -900,7 +917,7 @@ namespace sim_core {
 	auto inConns = getInputConnections(vd, g);
       
 	for (auto inConn : inConns) {
-	  str += cVar(*(inConn.second.getWire())) + " = " + cVar(*(inConn.first.getWire())) + ";\n";
+	  str += cVar(*(inConn.second.getWire())) + " = " + cVar(inConn.first) + ";\n";
 	}
 
       }
