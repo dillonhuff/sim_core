@@ -3,27 +3,12 @@
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"
 
+#include "utils.h"
+
 using namespace CoreIR;
 using namespace CoreIR::Passes;
 
 namespace sim_core {
-
-  bool isSelect(Wireable* fst) {
-    return fst->getKind() == Wireable::WK_Select;
-  }
-
-  bool isSelect(const Wireable& fst) {
-    return fst.getKind() == Wireable::WK_Select;
-  }
-
-  Select& toSelect(Wireable& fst) {
-    assert(isSelect(fst));
-    return static_cast<Select&>(fst);
-  }
-
-  bool isInstance(Wireable* fst) {
-    return fst->getKind() == Wireable::WK_Instance;
-  }
 
   void print_wireable_selects(Wireable* fst_select) {
     cout << "Wireable selects" << endl;

@@ -14,7 +14,8 @@ SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${COREIR_LINK_FLAGS}" )
 
 INCLUDE_DIRECTORIES(./src/)
 
-SET(SRC_FILES ./src/sim.cpp)
+SET(SRC_FILES ./src/sim.cpp
+	      ./src/utils.cpp)
 
 SET(TEST_FILES ./test/combinational_tests.cpp
 	       ./test/sequential_tests.cpp)
