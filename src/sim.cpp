@@ -410,7 +410,6 @@ namespace sim_core {
     string res = "";
 
     bool foundValue = false;
-    cout << "Args" << endl;
 
     string argStr = "";
     for (auto& arg : inst->getConfigArgs()) {
@@ -423,13 +422,11 @@ namespace sim_core {
 	ArgInt* valInt = static_cast<ArgInt*>(valArg);
 	argStr = valInt->toString();
       }
-      cout << arg.first << endl;
     }
 
     assert(foundValue);
 
     pair<string, Wireable*> outPair = *std::begin(outSelects);
-    // TODO: Actuall set constant value
     res += inst->getInstname() + "_" + outPair.first + " = " + argStr + ";\n";
 
     return res;
@@ -795,54 +792,54 @@ namespace sim_core {
     return self_inputs;
   }
 
-  struct DeclaredWireables {
-    vector<Wireable*> selfInputs;
-    vector<Wireable*> selfOutputs;
-    vector<Wireable*> internals;
-  };
+  // struct DeclaredWireables {
+  //   vector<Wireable*> selfInputs;
+  //   vector<Wireable*> selfOutputs;
+  //   vector<Wireable*> internals;
+  // };
   
-  DeclaredWireables getDeclaredWireables(const std::deque<vdisc>& topo_order,
-					 NGraph& g) {
-    vector<Wireable*> self_inputs;
-    vector<Wireable*> self_outputs;
-    vector<Wireable*> internals;
+  // DeclaredWireables getDeclaredWireables(const std::deque<vdisc>& topo_order,
+  // 					 NGraph& g) {
+  //   vector<Wireable*> self_inputs;
+  //   vector<Wireable*> self_outputs;
+  //   vector<Wireable*> internals;
 
-    for (auto& vd : topo_order) {
-      Wireable* inst = get(boost::vertex_name, g, vd).getWire();
+  //   for (auto& vd : topo_order) {
+  //     Wireable* inst = get(boost::vertex_name, g, vd).getWire();
 
-      auto ins = getInputSelects(inst);
-      for (auto& inSel : ins) {
-	auto in = inSel.second;
-	if (!arrayAccess(toSelect(in))) {
-	  if (fromSelfOutput(toSelect(in))) {
-	    self_outputs.push_back(in);
-	  } else if (fromSelfInput(toSelect(in))) {
-	    self_inputs.push_back(in);
-	  } else {
-	    internals.push_back(in);
-	  }
-	}
+  //     auto ins = getInputSelects(inst);
+  //     for (auto& inSel : ins) {
+  // 	auto in = inSel.second;
+  // 	if (!arrayAccess(toSelect(in))) {
+  // 	  if (fromSelfOutput(toSelect(in))) {
+  // 	    self_outputs.push_back(in);
+  // 	  } else if (fromSelfInput(toSelect(in))) {
+  // 	    self_inputs.push_back(in);
+  // 	  } else {
+  // 	    internals.push_back(in);
+  // 	  }
+  // 	}
 
-      }
+  //     }
 
-      auto outs = getOutputSelects(inst);
-      for (auto& outSel : outs) {
-	auto out = outSel.second;
-	if (!arrayAccess(toSelect(out))) {
-	  if (fromSelfOutput(toSelect(out))) {
-	    self_outputs.push_back(out);
-	  } else if (fromSelfInput(toSelect(out))) {
-	    self_inputs.push_back(out);
-	  } else {
-	    internals.push_back(out);
-	  }
-	}
-      }
+  //     auto outs = getOutputSelects(inst);
+  //     for (auto& outSel : outs) {
+  // 	auto out = outSel.second;
+  // 	if (!arrayAccess(toSelect(out))) {
+  // 	  if (fromSelfOutput(toSelect(out))) {
+  // 	    self_outputs.push_back(out);
+  // 	  } else if (fromSelfInput(toSelect(out))) {
+  // 	    self_inputs.push_back(out);
+  // 	  } else {
+  // 	    internals.push_back(out);
+  // 	  }
+  // 	}
+  //     }
 
-    }
+  //   }
 
-    return DeclaredWireables{self_inputs, self_outputs, internals};
-  }
+  //   return DeclaredWireables{self_inputs, self_outputs, internals};
+  // }
 
 
   std::unordered_map<string, Type*>
@@ -937,8 +934,6 @@ namespace sim_core {
     // Declare all variables
     str += "// Variable declarations\n";
 
-    auto dw = getDeclaredWireables(topo_order, g);
-
     str += "// Outputs\n";
 
     for (auto& name_type_pair : outputs(mod)) {
@@ -949,15 +944,6 @@ namespace sim_core {
     str += "// Internal variables\n";
     str += printInternalVariables(topo_order, g, mod);
 
-      
-    // }
-
-
-    // for (auto& in : dw.internals) {
-    //   str += cTypeString(*(in->getType())) + " " + cVar(*in) + ";\n";
-    // }
-    
-  
     // Print out operations in topological order
     str += "// Simulation code\n";
     for (auto& vd : topo_order) {
@@ -990,8 +976,21 @@ namespace sim_core {
     return str;
   }
 
+  std::string commaSepList(std::vector<std::string>& declStrs) {
+    std::string res = "";
+    for (int i = 0; i < declStrs.size(); i++) {
+      res += declStrs[i];
+      if (i < declStrs.size() - 1) {
+	res += ", ";
+      }
+    }
+
+    return res;
+    
+  }
+
   string printSimArguments(Module& mod) {
-			   //			   const DeclaredWireables& dw) {
+
     Type* tp = mod.getType();
 
     cout << "module type = " << tp->toString() << endl;
@@ -1027,13 +1026,7 @@ namespace sim_core {
     }
     
     // Print out declstrings
-    string res;
-    for (int i = 0; i < declStrs.size(); i++) {
-      res += declStrs[i];
-      if (i < declStrs.size() - 1) {
-	res += ", ";
-      }
-    }
+    string res = commaSepList(declStrs);
 
     return res;
   }
