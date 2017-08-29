@@ -8,9 +8,11 @@
 
 namespace sim_core {
 
-  typedef std::pair<CoreIR::Wireable*, CoreIR::Wireable*> Conn;
+  typedef CoreIR::Wireable* WireableNode;
+
+  typedef std::pair<WireableNode, WireableNode> Conn;
   typedef boost::property<boost::edge_name_t, Conn > EdgeProp;
-  typedef boost::directed_graph<boost::property<boost::vertex_name_t, CoreIR::Wireable*>, EdgeProp > NGraph;
+  typedef boost::directed_graph<boost::property<boost::vertex_name_t, WireableNode>, EdgeProp > NGraph;
 
   typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
   typedef boost::graph_traits<NGraph>::edge_descriptor edisc;
