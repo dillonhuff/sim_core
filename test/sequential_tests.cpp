@@ -89,9 +89,9 @@ namespace sim_core {
 	REQUIRE(isRec);
       }
 
-      // auto str = printCode(topo_order, g, counter);
-      // cout << "CODE STRING" << endl;
-      // cout << str << endl;
+      auto str = printCode(topoOrder, g, counter);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
 
       // string outFile = "./gencode/two_negs.c";
       // std::ofstream out(outFile);

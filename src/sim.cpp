@@ -463,6 +463,7 @@ namespace sim_core {
       return printUnop(inst, vd, g);
     }
 
+    cout << "Unsupported instance = " << inst->toString() << endl;
     assert(false);
   }
 
@@ -533,6 +534,20 @@ namespace sim_core {
     return false;
   }
 
+  bool isNamedType(Type& t, const std::string& name) {
+    if (t.getKind() != Type::TK_Named) {
+      return false;
+    }
+
+    NamedType& nt = static_cast<NamedType&>(t);
+    return nt.getName() == name;
+
+  }
+
+  bool isClkIn(Type& t) {
+    return isNamedType(t, "clkIn");
+  }
+
   std::string cTypeString(Type& t) {
     if (isBitArrayOfLength(t, 8)) {
       return "uint8_t";
@@ -556,6 +571,20 @@ namespace sim_core {
 
       return cTypeString(underlying) + "*";
     }
+
+    if (t.getKind() == Type::TK_BitIn) {
+      return "uint8_t";
+    }
+
+    if (t.getKind() == Type::TK_Bit) {
+      return "uint8_t";
+    }
+
+    if (isClkIn(t) || isNamedType(t, "clk")) {
+      return "uint8_t";
+    }
+
+    cout << "ERROR: Unsupported type = " << t.toString() << endl;
 
     assert(false);
 
