@@ -1,1 +1,3 @@
-void simulate( uint64_t** self_A, uint64_t** self_B, uint64_t*** self_out_ptr );
+void simulate( uint64_t  self_A[ 2 ][ 3 ],
+	       uint64_t  self_B[ 2 ][ 3 ],
+	       uint64_t (*self_out_ptr)[2][3] );

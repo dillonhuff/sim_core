@@ -748,9 +748,14 @@ namespace sim_core {
       ArrayType& tArr = static_cast<ArrayType&>(t);
       Type& underlying = *(tArr.getElemType());
 
-      return cArrayTypeDecl(underlying, varName) + "[ " + std::to_string(tArr.getLen()) + " ]";
+      return cArrayTypeDecl(underlying, varName + "[ " + std::to_string(tArr.getLen()) + " ]");
     }
 
+    if (!isArray(t)) {
+      return cTypeString(t) + " " + varName;
+    }
+
+    
     assert(false);
 
   }
@@ -954,14 +959,15 @@ namespace sim_core {
 
       if (tp->isInput()) {
 	if (!isClkIn(*tp)) {
-	  declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
+	  //declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
+	  declStrs.push_back(cArrayTypeDecl(*tp, " self_" + name_type_pair.first));
 	} else {
 	  declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
 	  declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first + "_last");
 	}
       } else {
 	assert(tp->isOutput());
-	declStrs.push_back(cTypeString(*tp) + "*" + " self_" + name_type_pair.first + "_ptr");
+	declStrs.push_back(cArrayTypeDecl(*tp, "(*self_" + name_type_pair.first + "_ptr)"));
       }
     }
 
