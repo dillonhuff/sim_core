@@ -532,17 +532,6 @@ namespace sim_core {
     assert(isRegisterInstance(w));
 
     return recordTypeHasField("en", w->getType());
-
-    // Instance* iw = toInstance(w);
-    // auto args = iw->getConfigArgs();
-
-    // cout << "Instance type = " << iw->getType()->toString() << endl;
-    // cout << "Instance args" << endl;
-    // for (auto& arg : iw->getConfigArgs()) {
-    //   cout << arg.first << endl;
-    // }
-
-    // return args.find("en") != end(args);
   }
 
   string enableRegReceiver(const WireNode& wd, const vdisc vd, const NGraph& g) {
@@ -585,6 +574,43 @@ namespace sim_core {
     return s;
   }
 
+  string noEnableRegReceiver(const WireNode& wd, const vdisc vd, const NGraph& g) {
+
+    auto outSel = getOutputSelects(wd.getWire());
+
+    assert(outSel.size() == 1);
+    Select* sl = toSelect((*(begin(outSel))).second);
+
+    assert(isInstance(sl->getParent()));
+
+    Instance* r = toInstance(sl->getParent());
+    string rName = r->getInstname();
+
+    auto ins = getInputConnections(vd, g);
+
+    assert(ins.size() == 2);
+
+    string s = "*" + rName + "_new_value = ";
+    WireNode clk;
+    WireNode add;
+
+    for (auto& conn : ins) {
+      WireNode arg = conn.first;
+      WireNode placement = conn.second;
+      string selName = toSelect(placement.getWire())->getSelStr();
+      if (selName == "clk") {
+	clk = arg;
+      } else {
+	add = arg;
+      }
+    }
+
+    string oldValName = rName + "_old_value";
+    s += "((" + cVar(clk) + "_last == 0) && (" + cVar(clk) + " == 1)) ? " + cVar(add) + " : " + oldValName + ";\n";
+
+    return s;
+  }
+  
   string printOp(const WireNode& wd, const vdisc vd, const NGraph& g) {
     Instance* inst = toInstance(wd.getWire());
     auto ins = getInputs(vd, g);
@@ -608,7 +634,7 @@ namespace sim_core {
 	if (hasEnable(wd.getWire())) {
 	  return enableRegReceiver(wd, vd, g);
 	} else {
-	  assert(false);
+	  return noEnableRegReceiver(wd, vd, g);
 	}
       }
 
