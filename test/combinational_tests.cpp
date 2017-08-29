@@ -186,6 +186,62 @@ namespace sim_core {
 
     }
 
+    SECTION("One 16 bit negation") {
+      uint n = 16;
+  
+      Generator* neg = c->getGenerator("coreir.neg");
+
+      Type* neg2Type = c->Record({
+	  {"A",    c->Array(n,c->BitIn())},
+	    {"res", c->Array(n,c->Bit())}
+	});
+
+      Module* neg_n = g->newModuleDecl("neg_16", neg2Type);
+
+      ModuleDef* def = neg_n->newModuleDef();
+
+      Wireable* self = def->sel("self");
+      Wireable* neg0 = def->addInstance("neg0", neg, {{"width", c->argInt(n)}});
+
+      def->connect(self->sel("A"), neg0->sel("in"));
+
+      def->connect(neg0->sel("out"), self->sel("res"));
+
+      neg_n->setDef(def);
+
+      RunGenerators rg;
+      rg.runOnNamespace(g);
+
+      Type* t = neg_n->getType();
+      cout << "Module type = " << t->toString() << endl;
+      
+      NGraph g;
+      buildOrderedGraph(neg_n, g);
+
+      SECTION("Checking graph size") {
+      	REQUIRE(num_vertices(g) == 3);
+      }
+
+      deque<vdisc> topo_order = topologicalSort(g);
+
+      auto str = printCode(topo_order, g, neg_n);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
+
+      string outFile = "./gencode/neg16.c";
+      std::ofstream out(outFile);
+      out << str;
+      out.close();
+
+      string runCmd = "clang -c " + outFile;
+      int s = system(runCmd.c_str());
+
+      cout << "Command result = " << s << endl;
+
+      REQUIRE(s == 0);
+      
+    }
+    
     SECTION("Two 16 bit negs") {
       uint n = 16;
   
