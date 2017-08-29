@@ -195,6 +195,16 @@ namespace sim_core {
     return outConns;
   }
 
+  int numVertices(const NGraph& g) {
+    auto vertex_it_pair = boost::vertices(g);
+
+    int numVerts = 0;
+    for (auto it = vertex_it_pair.first; it != vertex_it_pair.second; it++) {
+      numVerts++;
+    }
+    return numVerts;
+  }
+
   std::vector<Conn> getInputConnections(const vdisc vd, const NGraph& g) {
     vector<Conn> inConss;
 
@@ -759,10 +769,6 @@ namespace sim_core {
       Type* tp = name_type_pair.second;
       str += copyTypeFromInternal(tp, name_type_pair.first);
     }
-
-    // for (auto& out : dw.selfOutputs) {
-    //   str += "*" + cVar(*out) + "_ptr = " + cVar(*out) + ";\n";
-    // }
 
     return str;
   }

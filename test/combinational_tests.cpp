@@ -54,6 +54,10 @@ namespace sim_core {
       NGraph g;
       buildOrderedGraph(add4_n, g);
 
+      SECTION("Checking graph size") {
+	REQUIRE(num_vertices(g) == 5);
+      }
+      
       deque<vdisc> topo_order = topologicalSort(g);
 
       auto str = printCode(topo_order, g, add4_n);
@@ -106,6 +110,10 @@ namespace sim_core {
       NGraph g;
       buildOrderedGraph(sub4_n, g);
 
+      SECTION("Checking graph size") {
+	REQUIRE(num_vertices(g) == 5);
+      }
+      
       deque<vdisc> topo_order = topologicalSort(g);
 
       auto str = printCode(topo_order, g, sub4_n);
@@ -154,6 +162,10 @@ namespace sim_core {
       NGraph g;
       buildOrderedGraph(mul_n, g);
 
+      SECTION("Checking graph size") {
+	REQUIRE(num_vertices(g) == 3);
+      }
+      
       deque<vdisc> topo_order = topologicalSort(g);
 
       auto str = printCode(topo_order, g, mul_n);
@@ -208,6 +220,10 @@ namespace sim_core {
       
       NGraph g;
       buildOrderedGraph(neg_n, g);
+
+      SECTION("Checking graph size") {
+	REQUIRE(num_vertices(g) == 4);
+      }
 
       deque<vdisc> topo_order = topologicalSort(g);
 

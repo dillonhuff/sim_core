@@ -22,5 +22,7 @@ namespace sim_core {
   std::string printCode(const std::deque<vdisc>& topoOrder,
 			NGraph& g,
 			CoreIR::Module* mod);
-  
+
+  int numVertices(const NGraph& g);
+
 }
