@@ -489,7 +489,44 @@ namespace sim_core {
       assert(outSel.size() == 1);
       Select* s = toSelect((*(begin(outSel))).second);
 
-      return cVar(*s) + varSuffix(wd) + " = 0;\n";
+      assert(isInstance(s->getParent()));
+
+      Instance* r = toInstance(s->getParent());
+      string rName = r->getInstname();
+
+      if (!wd.isReceiver) {
+	return cVar(*s) + varSuffix(wd) + " = " + rName + "_old_value" + " ;\n";
+      } else {
+	auto ins = getInputConnections(vd, g);
+
+	assert(ins.size() == 3);
+	// Select* en;
+	// Select* clk;
+	// Select* in;
+
+	string s = "*" + rName + "_new_value = ";
+	WireNode clk;
+	WireNode en;
+	WireNode add;
+
+	for (auto& conn : ins) {
+	  WireNode arg = conn.first;
+	  WireNode placement = conn.second;
+	  string selName = toSelect(placement.getWire())->getSelStr();
+	  if (selName == "en") {
+	    en = arg;
+	  } else if (selName == "clk") {
+	    clk = arg;
+	  } else {
+	    add = arg;
+	  }
+	}
+
+	string oldValName = rName + "_old_value";
+	s += "(" + cVar(clk) + " & " + cVar(en) + ") ? " + cVar(add) + " : " + oldValName + ";\n";
+
+	return s;
+      }
 
     }
 
@@ -955,6 +992,22 @@ namespace sim_core {
       }
     }
 
+    // Add register inputs
+    for (auto& inst : mod.getDef()->getInstances()) {
+      if (isRegisterInstance(inst.second)) {
+	Instance* is = inst.second;
+
+	Select* in = is->sel("in");
+	Type* itp = in->getType();
+
+	string regName = is->getInstname();
+
+	declStrs.push_back(cTypeString(*itp) + " " + regName + "_old_value");
+	declStrs.push_back(cTypeString(*itp) + "* " + regName + "_new_value");
+      }
+    }
+    
+    // Print out declstrings
     string res;
     for (int i = 0; i < declStrs.size(); i++) {
       res += declStrs[i];
@@ -1036,11 +1089,6 @@ namespace sim_core {
     auto c1 = static_cast<Select*>(conn.first.getWire());
     auto c2 = static_cast<Select*>(conn.second.getWire());
 
-    // Need to handle 4 cases:
-    // 1. p1 and p2 are registers
-    // 2. just p2 is a register
-    // 3. just p3 is a register
-    // 4. just p4 is a register
     Wireable* p1 = static_cast<Instance*>(c1->getParent());
 
     vdisc c1_disc;
