@@ -230,7 +230,6 @@ namespace sim_core {
 
     Select* s = static_cast<Select*>(w);
     string ss = s->getSelStr();
-    //Wireable* parent = s->getParent();
   
   
     return ss + " " + s->getType()->toString();
@@ -244,7 +243,7 @@ namespace sim_core {
 
     for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
       auto out_edge_desc = *it;
-      //pair<Wireable*, Wireable*> edge_conn =
+
       Conn edge_conn =
 	boost::get(boost::edge_name, g, out_edge_desc);
 
@@ -277,7 +276,7 @@ namespace sim_core {
 
     for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
       auto out_edge_desc = *it;
-      //pair<Wireable*, Wireable*> edge_conn =
+
       Conn edge_conn =
 	boost::get(boost::edge_name, g, out_edge_desc);
 
@@ -301,7 +300,7 @@ namespace sim_core {
 
     for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
       auto out_edge_desc = *it;
-      //pair<Wireable*, Wireable*> edge_conn =
+
       Conn edge_conn =
 	boost::get(boost::edge_name, g, out_edge_desc);
 
