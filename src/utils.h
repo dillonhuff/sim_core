@@ -21,6 +21,10 @@ namespace sim_core {
     return fst->getKind() == CoreIR::Wireable::WK_Instance;
   }
 
+  static inline bool isInterface(CoreIR::Wireable* fst) {
+    return fst->getKind() == CoreIR::Wireable::WK_Interface;
+  }
+  
   static inline CoreIR::Instance* toInstance(CoreIR::Wireable* fst) {
     assert(isInstance(fst));
     return static_cast<CoreIR::Instance*>(fst);
@@ -37,5 +41,17 @@ namespace sim_core {
     return genRefName == "reg";
   }
   
-  
+  static inline std::string cVar(CoreIR::Wireable& w) {
+    if (isSelect(w)) {
+      CoreIR::Select& s = toSelect(w);
+      if (CoreIR::isNumber(s.getSelStr())) {
+	return cVar(*(s.getParent())) + "[" + s.getSelStr() + "]";
+      } else {
+	return cVar(*(s.getParent())) + "_" + s.getSelStr();
+      }
+    } else {
+      return w.toString();
+    }
+  }
+
 }

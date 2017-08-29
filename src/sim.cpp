@@ -29,6 +29,19 @@ using namespace CoreIR::Passes;
 
 namespace sim_core {
 
+  std::string cVar(const WireNode& w) {
+    string cv = cVar(*(w.getWire()));
+    if (w.isSequential) {
+      if (w.isReceiver) {
+	return cv += "_receiver";
+      } else {
+	return cv += "_source";
+      }
+
+    }
+    return cv;
+  }
+
   void print_wireable_selects(Wireable* fst_select) {
     cout << "Wireable selects" << endl;
     for (auto& s : fst_select->getSelects()) {
@@ -330,19 +343,6 @@ namespace sim_core {
     return outs;
   }
 
-  string cVar(Wireable& w) {
-    if (isSelect(w)) {
-      Select& s = toSelect(w);
-      if (isNumber(s.getSelStr())) {
-	return cVar(*(s.getParent())) + "[" + s.getSelStr() + "]";
-      } else {
-	return cVar(*(s.getParent())) + "_" + s.getSelStr();
-      }
-    } else {
-      return w.toString();
-    }
-  }
-
   void printOutput(Wireable* inst, const vdisc vd, const NGraph& g) {
     auto outSelects = getOutputSelects(inst);
 
@@ -467,7 +467,10 @@ namespace sim_core {
     auto ins = getInputs(vd, g);
 
     if (isRegisterInstance(inst)) {
-      return "REGISTER!!\n";
+      assert(wd.isSequential);
+
+      return cVar(wd) + " = 0;\n";
+
     }
 
     if (ins.size() == 2) {
@@ -493,6 +496,23 @@ namespace sim_core {
     }
 
     return parent->toString() == "self";
+  }
+
+  bool fromSelfInterface(Select* w) {
+    if (!fromSelf(w)) {
+      return false;
+    }
+
+    Wireable* parent = w->getParent();
+    if (isInterface(parent)) {
+      return true;
+    } else if (isInstance(parent)) {
+      return false;
+    }
+
+    assert(isSelect(parent));
+
+    return fromSelf(toSelect(parent));
   }
 
   bool fromSelfInput(Select* w) {
@@ -704,7 +724,6 @@ namespace sim_core {
     vector<Wireable*> selfOutputs;
     vector<Wireable*> internals;
   };
-
   
   DeclaredWireables getDeclaredWireables(const std::deque<vdisc>& topo_order,
 					 NGraph& g) {
@@ -803,6 +822,38 @@ namespace sim_core {
 				"self_" + field_name);
   }
 
+  string printInternalVariables(const std::deque<vdisc>& topo_order,
+				NGraph& g,
+				Module& mod) {
+    string str = "";
+    for (auto& vd : topo_order) {
+      WireNode wd = boost::get(boost::vertex_name, g, vd);
+      Wireable* w = wd.getWire();
+
+      //auto inSelects = getInputSelects(w);
+      for (auto inSel : w->getSelects()) { //inSelects) {
+	Select* in = toSelect(inSel.second);
+	//if (!fromSelfOutput(in) && !fromSelfInput(in)) {
+	if (!fromSelfInterface(in)) {
+	  if (!arrayAccess(in)) {
+
+	    if (!wd.isSequential) {
+	      str += cTypeString(*(in->getType())) + " " + cVar(*in) + ";\n";
+	    } else {
+	      if (wd.isReceiver) {
+		str += cTypeString(*(in->getType())) + " " + cVar(*in) + "_receiver;\n";
+	      } else {
+		str += cTypeString(*(in->getType())) + " " + cVar(*in) + "_source;\n";
+	      }
+	    }
+	  }
+	}
+      }
+    }
+
+    return str;
+  }
+
   string printSimFunctionBody(const std::deque<vdisc>& topo_order,
 			      NGraph& g,
 			      Module& mod) {
@@ -820,9 +871,15 @@ namespace sim_core {
     }
   
     str += "// Internal variables\n";
-    for (auto& in : dw.internals) {
-      str += cTypeString(*(in->getType())) + " " + cVar(*in) + ";\n";
-    }
+    str += printInternalVariables(topo_order, g, mod);
+
+      
+    // }
+
+
+    // for (auto& in : dw.internals) {
+    //   str += cTypeString(*(in->getType())) + " " + cVar(*in) + ";\n";
+    // }
     
   
     // Print out operations in topological order
@@ -857,8 +914,8 @@ namespace sim_core {
     return str;
   }
 
-  string printSimArguments(Module& mod,
-			   const DeclaredWireables& dw) {
+  string printSimArguments(Module& mod) {
+			   //			   const DeclaredWireables& dw) {
     Type* tp = mod.getType();
 
     cout << "module type = " << tp->toString() << endl;
@@ -893,8 +950,6 @@ namespace sim_core {
 		   NGraph& g,
 		   CoreIR::Module* mod) {
 
-    auto dw = getDeclaredWireables(topoOrder, g);
-
     string code = "";
 
     code += "#include <stdint.h>\n";
@@ -902,7 +957,7 @@ namespace sim_core {
     code += "#include <stdlib.h>\n";
     code += "void simulate( ";
 
-    code += printSimArguments(*mod, dw);
+    code += printSimArguments(*mod);
 
     code += + " ) {\n";
 
