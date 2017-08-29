@@ -72,14 +72,20 @@ namespace sim_core {
       for (auto it = edge_pair.first; it != edge_pair.second; it++) {
 	Conn c = boost::get(boost::edge_name, g, *it);
 
-	//cout << (c.first).getWire()->toString() << " ---> " << (c.second).getWire()->toString() << endl;
 	cout << (c.first).toString() << " ---> " << (c.second).toString() << endl;
 
-	// Either the first edge is not a register or it is an output
+	// Either the first edge is not a register or it is not a receiver
 	Wireable* fstParent = toSelect(*(c.first.getWire())).getParent();
-	bool isRec = !isRegisterInstance(fstParent) ||
+	bool notRec = !isRegisterInstance(fstParent) ||
 	  (c.first.isSequential && !(c.first.isReceiver));
 
+	REQUIRE(notRec);
+
+	// Either the second edge is not a register or it is a reciver
+	Wireable* sndParent = toSelect(*(c.second.getWire())).getParent();
+	bool isRec = !isRegisterInstance(sndParent) ||
+	  (c.second.isSequential && c.second.isReceiver);
+	
 	REQUIRE(isRec);
       }
 
