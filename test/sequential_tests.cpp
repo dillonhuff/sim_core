@@ -57,8 +57,13 @@ namespace sim_core {
       }
 
       cout << "About to topological sort" << endl;
-      deque<vdisc> topo_order = topologicalSort(g);
+      deque<vdisc> topoOrder = topologicalSort(g);
       cout << "Done topological sorting" << endl;
+
+      for (auto& vd : topoOrder) {
+	WireNode wd = boost::get(boost::vertex_name, g, vd);
+	cout << wd.getWire()->toString() << endl;
+      }
 
       // auto str = printCode(topo_order, g, counter);
       // cout << "CODE STRING" << endl;

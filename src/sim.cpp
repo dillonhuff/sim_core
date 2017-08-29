@@ -848,7 +848,7 @@ namespace sim_core {
     if (isInstance(w1)) {
       Instance* inst = toInstance(w1);
       string genRefName = inst->getGeneratorRef()->getName();
-      cout << "INSTANCE " << genRefName << " TYPE = " << w1->getType()->toString() << endl;
+
       if (genRefName == "reg") {
 	WireNode wOutput{w1, true, false};
 	WireNode wInput{w1, true, true};
@@ -924,10 +924,10 @@ namespace sim_core {
     if (isRegisterInstance(p2)) {
       auto c2_disc_it = imap.find({p2, true, true});
 
-      if (c2_disc_it == imap.end()) {
-	cout << "p2 = " << p2->toString() << " not found" << endl;
-	cout << "imap size == " << imap.size() << endl;
-      }
+      // if (c2_disc_it == imap.end()) {
+      // 	cout << "p2 = " << p2->toString() << " not found" << endl;
+      // 	cout << "imap size == " << imap.size() << endl;
+      // }
 
       assert(c2_disc_it != imap.end());
 
