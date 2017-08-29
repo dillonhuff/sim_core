@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include "sim.h"
+#include "utils.h"
 
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"
@@ -73,6 +74,13 @@ namespace sim_core {
 
 	//cout << (c.first).getWire()->toString() << " ---> " << (c.second).getWire()->toString() << endl;
 	cout << (c.first).toString() << " ---> " << (c.second).toString() << endl;
+
+	// Either the first edge is not a register or it is an output
+	Wireable* fstParent = toSelect(*(c.first.getWire())).getParent();
+	bool isRec = !isRegisterInstance(fstParent) ||
+	  (c.first.isSequential && !(c.first.isReceiver));
+
+	REQUIRE(isRec);
       }
 
       // auto str = printCode(topo_order, g, counter);
