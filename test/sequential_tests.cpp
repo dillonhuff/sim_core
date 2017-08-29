@@ -82,8 +82,8 @@ namespace sim_core {
       buildOrderedGraph(counter, g);
 
       SECTION("Checking number of vertices") {
-      	// self, ai, ci, ri_in, ri_out
-      	REQUIRE(numVertices(g) == 5);
+      	// clk, en, out, ai, ci, ri_in, ri_out
+      	REQUIRE(numVertices(g) == 7);
       }
 
       cout << "About to topological sort" << endl;
@@ -160,8 +160,8 @@ namespace sim_core {
       def->connect("r1.out","r2.in");
       def->connect("r2.out","ai.in0");
 
-      //def->connect("self.bp", "ai.in1");
-      def->connect("r2.out", "ai.in1");
+      def->connect("self.bp", "ai.in1");
+      //def->connect("r2.out", "ai.in1");
 
       def->connect("ai.out","self.out");
 
@@ -178,7 +178,7 @@ namespace sim_core {
 	REQUIRE(splitNodeEdgesCorrect(g));	
 
       	// self, ai, r0_in, r0_out, r1_in, r1_out, r2_in, r2_out
-      	REQUIRE(numVertices(g) == 8);
+      	REQUIRE(numVertices(g) == 12);
       }
 
 

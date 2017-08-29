@@ -29,6 +29,36 @@ using namespace CoreIR::Passes;
 
 namespace sim_core {
 
+  Select* toSelect(Wireable* w) {
+    assert(isSelect(w));
+    return static_cast<Select*>(w);
+  }
+
+  bool fromSelf(Select* w) {
+    Wireable* parent = w->getParent();
+    if (isSelect(parent)) {
+      return fromSelf(toSelect(parent));
+    }
+
+    return parent->toString() == "self";
+  }
+
+  Wireable* extractSource(Select* sel) {
+    Wireable* p = sel->getParent();
+
+    // Every select off of self gets its own node
+    if (fromSelf(sel) && (!isSelect(p))) {
+      return sel;
+    }
+
+    // Base case for non self connections
+    if (!isSelect(p)) {
+      return p;
+    }
+
+    return extractSource(toSelect(p));
+  }
+  
   std::string cVar(const WireNode& w) {
     string cv = cVar(*(w.getWire()));
     if (w.isSequential) {
@@ -74,9 +104,7 @@ namespace sim_core {
     return false;
   }
 
-  //vector<pair<Wireable*, Wireable*> > build_ordered_connections(Module* mod) {
   vector<Conn> build_ordered_connections(Module* mod) {
-    //vector<pair<Wireable*, Wireable*> > conns;
     vector<Conn> conns;
 
     for (auto& connection : mod->getDef()->getConnections()) {
@@ -93,12 +121,9 @@ namespace sim_core {
       Wireable* fst_p = toSelect(*fst).getParent();
       Wireable* snd_p = toSelect(*snd).getParent();
 
-
       Select* fst_select = static_cast<Select*>(fst);
-      //Select* snd_select = static_cast<Select*>(snd);
 
       Type* fst_tp = fst_select->getType();
-      //Type* snd_tp = snd_select->getType();
 
       WireNode w_fst{fst, false, false};
       WireNode w_snd{snd, false, false};
@@ -211,11 +236,6 @@ namespace sim_core {
     return ss + " " + s->getType()->toString();
   }
 
-  Select* toSelect(Wireable* w) {
-    assert(isSelect(w));
-    return static_cast<Select*>(w);
-  }
-
   std::vector<Conn> getOutputConnections(const vdisc vd, const NGraph& g) {
     vector<Conn> outConns;
 
@@ -265,7 +285,7 @@ namespace sim_core {
 
       Select* sel = static_cast<Select*>(edge_conn.second.getWire());
 
-      assert(sel->getParent() == w);
+      assert(extractSource(sel) == w);
 
       inConss.push_back(edge_conn);
     }
@@ -560,15 +580,6 @@ namespace sim_core {
 
     cout << "Unsupported instance = " << inst->toString() << endl;
     assert(false);
-  }
-
-  bool fromSelf(Select* w) {
-    Wireable* parent = w->getParent();
-    if (isSelect(parent)) {
-      return fromSelf(toSelect(parent));
-    }
-
-    return parent->toString() == "self";
   }
 
   bool fromSelfInterface(Select* w) {
@@ -1062,7 +1073,7 @@ namespace sim_core {
     auto c1 = static_cast<Select*>(conn.first.getWire());
     auto c2 = static_cast<Select*>(conn.second.getWire());
 
-    Wireable* p1 = static_cast<Instance*>(c1->getParent());
+    Wireable* p1 = extractSource(c1);//static_cast<Instance*>(c1->getParent());
 
     vdisc c1_disc;
     if (isRegisterInstance(p1)) {
@@ -1082,7 +1093,7 @@ namespace sim_core {
       c1_disc = (*c1_disc_it).second;
     }
       
-    Wireable* p2 = static_cast<Instance*>(c2->getParent());
+    Wireable* p2 = extractSource(c2); //static_cast<Instance*>(c2->getParent());
 
     vdisc c2_disc;
     if (isRegisterInstance(p2)) {
@@ -1120,8 +1131,8 @@ namespace sim_core {
       Select* sel1 = toSelect(conn.first.getWire());
       Select* sel2 = toSelect(conn.second.getWire());
 
-      Wireable* w1 = sel1->getParent();
-      Wireable* w2 = sel2->getParent();
+      Wireable* w1 = extractSource(sel1);
+      Wireable* w2 = extractSource(sel2);
 
       addWireableToGraph(w1, imap, g);
       addWireableToGraph(w2, imap, g);
