@@ -244,6 +244,35 @@ namespace sim_core {
       REQUIRE(s == 0);
       
     }
+
+    SECTION("Add 2 by 3 64 bit matrices") {
+      uint n = 64;
+  
+      Generator* neg = c->getGenerator("coreir.add");
+
+      Type* addMatsType = c->Record({
+	  {"A",    c->Array(2, c->Array(3, c->Array(n,c->BitIn()))) },
+	    {"B",    c->Array(2, c->Array(3, c->Array(n,c->BitIn()))) },
+	      {"out", c->Array(2, c->Array(3, c->Array(n,c->BitIn()))) }
+	});
+
+      Module* addM = g->newModuleDecl("two_negs", addMatsType);
+
+      ModuleDef* def = addM->newModuleDef();
+
+      // Wireable* self = def->sel("self");
+      // Wireable* neg0 = def->addInstance("neg0", neg, {{"width", c->argInt(n)}});
+      // Wireable* neg1 = def->addInstance("neg1", neg, {{"width", c->argInt(n)}});
+
+      // def->connect(self->sel("in")->sel(0), neg0->sel("in"));
+      // def->connect(self->sel("in")->sel(1), neg1->sel("in"));
+
+      // def->connect(neg0->sel("out"), self->sel("out")->sel(0));
+      // def->connect(neg1->sel("out"), self->sel("out")->sel(1));
+
+      // neg_n->setDef(def);
+      
+    }
 	      
 
     deleteContext(c);

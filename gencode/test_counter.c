@@ -17,14 +17,14 @@ int main() {
     self_clk = i % 2;
     simulate(self_en, self_out_ptr, self_clk, self_clk_last, ri_old_value, &ri_new_value);
 
-    printf("output = %hu\n", *self_out_ptr);
-    printf("new_register value = %hu\n", ri_new_value);
-
     // Copy old values to new values
     self_clk_last = self_clk;
     ri_old_value = ri_new_value;
   }
 
+  printf("output = %hu\n", *self_out_ptr);
+  printf("new_register value = %hu\n", ri_new_value);
+  
   if ((ri_new_value != 10) || (*self_out_ptr != 9)) {
     free(self_out_ptr);
 
