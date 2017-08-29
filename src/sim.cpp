@@ -411,7 +411,7 @@ namespace sim_core {
 
     pair<string, Wireable*> outPair = *std::begin(outSelects);
     // TODO: Actuall set constant value
-    res += inst->getInstname() + "_" + outPair.first + " = 0;\n";
+    res += inst->getInstname() + "_" + outPair.first + " = 1;\n";
 
     return res;
   }
