@@ -539,7 +539,7 @@ namespace sim_core {
 	}
 
 	string oldValName = rName + "_old_value";
-	s += "(" + cVar(clk) + " & " + cVar(en) + ") ? " + cVar(add) + " : " + oldValName + ";\n";
+	s += "(((" + cVar(clk) + "_last == 0) && (" + cVar(clk) + " == 1)) && " + cVar(en) + ") ? " + cVar(add) + " : " + oldValName + ";\n";
 
 	return s;
       }
@@ -792,56 +792,6 @@ namespace sim_core {
     return self_inputs;
   }
 
-  // struct DeclaredWireables {
-  //   vector<Wireable*> selfInputs;
-  //   vector<Wireable*> selfOutputs;
-  //   vector<Wireable*> internals;
-  // };
-  
-  // DeclaredWireables getDeclaredWireables(const std::deque<vdisc>& topo_order,
-  // 					 NGraph& g) {
-  //   vector<Wireable*> self_inputs;
-  //   vector<Wireable*> self_outputs;
-  //   vector<Wireable*> internals;
-
-  //   for (auto& vd : topo_order) {
-  //     Wireable* inst = get(boost::vertex_name, g, vd).getWire();
-
-  //     auto ins = getInputSelects(inst);
-  //     for (auto& inSel : ins) {
-  // 	auto in = inSel.second;
-  // 	if (!arrayAccess(toSelect(in))) {
-  // 	  if (fromSelfOutput(toSelect(in))) {
-  // 	    self_outputs.push_back(in);
-  // 	  } else if (fromSelfInput(toSelect(in))) {
-  // 	    self_inputs.push_back(in);
-  // 	  } else {
-  // 	    internals.push_back(in);
-  // 	  }
-  // 	}
-
-  //     }
-
-  //     auto outs = getOutputSelects(inst);
-  //     for (auto& outSel : outs) {
-  // 	auto out = outSel.second;
-  // 	if (!arrayAccess(toSelect(out))) {
-  // 	  if (fromSelfOutput(toSelect(out))) {
-  // 	    self_outputs.push_back(out);
-  // 	  } else if (fromSelfInput(toSelect(out))) {
-  // 	    self_inputs.push_back(out);
-  // 	  } else {
-  // 	    internals.push_back(out);
-  // 	  }
-  // 	}
-  //     }
-
-  //   }
-
-  //   return DeclaredWireables{self_inputs, self_outputs, internals};
-  // }
-
-
   std::unordered_map<string, Type*>
   outputs(Module& mod) {
     Type* tp = mod.getType();
@@ -1003,7 +953,12 @@ namespace sim_core {
       Type* tp = name_type_pair.second;
 
       if (tp->isInput()) {
-	declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
+	if (!isClkIn(*tp)) {
+	  declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
+	} else {
+	  declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
+	  declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first + "_last");
+	}
       } else {
 	assert(tp->isOutput());
 	declStrs.push_back(cTypeString(*tp) + "*" + " self_" + name_type_pair.first + "_ptr");
