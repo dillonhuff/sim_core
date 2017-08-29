@@ -854,11 +854,15 @@ namespace sim_core {
 	WireNode wInput{w1, true, true};
 
 	if (imap.find(wOutput) == end(imap)) {
-	  g.add_vertex(wOutput);
+	  cout << "Adding register output" << endl;
+	  auto v1 = g.add_vertex(wOutput);
+	  imap.insert({wOutput, v1});
 	}
 
 	if (imap.find(wInput) == end(imap)) {
-	  g.add_vertex(wInput);
+	  cout << "Adding register input" << endl;
+	  auto v1 = g.add_vertex(wInput);
+	  imap.insert({wInput, v1});
 	}
 
 	return;
@@ -871,7 +875,6 @@ namespace sim_core {
       imap.insert({w, v1});
     }
 
-    
   }
 
 
@@ -892,19 +895,39 @@ namespace sim_core {
     // 4. just p4 is a register
     Wireable* p1 = static_cast<Instance*>(c1->getParent());
 
-    assert(!isRegisterInstance(p1));
+    vdisc c1_disc;
+    if (isRegisterInstance(p1)) {
+      auto c1_disc_it = imap.find({p1, true, false});
 
-    auto c1_disc_it = imap.find({p1, false, false});
+      // if (c1_disc_it == imap.end()) {
+      // 	cout << "p2 = " << p2->toString() << " not found" << endl;
+      // 	cout << "imap size == " << imap.size() << endl;
+      // }
 
-    assert(c1_disc_it != imap.end());
+      assert(c1_disc_it != imap.end());
 
-    vdisc c1_disc = (*c1_disc_it).second;
+      c1_disc = (*c1_disc_it).second;
+
+    } else {
+      assert(!isRegisterInstance(p1));
+
+      auto c1_disc_it = imap.find({p1, false, false});
+
+      assert(c1_disc_it != imap.end());
+
+      c1_disc = (*c1_disc_it).second;
+    }
       
     Wireable* p2 = static_cast<Instance*>(c2->getParent());
 
     vdisc c2_disc;
     if (isRegisterInstance(p2)) {
-      auto c2_disc_it = imap.find({p2, true, false});
+      auto c2_disc_it = imap.find({p2, true, true});
+
+      if (c2_disc_it == imap.end()) {
+	cout << "p2 = " << p2->toString() << " not found" << endl;
+	cout << "imap size == " << imap.size() << endl;
+      }
 
       assert(c2_disc_it != imap.end());
 
