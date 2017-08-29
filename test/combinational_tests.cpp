@@ -248,7 +248,7 @@ namespace sim_core {
     SECTION("Add 2 by 3 64 bit matrices") {
       uint n = 64;
   
-      Generator* neg = c->getGenerator("coreir.add");
+      Generator* add = c->getGenerator("coreir.add");
 
       Type* addMatsType = c->Record({
 	  {"A",    c->Array(2, c->Array(3, c->Array(n,c->BitIn()))) },
@@ -260,7 +260,19 @@ namespace sim_core {
 
       ModuleDef* def = addM->newModuleDef();
 
-      // Wireable* self = def->sel("self");
+      Wireable* self = def->sel("self");
+      for (int i = 0; i < 2; i++) {
+	for (int j = 0; j < 3; j++) {
+	  string str = "add" + to_string(i) + "_" + to_string(j);
+	  Wireable* addInst = def->addInstance(str, add, {{"width", c->argInt(n)}});
+
+	  def->connect(self->sel("A")->sel(i)->sel(j), addInst->sel("in0"));
+	  def->connect(self->sel("B")->sel(i)->sel(j), addInst->sel("in1"));
+
+	  def->connect(addInst->sel("out"), self->sel("out")->sel(i)->sel(j));
+	}
+      }
+
       // Wireable* neg0 = def->addInstance("neg0", neg, {{"width", c->argInt(n)}});
       // Wireable* neg1 = def->addInstance("neg1", neg, {{"width", c->argInt(n)}});
 
