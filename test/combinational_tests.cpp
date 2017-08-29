@@ -253,7 +253,7 @@ namespace sim_core {
       Type* addMatsType = c->Record({
 	  {"A",    c->Array(2, c->Array(3, c->Array(n,c->BitIn()))) },
 	    {"B",    c->Array(2, c->Array(3, c->Array(n,c->BitIn()))) },
-	      {"out", c->Array(2, c->Array(3, c->Array(n,c->BitIn()))) }
+	      {"out", c->Array(2, c->Array(3, c->Array(n,c->Bit()))) }
 	});
 
       Module* addM = g->newModuleDecl("two_negs", addMatsType);
@@ -273,19 +273,40 @@ namespace sim_core {
 	}
       }
 
-      // Wireable* neg0 = def->addInstance("neg0", neg, {{"width", c->argInt(n)}});
-      // Wireable* neg1 = def->addInstance("neg1", neg, {{"width", c->argInt(n)}});
-
-      // def->connect(self->sel("in")->sel(0), neg0->sel("in"));
-      // def->connect(self->sel("in")->sel(1), neg1->sel("in"));
-
-      // def->connect(neg0->sel("out"), self->sel("out")->sel(0));
-      // def->connect(neg1->sel("out"), self->sel("out")->sel(1));
-
-      // neg_n->setDef(def);
+      addM->setDef(def);
       
-    }
 	      
+      RunGenerators rg;
+      rg.runOnNamespace(g);
+
+      Type* t = addM->getType();
+      cout << "Module type = " << t->toString() << endl;
+      
+      NGraph g;
+      buildOrderedGraph(addM, g);
+
+      // SECTION("Checking graph size") {
+      // 	REQUIRE(num_vertices(g) == 4);
+      // }
+
+      deque<vdisc> topo_order = topologicalSort(g);
+
+      auto str = printCode(topo_order, g, addM);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
+
+      string outFile = "./gencode/mat2_3_add.c";
+      std::ofstream out(outFile);
+      out << str;
+      out.close();
+
+      string runCmd = "clang -c " + outFile;
+      int s = system(runCmd.c_str());
+
+      cout << "Command result = " << s << endl;
+
+      REQUIRE(s == 0);
+    }
 
     deleteContext(c);
 
