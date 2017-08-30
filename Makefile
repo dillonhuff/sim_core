@@ -17,8 +17,8 @@ SRC_OBJS = $(patsubst src/%.cpp, build/%.o,$(SRC_FILES))
 
 all: all-tests simpass
 
-all-tests: $(SRC_FILES) $(TEST_FILES)
-	$(CXX) $(CXXFLAGS) $(SRC_FILES) $(TEST_FILES) -I$(COREIR_INCLUDE_PATH) -I/opt/local/include -I./src -lcoreir -L$(COREIR_LIB_PATH)
+all-tests: $(SRC_OBJS) $(TEST_FILES)
+	$(CXX) $(CXXFLAGS) $(SRC_OBJS) $(TEST_FILES) -I$(COREIR_INCLUDE_PATH) -I/opt/local/include -I./src -lcoreir -L$(COREIR_LIB_PATH) -o $@
 
 build/%.o: src/%.cpp $(SRC_HEADERS)
 	$(CXX) $(CXXFLAGS) -I$(COREIR_INCLUDE_PATH) -I/opt/local/include -I./src -c -o $@ $<

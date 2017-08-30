@@ -133,10 +133,10 @@ namespace sim_core {
       WireNode w_fst{fst, false, false};
       WireNode w_snd{snd, false, false};
 
-      cout << "Created wire nodes" << endl;
+      //cout << "Created wire nodes" << endl;
 
       if (fst_tp->isInput()) {
-	cout << "Fst is input" << endl;
+	//cout << "Fst is input" << endl;
 
 	if (isRegisterInstance(fst_p)) {
 	  w_fst = {fst, true, true};
@@ -146,30 +146,30 @@ namespace sim_core {
 	  w_snd = {snd, true, false};
 	}
 
-	cout << "Adding input" << endl;
+	//cout << "Adding input" << endl;
 	
 	conns.push_back({w_snd, w_fst});
       } else {
-	cout << "Fst is output" << endl;
+	//cout << "Fst is output" << endl;
 
 	if (isRegisterInstance(fst_p)) {
 	  w_fst = {fst, true, false};
 	}
 
-	cout << "fst register instance check done" << endl;
+	//cout << "fst register instance check done" << endl;
 
 	if (isRegisterInstance(snd_p)) {
 	  w_snd = {snd, true, true};
 	}
 
-	cout << "snd register instance check done" << endl;
+	//cout << "snd register instance check done" << endl;
 
-	cout << "Adding input" << endl;
+	//cout << "Adding input" << endl;
 
 	conns.push_back({w_fst, w_snd});
       }
 
-      cout << "Added connection" << endl;
+      //cout << "Added connection" << endl;
 
     }
 
@@ -1044,6 +1044,7 @@ namespace sim_core {
     deque<vdisc> topo_order;
     boost::topological_sort(g, std::front_inserter(topo_order));
 
+    cout << "TOP" << endl;
     return topo_order;
   }
 
