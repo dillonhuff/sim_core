@@ -1064,7 +1064,6 @@ namespace sim_core {
 
       if (tp->isInput()) {
 	if (!isClkIn(*tp)) {
-	  //declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
 	  declStrs.push_back(cArrayTypeDecl(*tp, " self_" + name_type_pair.first));
 	} else {
 	  declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
@@ -1150,7 +1149,7 @@ namespace sim_core {
 
     if (imap.find({w1, false, false}) == end(imap)) {
       WireNode w{w1, false, false};
-      vdisc v1 = g.add_vertex(w); //{w1, false, false});
+      vdisc v1 = g.add_vertex(w);
       imap.insert({w, v1});
     }
 
@@ -1167,7 +1166,7 @@ namespace sim_core {
     auto c1 = static_cast<Select*>(conn.first.getWire());
     auto c2 = static_cast<Select*>(conn.second.getWire());
 
-    Wireable* p1 = extractSource(c1);//static_cast<Instance*>(c1->getParent());
+    Wireable* p1 = extractSource(c1);
 
     vdisc c1_disc;
     if (isRegisterInstance(p1)) {
@@ -1187,7 +1186,7 @@ namespace sim_core {
       c1_disc = (*c1_disc_it).second;
     }
       
-    Wireable* p2 = extractSource(c2); //static_cast<Instance*>(c2->getParent());
+    Wireable* p2 = extractSource(c2);
 
     vdisc c2_disc;
     if (isRegisterInstance(p2)) {
