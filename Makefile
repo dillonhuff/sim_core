@@ -21,6 +21,8 @@ all-tests: $(SRC_FILES) $(TEST_FILES)
 build/%.o: src/%.cpp $(SRC_HEADERS)
 	$(CXX) $(CXXFLAGS) -I$(COREIR_INCLUDE_PATH) -I/opt/local/include -I./src -c -o $@ $<
 
+simpass: build/simpass.dylib
+
 build/simpass.dylib: $(SRC_OBJS)
 	$(CXX) -L$(COREIR_LIB_PATH) -install_name "simpass.dylib" -dynamiclib $(LPATH) -lcoreir -o $@ $^
 
