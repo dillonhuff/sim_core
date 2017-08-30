@@ -6,6 +6,9 @@
  */
 
 #include "coreir.h"
+#include "coreir-passes/transform/flatten.h"
+#include "coreir-passes/transform/rungenerators.h"
+
 #include "pass_sim.hpp"
 #include "sim.h"
 
@@ -20,6 +23,9 @@ string SimModule::ID = "simpass";
 bool SimModule::runOnModule(Module* m) {
 
   cout << "RUNNING!!!" << endl;
+
+  CoreIR::RunGenerators rg;
+  rg.runOnModule(m);
 
   NGraph g;
   buildOrderedGraph(m, g);
