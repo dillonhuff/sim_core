@@ -99,5 +99,19 @@ namespace sim_core {
     return ss + " " + s->getType()->toString();
   }
 
+  static inline CoreIR::Select* toSelect(CoreIR::Wireable* w) {
+    assert(isSelect(w));
+    return static_cast<CoreIR::Select*>(w);
+  }
+
+  static inline bool fromSelf(CoreIR::Select* w) {
+    CoreIR::Wireable* parent = w->getParent();
+    if (isSelect(parent)) {
+      return fromSelf(toSelect(parent));
+    }
+
+    return parent->toString() == "self";
+  }
+
   
 }

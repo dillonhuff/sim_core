@@ -29,20 +29,6 @@ using namespace CoreIR::Passes;
 
 namespace sim_core {
 
-  Select* toSelect(Wireable* w) {
-    assert(isSelect(w));
-    return static_cast<Select*>(w);
-  }
-
-  bool fromSelf(Select* w) {
-    Wireable* parent = w->getParent();
-    if (isSelect(parent)) {
-      return fromSelf(toSelect(parent));
-    }
-
-    return parent->toString() == "self";
-  }
-
   Wireable* extractSource(Select* sel) {
     Wireable* p = sel->getParent();
 
