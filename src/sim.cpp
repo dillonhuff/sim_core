@@ -623,44 +623,6 @@ namespace sim_core {
     return fromSelf(toSelect(parent));
   }
 
-  bool fromSelfInput(Select* w) {
-
-    if (!fromSelf(w)) {
-      return false;
-    }
-
-    if (w->getSelStr() == "in") {
-      return true;
-    }
-
-    Wireable* parent = w->getParent();
-
-    if (!isSelect(parent)) {
-      return false;
-    }
-
-    return fromSelfInput(toSelect(parent));
-
-  }
-
-  bool fromSelfOutput(Select* w) {
-    if (!fromSelf(w)) {
-      return false;
-    }
-
-    if (w->getSelStr() == "out") {
-      return true;
-    }
-
-    Wireable* parent = w->getParent();
-    if (!isSelect(parent)) {
-      return false;
-    }
-
-    return fromSelfOutput(toSelect(parent));
-
-  }
-
   std::string cArrayTypeDecl(Type& t, const std::string& varName) {
     if (isBitArrayOfLengthLEQ(t, 8)) {
       return "uint8_t " + varName;
@@ -696,39 +658,6 @@ namespace sim_core {
   
   bool arrayAccess(Select* in) {
     return isNumber(in->getSelStr());
-  }
-
-  vector<Wireable*> collectInputVars(const std::deque<vdisc>& topo_order,
-				     NGraph& g) {
-
-    vector<Wireable*> self_inputs;
-  
-    for (auto& vd : topo_order) {
-      Wireable* inst = get(boost::vertex_name, g, vd).getWire();
-
-      auto ins = getInputSelects(inst);
-      for (auto& inSel : ins) {
-	auto in = inSel.second;
-	if  (!arrayAccess(toSelect(in))) {
-	  if (fromSelfInput(toSelect(in))) {
-	    self_inputs.push_back(in);
-	  }
-	}
-      }
-
-      auto outs = getOutputSelects(inst);
-      for (auto& outSel : outs) {
-	auto out = outSel.second;
-	if (!arrayAccess(toSelect(out))) {
-	  if (fromSelfInput(toSelect(out))) {
-	    self_inputs.push_back(out);
-	  }
-	}
-      }
-
-    }
-  
-    return self_inputs;
   }
 
   std::unordered_map<string, Type*>
