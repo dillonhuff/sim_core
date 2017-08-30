@@ -24,9 +24,6 @@ bool SimModule::runOnModule(Module* m) {
 
   cout << "RUNNING!!!" << endl;
 
-  CoreIR::RunGenerators rg;
-  rg.runOnModule(m);
-
   NGraph g;
   buildOrderedGraph(m, g);
 
