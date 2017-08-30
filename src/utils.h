@@ -79,4 +79,25 @@ namespace sim_core {
   bool isBitArrayOfLength(CoreIR::Type& t, const uint len);
   bool isBitArrayOfLengthLEQ(CoreIR::Type& t, const uint len);
   bool isPrimitiveType(CoreIR::Type& t);
+
+  unordered_map<string, CoreIR::Wireable*>
+  getOutputSelects(CoreIR::Wireable* inst);
+
+  unordered_map<string, CoreIR::Wireable*>
+  getInputSelects(CoreIR::Wireable* inst);
+
+  bool recordTypeHasField(const std::string& fieldName, CoreIR::Type* t);
+
+  std::string commaSepList(std::vector<std::string>& declStrs);
+
+  static inline std::string selectInfoString(CoreIR::Wireable* w) {
+    assert(isSelect(w));
+
+    CoreIR::Select* s = static_cast<CoreIR::Select*>(w);
+    std::string ss = s->getSelStr();
+
+    return ss + " " + s->getType()->toString();
+  }
+
+  
 }
