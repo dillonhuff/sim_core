@@ -246,6 +246,66 @@ namespace sim_core {
       
     }
 
+    SECTION("One 63 bit addition") {
+      uint n = 63;
+
+      Generator* addG = c->getGenerator("coreir.add");
+
+      Type* addType = c->Record({
+	  {"input", c->Array(2, c->Array(n, c->BitIn()))},
+	    {"output", c->Array(n, c->Bit())}
+	});
+
+      Module* addM = g->newModuleDecl("add63", addType);
+
+      ModuleDef* def = addM->newModuleDef();
+
+      Wireable* self = def->sel("self");
+      Wireable* add0 = def->addInstance("add0", addG, {{"width", c->argInt(n)}});
+
+      def->connect("self.input.0", "add0.in0");
+      def->connect("self.input.1", "add0.in1");
+      def->connect("add0.out", "self.output");
+
+      addM->setDef(def);
+
+      RunGenerators rg;
+      rg.runOnNamespace(g);
+
+      NGraph g;
+      buildOrderedGraph(addM, g);
+
+      SECTION("Checking graph size") {
+      	REQUIRE(num_vertices(g) == 3);
+      }
+
+      deque<vdisc> topo_order = topologicalSort(g);
+
+      auto str = printCode(topo_order, g, addM);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
+
+      string outFile = "./gencode/add63.c";
+      std::ofstream out(outFile);
+      out << str;
+      out.close();
+
+      string runCmd = "clang " + outFile + " ./gencode/test_add63.c";
+      int s = system(runCmd.c_str());
+
+      cout << "Command result = " << s << endl;
+
+      REQUIRE(s == 0);
+
+      string runTest = "./a.out";
+      s = system(runTest.c_str());
+
+      cout << "Test result = " << s << endl;
+
+      REQUIRE(s == 0);
+
+    }
+
     SECTION("One 16 bit negation") {
       uint n = 16;
   
