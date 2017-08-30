@@ -31,12 +31,23 @@ namespace sim_core {
   }
 
   static inline bool isRegisterInstance(CoreIR::Wireable* fst) {
+    cout << "checking isRegisterInstance " << fst->toString() << endl;
+
     if (!isInstance(fst)) {
       return false;
     }
 
+    cout << "Is instance" << endl;
+
     CoreIR::Instance* inst = toInstance(fst);
-    string genRefName = inst->getGeneratorRef()->getName();
+
+    auto genRef = inst->getGeneratorRef();
+
+    cout << "genRef is null ? " << (genRef == nullptr) << endl;
+
+    assert(genRef != nullptr);
+
+    string genRefName = genRef->getName();
 
     return genRefName == "reg";
   }

@@ -133,7 +133,11 @@ namespace sim_core {
       WireNode w_fst{fst, false, false};
       WireNode w_snd{snd, false, false};
 
+      cout << "Created wire nodes" << endl;
+
       if (fst_tp->isInput()) {
+	cout << "Fst is input" << endl;
+
 	if (isRegisterInstance(fst_p)) {
 	  w_fst = {fst, true, true};
 	}
@@ -141,20 +145,31 @@ namespace sim_core {
 	if (isRegisterInstance(snd_p)) {
 	  w_snd = {snd, true, false};
 	}
+
+	cout << "Adding input" << endl;
 	
 	conns.push_back({w_snd, w_fst});
       } else {
+	cout << "Fst is output" << endl;
 
 	if (isRegisterInstance(fst_p)) {
 	  w_fst = {fst, true, false};
 	}
 
+	cout << "fst register instance check done" << endl;
+
 	if (isRegisterInstance(snd_p)) {
 	  w_snd = {snd, true, true};
 	}
 
+	cout << "snd register instance check done" << endl;
+
+	cout << "Adding input" << endl;
+
 	conns.push_back({w_fst, w_snd});
       }
+
+      cout << "Added connection" << endl;
 
     }
 
