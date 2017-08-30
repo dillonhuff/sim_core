@@ -903,8 +903,8 @@ namespace sim_core {
 	if (!underlyingTypeIsClkIn(*tp)) { //(!isClkIn(*tp)) {
 	  declStrs.push_back(cArrayTypeDecl(*tp, " self_" + name_type_pair.first));
 	} else {
-	  declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
-	  declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first + "_last");
+	  declStrs.push_back(cArrayTypeDecl(*tp, + " self_" + name_type_pair.first));
+	  declStrs.push_back(cArrayTypeDecl(*tp, + " self_" + name_type_pair.first + "_last"));
 	}
       } else {
 	assert(tp->isOutput());
