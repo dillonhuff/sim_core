@@ -546,34 +546,37 @@ namespace sim_core {
 
     return s;
   }
+
+  string printRegister(const WireNode& wd, const vdisc vd, const NGraph& g) {
+    assert(wd.isSequential);
+
+    auto outSel = getOutputSelects(wd.getWire());
+
+    assert(outSel.size() == 1);
+    Select* s = toSelect((*(begin(outSel))).second);
+
+    assert(isInstance(s->getParent()));
+
+    Instance* r = toInstance(s->getParent());
+    string rName = r->getInstname();
+
+    if (!wd.isReceiver) {
+      return cVar(*s) + varSuffix(wd) + " = " + rName + "_old_value" + " ;\n";
+    } else {
+      if (hasEnable(wd.getWire())) {
+	return enableRegReceiver(wd, vd, g);
+      } else {
+	return noEnableRegReceiver(wd, vd, g);
+      }
+    }
+  }
   
   string printOp(const WireNode& wd, const vdisc vd, const NGraph& g) {
     Instance* inst = toInstance(wd.getWire());
     auto ins = getInputs(vd, g);
-
+    
     if (isRegisterInstance(inst)) {
-      assert(wd.isSequential);
-
-      auto outSel = getOutputSelects(wd.getWire());
-
-      assert(outSel.size() == 1);
-      Select* s = toSelect((*(begin(outSel))).second);
-
-      assert(isInstance(s->getParent()));
-
-      Instance* r = toInstance(s->getParent());
-      string rName = r->getInstname();
-
-      if (!wd.isReceiver) {
-	return cVar(*s) + varSuffix(wd) + " = " + rName + "_old_value" + " ;\n";
-      } else {
-	if (hasEnable(wd.getWire())) {
-	  return enableRegReceiver(wd, vd, g);
-	} else {
-	  return noEnableRegReceiver(wd, vd, g);
-	}
-      }
-
+      return printRegister(wd, vd, g);
     }
 
     if (ins.size() == 2) {
