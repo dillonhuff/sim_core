@@ -278,6 +278,21 @@ namespace sim_core {
 	REQUIRE(s == 0);
       }
     }
+
+    SECTION("Register array") {
+      uint n = 16;
+      uint nRegs = 3;
+
+      Type* regArrayType = c->Record({
+	  {"clk", c->Named("coreir.clkIn")},
+	    {"a", c->Array(3, c->Array(n, c->BitIn()))},
+	      {"b", c->Array(3, c->Array(n, c->Bit()))}
+	});
+
+      Module* regArr = c->getGlobal()->newModuleDecl("regArr", regArrayType);
+      
+      
+    }
     
     deleteContext(c);
 
