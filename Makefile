@@ -15,6 +15,8 @@ SRC_HEADERS += $(wildcard src/[^_]*.hpp)
 
 SRC_OBJS = $(patsubst src/%.cpp, build/%.o,$(SRC_FILES))
 
+all: all-tests simpass
+
 all-tests: $(SRC_FILES) $(TEST_FILES)
 	$(CXX) $(CXXFLAGS) $(SRC_FILES) $(TEST_FILES) -I$(COREIR_INCLUDE_PATH) -I/opt/local/include -I./src -lcoreir -L$(COREIR_LIB_PATH)
 
