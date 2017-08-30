@@ -2,6 +2,7 @@
 
 #include "sim.h"
 #include "utils.h"
+#include "test_utils.h"
 
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"
@@ -12,21 +13,6 @@ using namespace CoreIR;
 using namespace CoreIR::Passes;
 
 namespace sim_core {
-
-  int compileCode(const std::string& code, const std::string& outFile) {
-    std::ofstream out(outFile);
-    out << code;
-    out.close();
-
-
-    string runCmd = "clang -c " + outFile;
-    int s = system(runCmd.c_str());
-
-    cout << "Command result = " << s << endl;
-
-    return s;
-
-  }
 
   bool splitNodeEdgesCorrect(const NGraph& g) {
 

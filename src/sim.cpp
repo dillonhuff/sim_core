@@ -1044,7 +1044,6 @@ namespace sim_core {
     deque<vdisc> topo_order;
     boost::topological_sort(g, std::front_inserter(topo_order));
 
-    cout << "TOP" << endl;
     return topo_order;
   }
 
