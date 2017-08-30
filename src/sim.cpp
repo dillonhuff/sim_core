@@ -58,6 +58,19 @@ namespace sim_core {
     return cv;
   }
 
+  std::string cVar(const WireNode& w, const std::string& suffix) {
+    string cv = cVar(*(w.getWire()), suffix);
+    if (w.isSequential) {
+      if (w.isReceiver) {
+	return cv += "_receiver";
+      } else {
+	return cv += "_source";
+      }
+
+    }
+    return cv;
+  }
+  
   void print_wireable_selects(Wireable* fst_select) {
     cout << "Wireable selects" << endl;
     for (auto& s : fst_select->getSelects()) {
@@ -93,7 +106,13 @@ namespace sim_core {
   vector<Conn> build_ordered_connections(Module* mod) {
     vector<Conn> conns;
 
+    assert(mod->hasDef());
+
+    cout << "Building connections" << endl;
+
     for (auto& connection : mod->getDef()->getConnections()) {
+
+      cout << "Connection = " << (connection.first)->toString() << " " << (connection.second)->toString() << endl;
 
       assert(connection_is_ordered(connection));
 
@@ -505,7 +524,7 @@ namespace sim_core {
     }
 
     string oldValName = rName + "_old_value";
-    s += "(((" + cVar(clk) + "_last == 0) && (" + cVar(clk) + " == 1)) && " + cVar(en) + ") ? " + cVar(add) + " : " + oldValName + ";\n";
+    s += "(((" + cVar(clk, "_last") + " == 0) && (" + cVar(clk) + " == 1)) && " + cVar(en) + ") ? " + cVar(add) + " : " + oldValName + ";\n";
 
     return s;
   }
@@ -742,20 +761,20 @@ namespace sim_core {
 			      Module& mod) {
     string str = "";
     // Declare all variables
-    str += "// Variable declarations\n";
+    str += "\n// Variable declarations\n";
 
-    str += "// Outputs\n";
+    str += "\n// Outputs\n";
 
     for (auto& name_type_pair : outputs(mod)) {
       Type* tp = name_type_pair.second;
       str += cArrayTypeDecl(*tp, "self_" + name_type_pair.first) + ";\n";
     }
   
-    str += "// Internal variables\n";
+    str += "\n// Internal variables\n";
     str += printInternalVariables(topo_order, g, mod);
 
     // Print out operations in topological order
-    str += "// Simulation code\n";
+    str += "\n// Simulation code\n";
     for (auto& vd : topo_order) {
 
       WireNode wd = get(boost::vertex_name, g, vd);
@@ -777,7 +796,7 @@ namespace sim_core {
     }
 
     // Copy outputs over to corresponding output pointers
-    str += "// Copy results to output parameters\n";
+    str += "\n// Copy results to output parameters\n";
     for (auto& name_type_pair : outputs(mod)) {
       Type* tp = name_type_pair.second;
       str += copyTypeFromInternal(tp, name_type_pair.first);
@@ -786,6 +805,25 @@ namespace sim_core {
     return str;
   }
 
+  ArrayType& toArray(Type& tp) {
+    assert(isArray(tp));
+
+    return static_cast<ArrayType&>(tp);
+  }
+
+  bool underlyingTypeIsClkIn(Type& tp) {
+    if (isClkIn(tp)) {
+      return true;
+    }
+
+    if (isArray(tp)) {
+      ArrayType& tarr = toArray(tp);
+      return underlyingTypeIsClkIn(*(tarr.getElemType()));
+    }
+
+    return false;
+
+  } 
   string printSimArguments(Module& mod) {
 
     Type* tp = mod.getType();
@@ -800,7 +838,7 @@ namespace sim_core {
       Type* tp = name_type_pair.second;
 
       if (tp->isInput()) {
-	if (!isClkIn(*tp)) {
+	if (!underlyingTypeIsClkIn(*tp)) { //(!isClkIn(*tp)) {
 	  declStrs.push_back(cArrayTypeDecl(*tp, " self_" + name_type_pair.first));
 	} else {
 	  declStrs.push_back(cTypeString(*tp) + " self_" + name_type_pair.first);
@@ -951,7 +989,12 @@ namespace sim_core {
   }
 
   void buildOrderedGraph(Module* mod, NGraph& g) {
+
+    cout << "Building ordered conns" << endl;
+
     auto ord_conns = build_ordered_connections(mod);
+
+    cout << "Built ordered connections" << endl;
 
     // Add vertexes for all instances in the graph
     unordered_map<WireNode, vdisc> imap;
@@ -969,10 +1012,14 @@ namespace sim_core {
 
     }
 
+    cout << "Adding edges" << endl;
+
     // Add edges to the graph
     for (Conn conn : ord_conns) {
       addConnection(imap, conn, g);
     }
+
+    cout << "Done adding edges" << endl;
 
   }
 

@@ -54,6 +54,19 @@ namespace sim_core {
     }
   }
 
+  static inline std::string cVar(CoreIR::Wireable& w, const std::string& suffix) {
+    if (isSelect(w)) {
+      CoreIR::Select& s = toSelect(w);
+      if (CoreIR::isNumber(s.getSelStr())) {
+	return cVar(*(s.getParent()), suffix) + "[" + s.getSelStr() + "]";
+      } else {
+	return cVar(*(s.getParent())) + "_" + s.getSelStr() + suffix;
+      }
+    } else {
+      return w.toString() + suffix;
+    }
+  }
+  
   static inline bool isNamedType(CoreIR::Type& t, const std::string& name) {
     if (t.getKind() != CoreIR::Type::TK_Named) {
       return false;

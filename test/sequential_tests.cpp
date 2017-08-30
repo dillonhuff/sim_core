@@ -222,7 +222,7 @@ namespace sim_core {
       
     }
 
-    SECTION("Register withoug enable") {
+    SECTION("Register without enable") {
 
       Type* regChainType = c->Record({
 	  {"a", c->BitIn()->Arr(8)},
@@ -232,7 +232,6 @@ namespace sim_core {
 
       Module* regChain = c->getGlobal()->newModuleDecl("regChain", regChainType);
       ModuleDef* def = regChain->newModuleDef();
-      Args wArg({{"width",c->argInt(8)}});
 
       def->addInstance("r0","coreir.reg",{{"width",c->argInt(8)},{"en",c->argBool(false)}});
     
@@ -279,18 +278,71 @@ namespace sim_core {
       }
     }
 
-    SECTION("Register array") {
+    SECTION("Clock array") {
       uint n = 16;
       uint nRegs = 3;
 
-      Type* regArrayType = c->Record({
-	  {"clk", c->Named("coreir.clkIn")},
-	    {"a", c->Array(3, c->Array(n, c->BitIn()))},
-	      {"b", c->Array(3, c->Array(n, c->Bit()))}
+      Type* clkArrayType = c->Record({
+	  {"clkArr", c->Array(nRegs, c->Named("coreir.clkIn"))},
+	    {"a", c->Array(nRegs, c->Array(n, c->BitIn()))},
+	      {"b", c->Array(nRegs, c->Array(n, c->Bit()))}
 	});
 
-      Module* regArr = c->getGlobal()->newModuleDecl("regArr", regArrayType);
+      Module* clkArr = c->getGlobal()->newModuleDecl("clkArr", clkArrayType);
+
+      ModuleDef* def = clkArr->newModuleDef();
+      Wireable* self = def->sel("self");
+
+      for (uint i = 0; i < nRegs; i++) {
+	string rName = "r" + to_string(i);
+	Wireable* r = def->addInstance(rName,
+				       "coreir.reg",
+				       {{"width",c->argInt(n)},
+					   {"en",c->argBool(false)}});
+
+	def->connect(self->sel("clkArr")->sel(i), r->sel("clk"));
+	def->connect(self->sel("a")->sel(i), r->sel("in"));
+
+	def->connect(r->sel("out"), self->sel("b")->sel(i));
+      }
+
+      clkArr->setDef(def);
+
+
+      RunGenerators rg;
+      rg.runOnNamespace(c->getGlobal());
+
+      cout << "Building graph" << endl;
+
+      NGraph g;
+      buildOrderedGraph(clkArr, g);
+
+      cout << "Done building graph" << endl;
+
+      SECTION("Checking number of vertices") {
+	REQUIRE(splitNodeEdgesCorrect(g));	
+
+      	REQUIRE(numVertices(g) == 9);
+      }
+
+      deque<vdisc> topoOrder = topologicalSort(g);
+
+      cout << "Vertices" << endl;
+      for (auto& vd : topoOrder) {
+      	WireNode wd = boost::get(boost::vertex_name, g, vd);
+      	cout << wd.getWire()->toString() << endl;
+      }
+
+      auto str = printCode(topoOrder, g, clkArr);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
       
+      SECTION("Compile and run") {
+	string outFile = "./gencode/clock_array.c";
+	int s = compileCode(str, outFile);
+
+	REQUIRE(s == 0);
+      }
       
     }
     
