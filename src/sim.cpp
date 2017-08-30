@@ -382,6 +382,8 @@ namespace sim_core {
       return " - ";
     } else if (genRefName == "mul") {
       return " * ";
+    } else if (genRefName == "and") {
+      return " & ";
     } else if (genRefName == "neg") {
       return "~";
     }
@@ -730,6 +732,22 @@ namespace sim_core {
     return false;
   }
 
+  bool isBitArrayOfLengthLEQ(Type& t, const uint len) {
+    if (t.getKind() != Type::TK_Array) {
+      return false;
+    }
+
+    ArrayType& tArr = static_cast<ArrayType&>(t);
+
+    Type::TypeKind elemKind = (tArr.getElemType())->getKind();
+    if ((elemKind == Type::TK_Bit || elemKind == Type::TK_BitIn) &&
+	(tArr.getLen() <= len)) {
+      return true;
+    }
+
+    return false;
+  }
+  
   bool isNamedType(Type& t, const std::string& name) {
     if (t.getKind() != Type::TK_Named) {
       return false;
@@ -745,19 +763,19 @@ namespace sim_core {
   }
 
   std::string cTypeString(Type& t) {
-    if (isBitArrayOfLength(t, 8)) {
+    if (isBitArrayOfLengthLEQ(t, 8)) {
       return "uint8_t";
     }
 
-    if (isBitArrayOfLength(t, 16)) {
+    if (isBitArrayOfLengthLEQ(t, 16)) {
       return "uint16_t";
     }
     
-    if (isBitArrayOfLength(t, 32)) {
+    if (isBitArrayOfLengthLEQ(t, 32)) {
       return "uint32_t";
     }
 
-    if (isBitArrayOfLength(t, 64)) {
+    if (isBitArrayOfLengthLEQ(t, 64)) {
       return "uint64_t";
     }
     
@@ -792,19 +810,19 @@ namespace sim_core {
       return true;
     }
     
-    if (isBitArrayOfLength(t, 8)) {
+    if (isBitArrayOfLengthLEQ(t, 8)) {
       return true;
     }
 
-    if (isBitArrayOfLength(t, 16)) {
+    if (isBitArrayOfLengthLEQ(t, 16)) {
       return true;
     }
     
-    if (isBitArrayOfLength(t, 32)) {
+    if (isBitArrayOfLengthLEQ(t, 32)) {
       return true;
     }
 
-    if (isBitArrayOfLength(t, 64)) {
+    if (isBitArrayOfLengthLEQ(t, 64)) {
       return true;
     }
 
@@ -812,19 +830,19 @@ namespace sim_core {
   }
 
   std::string cArrayTypeDecl(Type& t, const std::string& varName) {
-    if (isBitArrayOfLength(t, 8)) {
+    if (isBitArrayOfLengthLEQ(t, 8)) {
       return "uint8_t " + varName;
     }
 
-    if (isBitArrayOfLength(t, 16)) {
+    if (isBitArrayOfLengthLEQ(t, 16)) {
       return "uint16_t " + varName;
     }
     
-    if (isBitArrayOfLength(t, 32)) {
+    if (isBitArrayOfLengthLEQ(t, 32)) {
       return "uint32_t " + varName;
     }
 
-    if (isBitArrayOfLength(t, 64)) {
+    if (isBitArrayOfLengthLEQ(t, 64)) {
       return "uint64_t " + varName;
     }
     
@@ -924,6 +942,9 @@ namespace sim_core {
       return res;
     }
 
+    cout << "Failed for type = " << tp->toString() << endl;
+    cout << "         toName = " << toName << endl;
+    cout << "       fromName = " << fromName << endl;
     assert(false);
   }  
 

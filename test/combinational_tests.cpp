@@ -186,6 +186,59 @@ namespace sim_core {
 
     }
 
+    SECTION("One 37 bit logical and") {
+      uint n = 37;
+
+      Generator* andG = c->getGenerator("coreir.and");
+
+      Type* andType = c->Record({
+	  {"input", c->Array(2, c->Array(n, c->BitIn()))},
+	    {"output", c->Array(n, c->Bit())}
+	});
+
+      Module* andM = g->newModuleDecl("and37", andType);
+
+      ModuleDef* def = andM->newModuleDef();
+
+      Wireable* self = def->sel("self");
+      Wireable* and0 = def->addInstance("and0", andG, {{"width", c->argInt(n)}});
+
+      def->connect("self.input.0", "and0.in0");
+      def->connect("self.input.1", "and0.in1");
+      def->connect("and0.out", "self.output");
+
+      andM->setDef(def);
+
+      RunGenerators rg;
+      rg.runOnNamespace(g);
+
+      NGraph g;
+      buildOrderedGraph(andM, g);
+
+      SECTION("Checking graph size") {
+      	REQUIRE(num_vertices(g) == 3);
+      }
+
+      deque<vdisc> topo_order = topologicalSort(g);
+
+      auto str = printCode(topo_order, g, andM);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
+
+      string outFile = "./gencode/and37.c";
+      std::ofstream out(outFile);
+      out << str;
+      out.close();
+
+      string runCmd = "clang -c " + outFile;
+      int s = system(runCmd.c_str());
+
+      cout << "Command result = " << s << endl;
+
+      REQUIRE(s == 0);
+      
+    }
+
     SECTION("One 16 bit negation") {
       uint n = 16;
   
