@@ -29,8 +29,9 @@ bool SimModule::runOnModule(Module* m) {
 
   auto topOrder = topologicalSort(g);
 
-  cout << "CODE" << endl;
-  cout << printCode(topOrder, g, m) << endl;
+  string codeStr = printCode(topOrder, g, m);
+  cout << "SIMULATION CODE" << endl;
+  cout << codeStr << endl;
   
   return false;
 }
