@@ -55,14 +55,18 @@ namespace sim_core {
   }
 
   static inline std::string cVar(CoreIR::Wireable& w, const std::string& suffix) {
+    cout << "cvar for " << w.toString() << " with suffix = " << suffix << endl;
     if (isSelect(w)) {
       CoreIR::Select& s = toSelect(w);
       if (CoreIR::isNumber(s.getSelStr())) {
+	cout << "select is number" << endl;
 	return cVar(*(s.getParent()), suffix) + "[" + s.getSelStr() + "]";
       } else {
+	cout << "Select is not number" << endl;
 	return cVar(*(s.getParent())) + "_" + s.getSelStr() + suffix;
       }
     } else {
+      cout << "Not a select" << endl;
       return w.toString() + suffix;
     }
   }

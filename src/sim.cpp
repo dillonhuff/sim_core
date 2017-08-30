@@ -524,6 +524,8 @@ namespace sim_core {
     }
 
     string oldValName = rName + "_old_value";
+
+    
     s += "(((" + cVar(clk, "_last") + " == 0) && (" + cVar(clk) + " == 1)) && " + cVar(en) + ") ? " + cVar(add) + " : " + oldValName + ";\n";
 
     return s;
@@ -561,7 +563,7 @@ namespace sim_core {
     }
 
     string oldValName = rName + "_old_value";
-    s += "((" + cVar(clk) + "_last == 0) && (" + cVar(clk) + " == 1)) ? " + cVar(add) + " : " + oldValName + ";\n";
+    s += "((" + cVar(clk, "_last") + " == 0) && (" + cVar(clk) + " == 1)) ? " + cVar(add) + " : " + oldValName + ";\n";
 
     return s;
   }
