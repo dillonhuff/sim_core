@@ -54,4 +54,29 @@ namespace sim_core {
     }
   }
 
+  static inline bool isNamedType(CoreIR::Type& t, const std::string& name) {
+    if (t.getKind() != CoreIR::Type::TK_Named) {
+      return false;
+    }
+
+    CoreIR::NamedType& nt = static_cast<CoreIR::NamedType&>(t);
+    return nt.getName() == name;
+
+  }
+
+  
+  static inline bool isArray(CoreIR::Type& t) {
+    return t.getKind() == CoreIR::Type::TK_Array;
+  }
+
+  static inline bool isClkIn(CoreIR::Type& t) {
+    return isNamedType(t, "clkIn");
+  }
+
+  
+  std::string cTypeString(CoreIR::Type& t);
+
+  bool isBitArrayOfLength(CoreIR::Type& t, const uint len);
+  bool isBitArrayOfLengthLEQ(CoreIR::Type& t, const uint len);
+  bool isPrimitiveType(CoreIR::Type& t);
 }
