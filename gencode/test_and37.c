@@ -21,5 +21,9 @@ int main() {
   printf("and out  = %llu\n", out);
   printf("expected = %llu\n", expected);
 
-  return expected == out;
+  if (expected == out) {
+    return 0;
+  }
+
+  return 1;
 }
