@@ -191,7 +191,7 @@ namespace sim_core {
 
     assert(mod->hasDef());
 
-    cout << "Building connections" << endl;
+    //cout << "Building connections" << endl;
 
     for (auto& connection : mod->getDef()->getConnections()) {
 
