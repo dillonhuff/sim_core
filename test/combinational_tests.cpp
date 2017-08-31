@@ -62,14 +62,7 @@ namespace sim_core {
       deque<vdisc> topo_order = topologicalSort(g);
 
       auto str = printCode(topo_order, g, add4_n);
-
-      string outFile = "./gencode/add4.c";
-      std::ofstream out(outFile);
-      out << str;
-      out.close();
-
-      string runCmd = "clang -c " + outFile;
-      int s = system(runCmd.c_str());
+      int s = compileCode(str, "./gencode/add4.c");
 
       cout << "Command result = " << s << endl;
 
@@ -172,14 +165,7 @@ namespace sim_core {
       auto str = printCode(topo_order, g, mul_n);
       cout << "CODE STRING" << endl;
       cout << str << endl;
-
-      string outFile = "./gencode/mul2.c";
-      std::ofstream out(outFile);
-      out << str;
-      out.close();
-
-      string runCmd = "clang -c " + outFile;
-      int s = system(runCmd.c_str());
+      int s = compileCode(str, "./gencode/mul2.c");
 
       cout << "Command result = " << s << endl;
 
@@ -227,19 +213,10 @@ namespace sim_core {
       cout << str << endl;
 
       string outFile = "./gencode/and37.c";
-      std::ofstream out(outFile);
-      out << str;
-      out.close();
 
-      string runCmd = "clang " + outFile + " ./gencode/test_and37.c";
-      int s = system(runCmd.c_str());
-
-      cout << "Command result = " << s << endl;
-
-      REQUIRE(s == 0);
-
-      string runTest = "./a.out";
-      s = system(runTest.c_str());
+      int s = compileCodeAndRun(str,
+				"./gencode/and37.c",
+				"./gencode/test_and37.c");
 
       cout << "Test result = " << s << endl;
 
@@ -408,18 +385,11 @@ namespace sim_core {
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
-      string outFile = "./gencode/neg16.c";
-      std::ofstream out(outFile);
-      out << str;
-      out.close();
-
-      string runCmd = "clang -c " + outFile;
-      int s = system(runCmd.c_str());
+      int s = compileCode(str, "./gencode/neg16.c");
 
       cout << "Command result = " << s << endl;
 
       REQUIRE(s == 0);
-      
     }
     
     SECTION("Two 16 bit nots") {
@@ -467,13 +437,7 @@ namespace sim_core {
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
-      string outFile = "./gencode/two_negs.c";
-      std::ofstream out(outFile);
-      out << str;
-      out.close();
-
-      string runCmd = "clang -c " + outFile;
-      int s = system(runCmd.c_str());
+      int s = compileCode(str, "./gencode/two_negs.c");
 
       cout << "Command result = " << s << endl;
 
