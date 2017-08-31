@@ -306,6 +306,65 @@ namespace sim_core {
 
     }
 
+    SECTION("One 2 bit negation") {
+      uint n = 2;
+  
+      Generator* neg = c->getGenerator("coreir.neg");
+
+      Type* neg2Type = c->Record({
+	  {"A",    c->Array(n,c->BitIn())},
+	    {"res", c->Array(n,c->Bit())}
+	});
+
+      Module* neg_n = g->newModuleDecl("neg_16", neg2Type);
+
+      ModuleDef* def = neg_n->newModuleDef();
+
+      Wireable* self = def->sel("self");
+      Wireable* neg0 = def->addInstance("neg0", neg, {{"width", c->argInt(n)}});
+
+      def->connect(self->sel("A"), neg0->sel("in"));
+
+      def->connect(neg0->sel("out"), self->sel("res"));
+
+      neg_n->setDef(def);
+
+      RunGenerators rg;
+      rg.runOnNamespace(g);
+
+      Type* t = neg_n->getType();
+      cout << "Module type = " << t->toString() << endl;
+      
+      NGraph g;
+      buildOrderedGraph(neg_n, g);
+
+      deque<vdisc> topo_order = topologicalSort(g);
+
+      auto str = printCode(topo_order, g, neg_n);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
+
+      string outFile = "./gencode/neg2.c";
+      std::ofstream out(outFile);
+      out << str;
+      out.close();
+
+      string runCmd = "clang " + outFile + " ./gencode/test_neg2.c";
+      int s = system(runCmd.c_str());
+
+      cout << "Command result = " << s << endl;
+
+      REQUIRE(s == 0);
+
+      string runTest = "./a.out";
+      s = system(runTest.c_str());
+
+      cout << "2 bit not Test result = " << s << endl;
+
+      REQUIRE(s == 0);
+      
+    }
+    
     SECTION("One 16 bit negation") {
       uint n = 16;
   
