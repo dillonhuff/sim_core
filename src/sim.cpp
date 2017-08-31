@@ -494,7 +494,7 @@ namespace sim_core {
   }
 
   string seString(Type& tp, const std::string& arg) {
-    return "";
+    return arg;
   }
 
   string
