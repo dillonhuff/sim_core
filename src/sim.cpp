@@ -374,13 +374,13 @@ namespace sim_core {
       return "~";
     } else if (genRefName == "eq") {
       return " == ";
-    } else if (genRefName == "sge") {
+    } else if ((genRefName == "sge") || (genRefName == "uge")) {
       return " >= ";
-    } else if (genRefName == "sle") {
+    } else if ((genRefName == "sle") || (genRefName == "ule")) {
       return " <= ";
-    } else if (genRefName == "sgt") {
+    } else if ((genRefName == "sgt") || (genRefName == "ugt")) {
       return " > ";
-    } else if (genRefName == "slt") {
+    } else if ((genRefName == "slt") || (genRefName == "ult")) {
       return " < ";
     }
 
