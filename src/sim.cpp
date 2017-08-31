@@ -41,6 +41,8 @@ namespace sim_core {
   }
 
   uint typeWidth(Type& tp) {
+    //cout << "typeWidth = " << tp.toString() << endl;
+
     assert(isPrimitiveType(tp));
 
     if ((tp.getKind() == Type::TK_BitIn) ||
@@ -332,8 +334,24 @@ namespace sim_core {
       return " * ";
     } else if (genRefName == "and") {
       return " & ";
+    } else if (genRefName == "or") {
+      return " | ";
+    } else if (genRefName == "xor") {
+      return " ^ ";
     } else if (genRefName == "not") {
       return "~";
+    } else if (genRefName == "eq") {
+      return " == ";
+    } else if (genRefName == "geq") {
+      return " >= ";
+    } else if (genRefName == "leq") {
+      return " <= ";
+    } else if (genRefName == "gt") {
+      return " > ";
+    } else if (genRefName == "lt") {
+      return " < ";
+    } else if (genRefName == "neq") {
+      return " != ";
     }
 
     assert(false);

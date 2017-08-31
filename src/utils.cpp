@@ -38,7 +38,8 @@ namespace sim_core {
   
   bool isPrimitiveType(Type& t) {
 
-    if (t.getKind() == Type::TK_BitIn) {
+    if ((t.getKind() == Type::TK_BitIn) ||
+	(t.getKind() == Type::TK_Bit)) {
       return true;
     }
     

@@ -551,6 +551,42 @@ namespace sim_core {
       REQUIRE(s == 0);
     }
 
+    SECTION("Equality comparison on ") {
+      uint n = 54;
+  
+      Generator* eq = c->getGenerator("coreir.eq");
+
+      Type* eqType = c->Record({
+	  {"A",    c->Array(2, c->Array(n, c->BitIn())) },
+	    {"out", c->Bit() }
+	});
+
+      Module* eqM = g->newModuleDecl("equality_test", eqType);
+
+      ModuleDef* def = eqM->newModuleDef();
+
+      Wireable* self = def->sel("self");
+      Wireable* eq0 = def->addInstance("eq0", eq, {{"width", c->argInt(n)}});
+
+      def->connect("self.A.0", "eq0.in0");
+      def->connect("self.A.1", "eq0.in1");
+      def->connect(eq0->sel("out"), self->sel("out"));
+
+      eqM->setDef(def);
+
+      RunGenerators rg;
+      rg.runOnNamespace(g);
+
+      NGraph g;
+      buildOrderedGraph(eqM, g);
+
+      deque<vdisc> topo_order = topologicalSort(g);
+
+      auto str = printCode(topo_order, g, eqM);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
+    }
+
     deleteContext(c);
 
   }
