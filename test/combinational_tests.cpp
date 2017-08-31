@@ -306,10 +306,10 @@ namespace sim_core {
 
     }
 
-    SECTION("One 2 bit negation") {
+    SECTION("One 2 bit not") {
       uint n = 2;
   
-      Generator* neg = c->getGenerator("coreir.neg");
+      Generator* neg = c->getGenerator("coreir.not");
 
       Type* neg2Type = c->Record({
 	  {"A",    c->Array(n,c->BitIn())},
@@ -365,10 +365,10 @@ namespace sim_core {
       
     }
     
-    SECTION("One 16 bit negation") {
+    SECTION("One 16 bit not") {
       uint n = 16;
   
-      Generator* neg = c->getGenerator("coreir.neg");
+      Generator* neg = c->getGenerator("coreir.not");
 
       Type* neg2Type = c->Record({
 	  {"A",    c->Array(n,c->BitIn())},
@@ -421,10 +421,10 @@ namespace sim_core {
       
     }
     
-    SECTION("Two 16 bit negs") {
+    SECTION("Two 16 bit nots") {
       uint n = 16;
   
-      Generator* neg = c->getGenerator("coreir.neg");
+      Generator* neg = c->getGenerator("coreir.not");
 
       Type* neg2Type = c->Record({
 	  {"in",    c->Array(2, c->Array(n,c->BitIn()))},

@@ -343,7 +343,7 @@ namespace sim_core {
       return " * ";
     } else if (genRefName == "and") {
       return " & ";
-    } else if (genRefName == "neg") {
+    } else if (genRefName == "not") {
       return "~";
     }
 
