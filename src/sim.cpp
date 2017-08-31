@@ -138,7 +138,7 @@ namespace sim_core {
     cout << "End selects" << endl;
   }
 
-  bool connection_is_ordered(const Connection& connection) {
+  bool connectionIsOrdered(const Connection& connection) {
     Wireable* fst = connection.first;
     Wireable* snd = connection.second;
 
@@ -168,7 +168,7 @@ namespace sim_core {
 
       cout << "Connection = " << (connection.first)->toString() << " " << (connection.second)->toString() << endl;
 
-      assert(connection_is_ordered(connection));
+      assert(connectionIsOrdered(connection));
 
 
       Wireable* fst = connection.first;

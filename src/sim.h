@@ -29,8 +29,6 @@ namespace sim_core {
 
   };
 
-  //typedef CoreIR::Wireable* WireableNode;
-
   typedef WireNode WireableNode;
 
   typedef std::pair<WireableNode, WireableNode> Conn;
