@@ -485,10 +485,6 @@ namespace sim_core {
       NGraph g;
       buildOrderedGraph(addM, g);
 
-      // SECTION("Checking graph size") {
-      // 	REQUIRE(num_vertices(g) == 4);
-      // }
-
       deque<vdisc> topo_order = topologicalSort(g);
 
       auto str = printCode(topo_order, g, addM);
