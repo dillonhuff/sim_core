@@ -3,6 +3,7 @@
 #include "catch.hpp"
 
 #include "sim.h"
+#include "test_utils.h"
 
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"
@@ -551,7 +552,7 @@ namespace sim_core {
       REQUIRE(s == 0);
     }
 
-    SECTION("Equality comparison on ") {
+    SECTION("Equality comparison on 54 bits") {
       uint n = 54;
   
       Generator* eq = c->getGenerator("coreir.eq");
@@ -582,11 +583,53 @@ namespace sim_core {
 
       deque<vdisc> topo_order = topologicalSort(g);
 
+
       auto str = printCode(topo_order, g, eqM);
       cout << "CODE STRING" << endl;
       cout << str << endl;
+
+      compileCode(str, "./gencode/eq54.c");
     }
 
+    SECTION("sle on 7 bits") {
+      uint n = 7;
+  
+      Generator* sle = c->getGenerator("coreir.sle");
+
+      Type* sleType = c->Record({
+	  {"A",    c->Array(2, c->Array(n, c->BitIn())) },
+	    {"out", c->Bit() }
+	});
+
+      Module* sleM = g->newModuleDecl("sle_test", sleType);
+
+      ModuleDef* def = sleM->newModuleDef();
+
+      Wireable* self = def->sel("self");
+      Wireable* sle0 = def->addInstance("sle0", sle, {{"width", c->argInt(n)}});
+
+      def->connect("self.A.0", "sle0.in0");
+      def->connect("self.A.1", "sle0.in1");
+      def->connect(sle0->sel("out"), self->sel("out"));
+
+      sleM->setDef(def);
+
+      RunGenerators rg;
+      rg.runOnNamespace(g);
+
+      NGraph g;
+      buildOrderedGraph(sleM, g);
+
+      deque<vdisc> topo_order = topologicalSort(g);
+
+
+      auto str = printCode(topo_order, g, sleM);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
+
+      compileCode(str, "./gencode/sle7.c");
+    }
+    
     deleteContext(c);
 
   }

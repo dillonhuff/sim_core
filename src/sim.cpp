@@ -424,7 +424,9 @@ namespace sim_core {
     return res;
   }
 
-  string printSub(Instance* inst, const vdisc vd, const NGraph& g) {
+  string printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
+    assert(getInputs(vd, g).size() == 2);
+
     auto outSelects = getOutputSelects(inst);
 
     assert(outSelects.size() == 1);
@@ -462,13 +464,6 @@ namespace sim_core {
     res += "\n";
 
     return res;
-  }
-
-  string printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
-    assert(getInputs(vd, g).size() == 2);
-
-    return printSub(inst, vd, g);
-
   }
 
   string varSuffix(const WireNode& wd) {
