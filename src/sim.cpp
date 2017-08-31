@@ -3,6 +3,7 @@
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"
 
+#include "algorithm.h"
 #include "utils.h"
 
 using namespace CoreIR;
@@ -323,6 +324,11 @@ namespace sim_core {
     return inputs;
   }
 
+  std::string getOpName(Instance& inst) {
+    string genRefName = inst.getGeneratorRef()->getName();
+    return genRefName;
+  }
+
   std::string getOpString(Instance& inst) {
     string genRefName = inst.getGeneratorRef()->getName();
 
@@ -342,16 +348,14 @@ namespace sim_core {
       return "~";
     } else if (genRefName == "eq") {
       return " == ";
-    } else if (genRefName == "geq") {
+    } else if (genRefName == "sge") {
       return " >= ";
-    } else if (genRefName == "leq") {
+    } else if (genRefName == "sle") {
       return " <= ";
-    } else if (genRefName == "gt") {
+    } else if (genRefName == "sgt") {
       return " > ";
-    } else if (genRefName == "lt") {
+    } else if (genRefName == "slt") {
       return " < ";
-    } else if (genRefName == "neq") {
-      return " != ";
     }
 
     assert(false);
@@ -424,46 +428,132 @@ namespace sim_core {
     return res;
   }
 
+  bool isBitwiseOp(Instance& inst) {
+    string genRefName = inst.getGeneratorRef()->getName();
+    vector<string> bitwiseOps{"not", "and", "or", "xor"};
+    return elem(genRefName, bitwiseOps);
+  }
+
+  bool isSignInvariantOp(Instance& inst) {
+    string genRefName = inst.getGeneratorRef()->getName();
+    vector<string> siOps{"add", "sub", "mul", "eq"};
+    return elem(genRefName, siOps);
+  }
+
+  bool isUnsignedCmp(Instance& inst) {
+    string genRefName = inst.getGeneratorRef()->getName();
+    vector<string> siOps{"ult", "ugt", "ule", "uge"};
+    return elem(genRefName, siOps);
+  }
+
+  bool isSignedCmp(Instance& inst) {
+    string genRefName = inst.getGeneratorRef()->getName();
+    vector<string> siOps{"slt", "sgt", "sle", "sge"};
+    return elem(genRefName, siOps);
+  }
+  
+  string printOpThenMaskBinop(Instance* inst, const vdisc vd, const NGraph& g) {
+
+      auto outSelects = getOutputSelects(inst);
+
+      assert(outSelects.size() == 1);
+
+      string res = "";
+
+      pair<string, Wireable*> outPair = *std::begin(outSelects);
+      res += inst->getInstname() + "_" + outPair.first + " = ";
+
+      auto inConns = getInputConnections(vd, g);
+
+      assert(inConns.size() == 2);
+
+      WireNode arg1;
+      WireNode arg2;
+
+      auto dest = inConns[0].second.getWire();
+      assert(isSelect(dest));
+
+      Select* destSel = toSelect(dest);
+      assert(destSel->getParent() == inst);
+
+      if (destSel->getSelStr() == "in0") {
+	arg1 = inConns[0].first;
+	arg2 = inConns[1].first;
+      } else {
+	arg1 = inConns[1].first;
+	arg2 = inConns[0].first;
+      }
+
+      string opString = getOpString(*inst);
+
+      res += maskResult(*(outPair.second->getType()),
+			cVar(arg1) + opString + cVar(arg2)) + ";\n";
+      res += "\n";
+
+      return res;
+  }
+
+  string seString(Type& tp, const std::string& arg) {
+    return "";
+  }
+
+  string
+  printSEThenOpThenMaskBinop(Instance* inst, const vdisc vd, const NGraph& g) {
+      auto outSelects = getOutputSelects(inst);
+
+      assert(outSelects.size() == 1);
+
+      string res = "";
+
+      pair<string, Wireable*> outPair = *std::begin(outSelects);
+      res += inst->getInstname() + "_" + outPair.first + " = ";
+
+      auto inConns = getInputConnections(vd, g);
+
+      assert(inConns.size() == 2);
+
+      WireNode arg1;
+      WireNode arg2;
+
+      auto dest = inConns[0].second.getWire();
+      assert(isSelect(dest));
+
+      Select* destSel = toSelect(dest);
+      assert(destSel->getParent() == inst);
+
+      if (destSel->getSelStr() == "in0") {
+	arg1 = inConns[0].first;
+	arg2 = inConns[1].first;
+      } else {
+	arg1 = inConns[1].first;
+	arg2 = inConns[0].first;
+      }
+
+      string opString = getOpString(*inst);
+
+      res += maskResult(*(outPair.second->getType()),
+			seString(*((arg1.getWire())->getType()), cVar(arg1)) +
+			opString +
+			seString(*((arg2.getWire())->getType()), cVar(arg2))) +
+	";\n";
+
+      res += "\n";
+
+      return res;
+  }
+
   string printBinop(Instance* inst, const vdisc vd, const NGraph& g) {
     assert(getInputs(vd, g).size() == 2);
 
-    auto outSelects = getOutputSelects(inst);
-
-    assert(outSelects.size() == 1);
-
-    string res = "";
-
-    pair<string, Wireable*> outPair = *std::begin(outSelects);
-    res += inst->getInstname() + "_" + outPair.first + " = ";
-
-    auto inConns = getInputConnections(vd, g);
-
-    assert(inConns.size() == 2);
-
-    WireNode arg1;
-    WireNode arg2;
-    
-    auto dest = inConns[0].second.getWire();
-    assert(isSelect(dest));
-
-    Select* destSel = toSelect(dest);
-    assert(destSel->getParent() == inst);
-
-    if (destSel->getSelStr() == "in0") {
-      arg1 = inConns[0].first;
-      arg2 = inConns[1].first;
-    } else {
-      arg1 = inConns[1].first;
-      arg2 = inConns[0].first;
+    if (isBitwiseOp(*inst) || isSignInvariantOp(*inst) || isUnsignedCmp(*inst)) {
+      return printOpThenMaskBinop(inst, vd, g);
     }
 
-    string opString = getOpString(*inst);
+    if (isSignedCmp(*inst)) {
+      return printSEThenOpThenMaskBinop(inst, vd, g);
+    }
 
-    res += maskResult(*(outPair.second->getType()),
-		      cVar(arg1) + opString + cVar(arg2)) + ";\n";
-    res += "\n";
-
-    return res;
+    assert(false);
   }
 
   string varSuffix(const WireNode& wd) {

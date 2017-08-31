@@ -627,7 +627,21 @@ namespace sim_core {
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
-      compileCode(str, "./gencode/sle7.c");
+      string outFile = "./gencode/sle7.c";
+      string runCmd = "clang " + outFile + " gencode/test_sle7.c";
+      int s = system(runCmd.c_str());
+
+      cout << "Command result = " << s << endl;
+
+      REQUIRE(s == 0);
+
+
+      string runTest = "./a.out";
+      s = system(runTest.c_str());
+
+      cout << "Test result = " << s << endl;
+
+      REQUIRE(s == 0);
     }
     
     deleteContext(c);
