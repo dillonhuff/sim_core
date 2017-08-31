@@ -532,22 +532,9 @@ namespace sim_core {
       cout << str << endl;
 
       string outFile = "./gencode/mat2_3_add.c";
-      std::ofstream out(outFile);
-      out << str;
-      out.close();
-
-      string runCmd = "clang " + outFile + " gencode/test_mat2_3_add.c";
-      int s = system(runCmd.c_str());
-
-      cout << "Command result = " << s << endl;
-
-      REQUIRE(s == 0);
-
-
-      string runTest = "./a.out";
-      s = system(runTest.c_str());
-
-      cout << "Test result = " << s << endl;
+      int s = compileCodeAndRun(str,
+				"./gencode/mat2_3_add.c",
+				"./gencode/test_mat2_3_add.c");
 
       REQUIRE(s == 0);
     }
@@ -628,24 +615,8 @@ namespace sim_core {
       cout << str << endl;
 
       int s = compileCodeAndRun(str, "./gencode/sle7.c", "./gencode/test_sle7.c");
-      // string outFile = "./gencode/sle7.c";
-      // std::ofstream out(outFile);
-      // out << str;
-      // out.close();
-
-      // string runCmd = "clang " + outFile + " gencode/test_sle7.c";
-      // int s = system(runCmd.c_str());
-
-      // cout << "Command result = " << s << endl;
-
       REQUIRE(s == 0);
 
-      // string runTest = "./a.out";
-      // s = system(runTest.c_str());
-
-      // cout << "Test result = " << s << endl;
-
-      // REQUIRE(s == 0);
     }
     
     deleteContext(c);

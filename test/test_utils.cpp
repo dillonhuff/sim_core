@@ -39,7 +39,7 @@ namespace sim_core {
 
     cout << "Test result = " << r << endl;
 
-    return s && r;
+    return s || r;
   }
 
 }
