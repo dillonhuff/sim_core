@@ -627,24 +627,25 @@ namespace sim_core {
       cout << "CODE STRING" << endl;
       cout << str << endl;
 
-      string outFile = "./gencode/sle7.c";
-      std::ofstream out(outFile);
-      out << str;
-      out.close();
+      int s = compileCodeAndRun(str, "./gencode/sle7.c", "./gencode/test_sle7.c");
+      // string outFile = "./gencode/sle7.c";
+      // std::ofstream out(outFile);
+      // out << str;
+      // out.close();
 
-      string runCmd = "clang " + outFile + " gencode/test_sle7.c";
-      int s = system(runCmd.c_str());
+      // string runCmd = "clang " + outFile + " gencode/test_sle7.c";
+      // int s = system(runCmd.c_str());
 
-      cout << "Command result = " << s << endl;
-
-      REQUIRE(s == 0);
-
-      string runTest = "./a.out";
-      s = system(runTest.c_str());
-
-      cout << "Test result = " << s << endl;
+      // cout << "Command result = " << s << endl;
 
       REQUIRE(s == 0);
+
+      // string runTest = "./a.out";
+      // s = system(runTest.c_str());
+
+      // cout << "Test result = " << s << endl;
+
+      // REQUIRE(s == 0);
     }
     
     deleteContext(c);
