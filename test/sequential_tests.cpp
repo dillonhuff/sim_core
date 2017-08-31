@@ -47,6 +47,80 @@ namespace sim_core {
 
     Context* c = newContext();
 
+    SECTION("Non standard width register") {
+      uint n = 5;
+
+      Type* RegType = c->Record({
+	  {"en", c->BitIn()},
+	    {"out", c->Array(n, c->Bit())},
+	      {"a", c->Array(n, c->BitIn())},
+	      {"clk", c->Named("coreir.clkIn")}
+	});
+
+      Module* rg = c->getGlobal()->newModuleDecl("offReg", RegType);
+
+      ModuleDef* def = rg->newModuleDef();
+
+      def->addInstance("r", "coreir.reg", {{"width", c->argInt(n)}, {"en", c->argBool(true)}});
+
+      def->connect("self.en", "r.en");
+      def->connect("self.clk", "r.clk");
+      def->connect("self.a", "r.in");
+      def->connect("r.out", "self.out");
+
+      rg->setDef(def);
+
+      RunGenerators runGen;
+      runGen.runOnNamespace(c->getGlobal());
+
+      NGraph g;
+      buildOrderedGraph(rg, g);
+
+      SECTION("Checking number of vertices") {
+      	REQUIRE(numVertices(g) == 6);
+      }
+
+      cout << "About to topological sort" << endl;
+      deque<vdisc> topoOrder = topologicalSort(g);
+      cout << "Done topological sorting" << endl;
+
+      cout << "Vertices" << endl;
+      for (auto& vd : topoOrder) {
+	WireNode wd = boost::get(boost::vertex_name, g, vd);
+	cout << wd.getWire()->toString() << endl;
+      }
+
+      REQUIRE(splitNodeEdgesCorrect(g));
+
+      auto str = printCode(topoOrder, g, rg);
+      cout << "CODE STRING" << endl;
+      cout << str << endl;
+
+      SECTION("Compile and run") {      
+	string outFile = "./gencode/reg5.c";
+	std::ofstream out(outFile);
+	out << str;
+	out.close();
+
+
+	string runCmd = "clang " + outFile + " gencode/test_reg5.c";
+	int s = system(runCmd.c_str());
+
+	cout << "Command result = " << s << endl;
+
+	REQUIRE(s == 0);
+
+
+	string runTest = "./a.out";
+	s = system(runTest.c_str());
+
+	cout << "Test result = " << s << endl;
+
+	REQUIRE(s == 0);
+      }
+
+    }
+
     SECTION("Counter") {
 
       Type* CounterType = c->Record({
@@ -58,6 +132,7 @@ namespace sim_core {
       //Now lets create a module declaration. Declarations are specified separately from the definition
       Module* counter = c->getGlobal()->newModuleDecl("counter",CounterType); //use getGlobalFunction
       ModuleDef* def = counter->newModuleDef();
+
       Args wArg({{"width",c->argInt(16)}});
       def->addInstance("ai","coreir.add",wArg); // using <namespace>.<module> notation 
       def->addInstance("ci","coreir.const",wArg,{{"value",c->argInt(1)}});
