@@ -157,7 +157,7 @@ namespace sim_core {
     return false;
   }
 
-  vector<Conn> build_ordered_connections(Module* mod) {
+  vector<Conn> buildOrderedConnections(Module* mod) {
     vector<Conn> conns;
 
     assert(mod->hasDef());
@@ -231,72 +231,6 @@ namespace sim_core {
 
     return conns;
   
-  }
-
-  void print_ordered_connections(Module* add4_n) {
-    cout << "Ordered connections" << endl;
-    for (auto& connection : add4_n->getDef()->getConnections()) {
-      cout << "---- CONNECTION" << endl;
-      Wireable* fst = connection.first;
-      cout << "First wireable kind = " << fst->wireableKind2Str(fst->getKind()) << endl;
-      cout << "con first = " << connection.first->toString() << endl;
-
-      Wireable* snd = connection.second;
-      cout << "con second = " << connection.second->toString() << endl;
-
-      assert(isSelect(fst));
-      assert(isSelect(snd));
-
-      Select* fst_select = static_cast<Select*>(fst);
-      Select* snd_select = static_cast<Select*>(snd);
-
-      Type* fst_tp = fst_select->getType();
-      Type* snd_tp = snd_select->getType();
-
-      cout << "fst type = " << fst_tp->toString() << endl;
-      cout << "snd type = " << snd_tp->toString() << endl;
-
-      assert(connection_is_ordered(connection));
-
-    }
-  
-  }
-
-  void print_connections(Module* add4_n) {
-    cout << "Instance ptrs" << endl;
-    for (auto& inst : add4_n->getDef()->getInstances()) {
-      cout << inst.first << " = " << inst.second << endl;
-
-      Instance* ist = inst.second;
-
-      for (auto& arg : ist->getGenArgs()) {
-	cout << "Gen Arg" << endl;
-	Arg* ag = arg.second;
-	cout << ag->toString() << endl;
-      }
-    }
-    cout << "My connections printout" << endl;
-    for (auto& connection : add4_n->getDef()->getConnections()) {
-      cout << "---- CONNECTION" << endl;
-      Wireable* fst = connection.first;
-      cout << "First wireable kind = " << fst->wireableKind2Str(fst->getKind()) << endl;
-      cout << "con first = " << connection.first->toString() << endl;
-
-      Wireable* snd = connection.second;
-      cout << "con second = " << connection.second->toString() << endl;
-
-      assert(isSelect(fst));
-      assert(isSelect(snd));
-
-      Select* fst_select = static_cast<Select*>(fst);
-      Select* snd_select = static_cast<Select*>(snd);
-
-      cout << "fst parent ptr = " << fst_select->getParent() << endl;
-      print_wireable_selects(fst_select->getParent());
-      cout << "snd parent ptr = " << snd_select->getParent() << endl;
-      print_wireable_selects(snd_select->getParent());
-    }
-
   }
 
   std::vector<Conn> getOutputConnections(const vdisc vd, const NGraph& g) {
@@ -962,7 +896,6 @@ namespace sim_core {
     return code;
   }
 
-
   void addWireableToGraph(Wireable* w1,
 			  unordered_map<WireNode, vdisc>& imap,
 			  NGraph& g) {
@@ -1061,7 +994,7 @@ namespace sim_core {
 
     cout << "Building ordered conns" << endl;
 
-    auto ord_conns = build_ordered_connections(mod);
+    auto ord_conns = buildOrderedConnections(mod);
 
     cout << "Built ordered connections" << endl;
 
