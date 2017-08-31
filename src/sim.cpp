@@ -60,12 +60,38 @@ namespace sim_core {
     assert(false);
   }
 
-  string bitMaskString(Type& tp) {
+  uint containerTypeWidth(Type& tp) {
     uint w = typeWidth(tp);
 
-    assert(w > 0);
+    assert(w <= 64);
 
-    return parens(parens("1ULL << " + to_string(w)) + " - 1");
+    if (w <= 8) {
+      return 8;
+    }
+
+    if (w <= 16) {
+      return 16;
+    }
+
+    if (w <= 32) {
+      return 32;
+    }
+
+    if (w <= 64) {
+      return 64;
+    }
+
+    assert(false);
+  }
+
+  string bitMaskString(uint w) {
+    assert(w > 0);
+    return parens(parens("1ULL << " + to_string(w)) + " - 1");    
+  }
+
+  string bitMaskString(Type& tp) {
+    uint w = typeWidth(tp);
+    return bitMaskString(w);
   }
 
   bool standardWidth(Type& tp) {
@@ -493,8 +519,49 @@ namespace sim_core {
       return res;
   }
 
+  string lastMask(const uint startWidth, const uint endWidth) {
+    return parens(bitMaskString(startWidth) + " << " + to_string(endWidth - startWidth));
+  }
+
+  string signedCTypeString(Type& tp) {
+    assert(isPrimitiveType(tp));
+
+    uint w = containerTypeWidth(tp);
+
+    if (w == 8) {
+      return "int8_t";
+    }
+
+    if (w == 16) {
+      return "int16_t";
+    }
+
+    if (w == 32) {
+      return "int32_t";
+    }
+
+    if (w == 64) {
+      return "int64_t";
+    }
+    
+    assert(false);
+  }
+
+  string castToSigned(Type& tp, const std::string& expr) {
+    return parens(parens(signedCTypeString(tp)) + " " + expr);
+  }
+
   string seString(Type& tp, const std::string& arg) {
-    return arg;
+    uint startWidth = typeWidth(tp);
+    uint extWidth = containerTypeWidth(tp);
+
+    string mask = parens(arg + " & " + bitMaskString(startWidth));
+    string testClause = parens(arg + " & " + parens("1ULL << " + to_string(startWidth - 1)));
+
+    string resClause = lastMask(startWidth, extWidth) + " : 0";
+
+    string res = parens(mask + " | " + parens(testClause + " ? " + resClause));
+    return res;
   }
 
   string
@@ -531,10 +598,13 @@ namespace sim_core {
 
       string opString = getOpString(*inst);
 
+      Type& arg1Tp = *((arg1.getWire())->getType());
+      Type& arg2Tp = *((arg2.getWire())->getType());
+
       res += maskResult(*(outPair.second->getType()),
-			seString(*((arg1.getWire())->getType()), cVar(arg1)) +
+			castToSigned(arg1Tp, seString(arg1Tp, cVar(arg1))) +
 			opString +
-			seString(*((arg2.getWire())->getType()), cVar(arg2))) +
+			castToSigned(arg2Tp, seString(arg2Tp, cVar(arg2)))) +
 	";\n";
 
       res += "\n";

@@ -15,6 +15,9 @@ int main() {
 
   uint8_t r = 10;
   simulate(a, &r);
+
+  printf("expected as long = %hhu\n", expected);
+  printf("result   as long = %hhu\n", r);
   
   if (expected == r) {
     return 0;
