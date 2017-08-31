@@ -321,17 +321,6 @@ namespace sim_core {
     return inputs;
   }
 
-  void printOutput(Wireable* inst, const vdisc vd, const NGraph& g) {
-    auto outSelects = getOutputSelects(inst);
-
-    //assert(outSelects.size() == 1);
-
-    pair<string, Wireable*> outPair = *std::begin(outSelects);
-
-    //cout << inst->getInstname() << "_" << outPair.first << " = ";
-
-  }
-
   std::string getOpString(Instance& inst) {
     string genRefName = inst.getGeneratorRef()->getName();
 
