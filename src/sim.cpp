@@ -195,7 +195,7 @@ namespace sim_core {
 
     for (auto& connection : mod->getDef()->getConnections()) {
 
-      cout << "Connection = " << (connection.first)->toString() << " " << (connection.second)->toString() << endl;
+      //cout << "Connection = " << (connection.first)->toString() << " " << (connection.second)->toString() << endl;
 
       assert(connectionIsOrdered(connection));
 
@@ -980,7 +980,7 @@ namespace sim_core {
 
     Type* tp = mod.getType();
 
-    cout << "module type = " << tp->toString() << endl;
+    //cout << "module type = " << tp->toString() << endl;
 
     assert(tp->getKind() == Type::TK_Record);
 
@@ -1141,11 +1141,11 @@ namespace sim_core {
 
   void buildOrderedGraph(Module* mod, NGraph& g) {
 
-    cout << "Building ordered conns" << endl;
+    //cout << "Building ordered conns" << endl;
 
     auto ord_conns = buildOrderedConnections(mod);
 
-    cout << "Built ordered connections" << endl;
+    //cout << "Built ordered connections" << endl;
 
     // Add vertexes for all instances in the graph
     unordered_map<WireNode, vdisc> imap;
@@ -1163,14 +1163,14 @@ namespace sim_core {
 
     }
 
-    cout << "Adding edges" << endl;
+    //cout << "Adding edges" << endl;
 
     // Add edges to the graph
     for (Conn conn : ord_conns) {
       addConnection(imap, conn, g);
     }
 
-    cout << "Done adding edges" << endl;
+    //cout << "Done adding edges" << endl;
 
   }
 
