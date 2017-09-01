@@ -5,7 +5,7 @@
 
 #include "algorithm.h"
 #include "print_c.hpp"
-#include "utils.h"
+#include "utils.hpp"
 
 using namespace CoreIR;
 using namespace CoreIR::Passes;
@@ -72,19 +72,6 @@ namespace sim_core {
     }
     return cv;
   }
-  
-  // void print_wireable_selects(Wireable* fst_select) {
-  //   cout << "Wireable selects" << endl;
-  //   for (auto& s : fst_select->getSelects()) {
-  //     Wireable* w = s.second;
-  //     assert(isSelect(w));
-  //     Select* sel = static_cast<Select*>(w);
-  //     Type* tp = sel->getType();
-    
-  //     cout << s.first << " matches " << sel->wireableKind2Str(sel->getKind()) << " with type = " << tp->toString() << endl;
-  //   }
-  //   cout << "End selects" << endl;
-  // }
 
   bool connectionIsOrdered(const Connection& connection) {
     Wireable* fst = connection.first;

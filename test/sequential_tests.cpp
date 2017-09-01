@@ -1,7 +1,7 @@
 #include "catch.hpp"
 
 #include "sim.h"
-#include "utils.h"
+#include "utils.hpp"
 #include "test_utils.h"
 
 #include "coreir-passes/transform/flatten.h"

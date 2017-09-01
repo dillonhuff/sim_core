@@ -2,7 +2,7 @@
 
 #include "coreir.h"
 
-#include "utils.h"
+#include "utils.hpp"
 
 namespace sim_core {
 
