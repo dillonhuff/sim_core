@@ -19,10 +19,10 @@ TEST_OBJS = $(patsubst %.cpp, build/%.o, $(TEST_FILES))
 all: all-tests simpass
 
 all-tests: $(SRC_OBJS) $(TEST_OBJS)
-	$(CXX) $(CXXFLAGS) $(SRC_OBJS) $(TEST_OBJS) -I$(COREIR_INCLUDE_PATH) -I/opt/local/include -I./src -lcoreir -L$(COREIR_LIB_PATH) -o $@
+	$(CXX) $(CXXFLAGS) $(SRC_OBJS) $(TEST_OBJS) -I$(COREIR_INCLUDE_PATH) -I./src -lcoreir -L$(COREIR_LIB_PATH) -o $@
 
 build/%.o: %.cpp $(SRC_HEADERS)
-	$(CXX) $(CXXFLAGS) -I$(COREIR_INCLUDE_PATH) -I/opt/local/include -I./src -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -I$(COREIR_INCLUDE_PATH) -I./src -c -o $@ $<
 
 simpass: build/simpass.dylib
 
