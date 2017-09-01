@@ -32,20 +32,24 @@ namespace sim_core {
   }
 
   std::vector<Conn> getInputConnections(const vdisc vd, const NGraph& g) {
+    return g.getInputConnections(vd);
+  }
+
+  std::vector<Conn> NGraph::getInputConnections(const vdisc vd) const {
     vector<Conn> inConss;
 
-    auto out_edge_pair = boost::in_edges(vd, g.g);
-    Wireable* w = getNode(g, vd).getWire();
+    auto out_edge_pair = boost::in_edges(vd, g);
+    Wireable* w = getNode(*this, vd).getWire();
 
     for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
       auto out_edge_desc = *it;
 
       Conn edge_conn =
-	getConn(g, out_edge_desc);
+	getConn(*this, out_edge_desc);
 
       assert(isSelect(edge_conn.second.getWire()));
 
-      Select* sel = static_cast<Select*>(edge_conn.second.getWire());
+      CoreIR::Select* sel = static_cast<Select*>(edge_conn.second.getWire());
 
       assert(extractSource(sel) == w);
 
@@ -53,8 +57,9 @@ namespace sim_core {
     }
   
     return inConss;
-  }
 
+  }
+  
   std::vector<Wireable*> getOutputs(const vdisc vd, const NGraph& g) {
     vector<Wireable*> outputs;
 
@@ -175,16 +180,20 @@ namespace sim_core {
   }
 
   std::vector<Conn> getOutputConnections(const vdisc vd, const NGraph& g) {
+    return g.getOutputConnections(vd);
+  }
+
+  std::vector<Conn> NGraph::getOutputConnections(const vdisc vd) const {
     vector<Conn> outConns;
 
-    auto out_edge_pair = boost::out_edges(vd, g.g);
-    Wireable* w = getNode(g, vd).getWire();
+    auto out_edge_pair = boost::out_edges(vd, g);
+    Wireable* w = getNode(*this, vd).getWire();
 
     for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
       auto out_edge_desc = *it;
 
       Conn edge_conn =
-	getConn( g, out_edge_desc);
+	getConn(*this, out_edge_desc);
 
       assert(isSelect(edge_conn.first.getWire()));
       Select* sel = static_cast<Select*>(edge_conn.first.getWire());
