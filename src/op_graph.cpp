@@ -173,5 +173,123 @@ namespace sim_core {
 
     return topo_order;
   }
+
+  std::vector<Conn> getOutputConnections(const vdisc vd, const NGraph& g) {
+    vector<Conn> outConns;
+
+    auto out_edge_pair = boost::out_edges(vd, g);
+    Wireable* w = getNode( g, vd).getWire();
+
+    for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
+      auto out_edge_desc = *it;
+
+      Conn edge_conn =
+	getConn( g, out_edge_desc);
+
+      assert(isSelect(edge_conn.first.getWire()));
+      Select* sel = static_cast<Select*>(edge_conn.first.getWire());
+      assert(sel->getParent() == w);
+
+      outConns.push_back(edge_conn);
+      
+    }
+  
+    return outConns;
+  }
+
+
+  void addConnection(unordered_map<WireNode, vdisc>& imap,
+		     Conn& conn,
+		     NGraph& g) {
+
+    assert(isSelect(conn.first.getWire()));
+    assert(isSelect(conn.second.getWire()));
+
+    auto c1 = static_cast<Select*>(conn.first.getWire());
+    auto c2 = static_cast<Select*>(conn.second.getWire());
+
+    Wireable* p1 = extractSource(c1);
+
+    vdisc c1_disc;
+    if (isRegisterInstance(p1)) {
+      auto c1_disc_it = imap.find({p1, true, false});
+
+      assert(c1_disc_it != imap.end());
+
+      c1_disc = (*c1_disc_it).second;
+
+    } else {
+      assert(!isRegisterInstance(p1));
+
+      auto c1_disc_it = imap.find({p1, false, false});
+
+      assert(c1_disc_it != imap.end());
+
+      c1_disc = (*c1_disc_it).second;
+    }
+      
+    Wireable* p2 = extractSource(c2);
+
+    vdisc c2_disc;
+    if (isRegisterInstance(p2)) {
+      auto c2_disc_it = imap.find({p2, true, true});
+
+      assert(c2_disc_it != imap.end());
+
+      c2_disc = (*c2_disc_it).second;
+    } else {
+      assert(!isRegisterInstance(p2));
+
+      auto c2_disc_it = imap.find({p2, false, false});
+
+      assert(c2_disc_it != imap.end());
+
+      c2_disc = (*c2_disc_it).second;
+    }
+      
+    pair<edisc, bool> ed = g.add_edge(c1_disc, c2_disc);
+
+    assert(ed.second);
+
+    boost::put(boost::edge_name, g, ed.first, conn);
+    
+  }
+
+  void addWireableToGraph(Wireable* w1,
+			  unordered_map<WireNode, vdisc>& imap,
+			  NGraph& g) {
+
+    if (isInstance(w1)) {
+      Instance* inst = toInstance(w1);
+      string genRefName = inst->getGeneratorRef()->getName();
+
+      if (genRefName == "reg") {
+	WireNode wOutput{w1, true, false};
+	WireNode wInput{w1, true, true};
+
+	if (imap.find(wOutput) == end(imap)) {
+	  cout << "Adding register output" << endl;
+	  auto v1 = g.add_vertex(wOutput);
+	  imap.insert({wOutput, v1});
+	}
+
+	if (imap.find(wInput) == end(imap)) {
+	  cout << "Adding register input" << endl;
+	  auto v1 = g.add_vertex(wInput);
+	  imap.insert({wInput, v1});
+	}
+
+	return;
+      }
+    }
+
+    if (imap.find({w1, false, false}) == end(imap)) {
+      WireNode w{w1, false, false};
+      vdisc v1 = g.add_vertex(w);
+      imap.insert({w, v1});
+    }
+
+  }
+
   
 }

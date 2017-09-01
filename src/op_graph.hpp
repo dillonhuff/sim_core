@@ -28,4 +28,14 @@ namespace sim_core {
 
   CoreIR::Wireable* extractSource(CoreIR::Select* sel);
 
+  std::vector<Conn> getOutputConnections(const vdisc vd, const NGraph& g);
+
+  void addConnection(unordered_map<WireNode, vdisc>& imap,
+		     Conn& conn,
+		     NGraph& g);
+  
+  void addWireableToGraph(CoreIR::Wireable* w1,
+			  unordered_map<WireNode, vdisc>& imap,
+			  NGraph& g);
+
 }
