@@ -56,7 +56,7 @@ namespace sim_core {
       buildOrderedGraph(add4_n, g);
 
       SECTION("Checking graph size") {
-	REQUIRE(num_vertices(g) == 5);
+	REQUIRE(numVertices(g) == 5);
       }
       
       deque<vdisc> topo_order = topologicalSort(g);
@@ -105,7 +105,7 @@ namespace sim_core {
       buildOrderedGraph(sub4_n, g);
 
       SECTION("Checking graph size") {
-	REQUIRE(num_vertices(g) == 5);
+	REQUIRE(numVertices(g) == 5);
       }
       
       deque<vdisc> topo_order = topologicalSort(g);
@@ -157,7 +157,7 @@ namespace sim_core {
       buildOrderedGraph(mul_n, g);
 
       SECTION("Checking graph size") {
-	REQUIRE(num_vertices(g) == 3);
+	REQUIRE(numVertices(g) == 3);
       }
       
       deque<vdisc> topo_order = topologicalSort(g);
@@ -203,7 +203,7 @@ namespace sim_core {
       buildOrderedGraph(andM, g);
 
       SECTION("Checking graph size") {
-      	REQUIRE(num_vertices(g) == 3);
+      	REQUIRE(numVertices(g) == 3);
       }
 
       deque<vdisc> topo_order = topologicalSort(g);
@@ -254,7 +254,7 @@ namespace sim_core {
       buildOrderedGraph(addM, g);
 
       SECTION("Checking graph size") {
-      	REQUIRE(num_vertices(g) == 3);
+      	REQUIRE(numVertices(g) == 3);
       }
 
       deque<vdisc> topo_order = topologicalSort(g);
@@ -376,7 +376,7 @@ namespace sim_core {
       buildOrderedGraph(neg_n, g);
 
       SECTION("Checking graph size") {
-      	REQUIRE(num_vertices(g) == 3);
+      	REQUIRE(numVertices(g) == 3);
       }
 
       deque<vdisc> topo_order = topologicalSort(g);
@@ -428,7 +428,7 @@ namespace sim_core {
       buildOrderedGraph(neg_n, g);
 
       SECTION("Checking graph size") {
-	REQUIRE(num_vertices(g) == 4);
+	REQUIRE(numVertices(g) == 4);
       }
 
       deque<vdisc> topo_order = topologicalSort(g);

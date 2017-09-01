@@ -18,9 +18,9 @@ namespace sim_core {
 
     cout << "Edges" << endl;
 
-    auto edge_pair = boost::edges(g);
+    auto edge_pair = boost::edges(g.g);
     for (auto it = edge_pair.first; it != edge_pair.second; it++) {
-      Conn c = boost::get(boost::edge_name, g, *it);
+      Conn c = boost::get(boost::edge_name, g.g, *it);
 
       cout << (c.first).toString() << " ---> " << (c.second).toString() << endl;
 
@@ -86,7 +86,7 @@ namespace sim_core {
 
       cout << "Vertices" << endl;
       for (auto& vd : topoOrder) {
-	WireNode wd = boost::get(boost::vertex_name, g, vd);
+	WireNode wd = boost::get(boost::vertex_name, g.g, vd);
 	cout << wd.getWire()->toString() << endl;
       }
 
@@ -168,7 +168,7 @@ namespace sim_core {
 
       cout << "Vertices" << endl;
       for (auto& vd : topoOrder) {
-	WireNode wd = boost::get(boost::vertex_name, g, vd);
+	WireNode wd = boost::get(boost::vertex_name, g.g, vd);
 	cout << wd.getWire()->toString() << endl;
       }
 
@@ -265,7 +265,7 @@ namespace sim_core {
 
       cout << "Vertices" << endl;
       for (auto& vd : topoOrder) {
-	WireNode wd = boost::get(boost::vertex_name, g, vd);
+	WireNode wd = boost::get(boost::vertex_name, g.g, vd);
 	cout << wd.getWire()->toString() << endl;
       }
 
@@ -323,7 +323,7 @@ namespace sim_core {
 
       cout << "Vertices" << endl;
       for (auto& vd : topoOrder) {
-	WireNode wd = boost::get(boost::vertex_name, g, vd);
+	WireNode wd = boost::get(boost::vertex_name, g.g, vd);
 	cout << wd.getWire()->toString() << endl;
       }
 
@@ -390,7 +390,7 @@ namespace sim_core {
 
       cout << "Vertices" << endl;
       for (auto& vd : topoOrder) {
-      	WireNode wd = boost::get(boost::vertex_name, g, vd);
+      	WireNode wd = boost::get(boost::vertex_name, g.g, vd);
       	cout << wd.getWire()->toString() << endl;
       }
 

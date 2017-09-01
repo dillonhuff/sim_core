@@ -11,10 +11,16 @@ namespace sim_core {
 
   typedef std::pair<WireableNode, WireableNode> Conn;
   typedef boost::property<boost::edge_name_t, Conn > EdgeProp;
-  typedef boost::directed_graph<boost::property<boost::vertex_name_t, WireableNode>, EdgeProp > NGraph;
+  typedef boost::directed_graph<boost::property<boost::vertex_name_t, WireableNode>, EdgeProp > ONGraph;
 
-  typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
-  typedef boost::graph_traits<NGraph>::edge_descriptor edisc;
+  typedef boost::graph_traits<ONGraph>::vertex_descriptor vdisc;
+  typedef boost::graph_traits<ONGraph>::edge_descriptor edisc;
+
+  class NGraph {
+  public:
+    ONGraph g;
+
+  };
 
   int numVertices(const NGraph& g);
   std::deque<vdisc> topologicalSort(const NGraph& g);
