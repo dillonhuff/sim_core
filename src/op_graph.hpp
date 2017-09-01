@@ -26,9 +26,9 @@ namespace sim_core {
     std::map<vdisc, WireNode> vertNames;
 
 
-  public:
-
     ONGraph g;    
+
+  public:
     
     WireNode getNode(const vdisc vd) const {
       return boost::get(boost::vertex_name, g, vd);
@@ -36,6 +36,27 @@ namespace sim_core {
 
     Conn getConn(const edisc ed) const {
       return boost::get(boost::edge_name, g, ed);
+    }
+
+    vdisc source(const edisc ed)  const {
+      auto eit = edgeVals.find(ed);
+
+      assert(eit != std::end(edgeVals));
+
+      return (*eit).second.first;
+    }
+
+    void addEdgeLabel(const edisc ed, const Conn& conn) {
+      boost::put(boost::edge_name, g, ed, conn);
+      edgeNames[ed] = conn;
+    }
+
+    vdisc target(const edisc ed)  const {
+      auto eit = edgeVals.find(ed);
+
+      assert(eit != std::end(edgeVals));
+
+      return (*eit).second.second;
     }
     
     edisc addEdge(const vdisc s, const vdisc e) {
@@ -52,13 +73,14 @@ namespace sim_core {
     vdisc addVertex(const WireNode& w) {
       vdisc v = g.add_vertex(w);
       verts.push_back(v);
+      vertNames[v] = w;
       return v;
     }
 
     std::vector<edisc> outEdges(const vdisc vd) const {
       std::vector<edisc> eds;
       for (auto& e : edges) {
-	if (source(e, g) == vd) {
+	if (source(e) == vd) {
 	  eds.push_back(e);
 	}
       }
@@ -68,7 +90,7 @@ namespace sim_core {
     std::vector<edisc> inEdges(const vdisc vd) const {
       std::vector<edisc> eds;
       for (auto& e : edges) {
-	if (target(e, g) == vd) {
+	if (target(e) == vd) {
 	  eds.push_back(e);
 	}
       }

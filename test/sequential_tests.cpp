@@ -18,9 +18,10 @@ namespace sim_core {
 
     cout << "Edges" << endl;
 
-    auto edge_pair = boost::edges(g.g);
-    for (auto it = edge_pair.first; it != edge_pair.second; it++) {
-      Conn c = getConn(g, *it);
+    //auto edge_pair = boost::edges(g.g);
+    //for (auto it = edge_pair.first; it != edge_pair.second; it++) {
+    for (auto& ed : g.getEdges()) {
+      Conn c = getConn(g, ed);
 
       cout << (c.first).toString() << " ---> " << (c.second).toString() << endl;
 

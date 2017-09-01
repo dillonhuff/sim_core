@@ -166,8 +166,8 @@ namespace sim_core {
 
 	deleted_edges.push_back(ed);
 	
-	vdisc src = source(ed, g.g);
-	vdisc dest = target(ed, g.g);
+	vdisc src = g.source(ed);
+	vdisc dest = g.target(ed);
 
 	assert(src == vd);
 
@@ -275,7 +275,8 @@ namespace sim_core {
       
     edisc ed = g.addEdge(c1_disc, c2_disc);
 
-    boost::put(boost::edge_name, g.g, ed, conn);
+    //boost::put(boost::edge_name, g.g, ed, conn);
+    g.addEdgeLabel(ed, conn);
     
   }
 
