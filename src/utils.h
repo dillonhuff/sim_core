@@ -141,5 +141,17 @@ namespace sim_core {
     return parent->toString() == "self";
   }
 
+  uint typeWidth(CoreIR::Type& tp);
+
+  uint containerTypeWidth(CoreIR::Type& tp);
+
+  bool standardWidth(CoreIR::Type& tp);
+
+  static inline CoreIR::ArrayType& toArray(CoreIR::Type& tp) {
+    assert(isArray(tp));
+
+    return static_cast<CoreIR::ArrayType&>(tp);
+  }
+
   
 }

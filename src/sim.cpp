@@ -4,6 +4,7 @@
 #include "coreir-passes/transform/rungenerators.h"
 
 #include "algorithm.h"
+#include "print_c.hpp"
 #include "utils.h"
 
 using namespace CoreIR;
@@ -30,88 +31,6 @@ using namespace CoreIR::Passes;
 
 namespace sim_core {
 
-
-  ArrayType& toArray(Type& tp) {
-    assert(isArray(tp));
-
-    return static_cast<ArrayType&>(tp);
-  }
-
-  string parens(const std::string& expr) {
-    return "(" + expr + ")";
-  }
-
-  uint typeWidth(Type& tp) {
-    //cout << "typeWidth = " << tp.toString() << endl;
-
-    assert(isPrimitiveType(tp));
-
-    if ((tp.getKind() == Type::TK_BitIn) ||
-	(tp.getKind() == Type::TK_Bit)) {
-      return 1;
-    }
-
-    if (isBitArrayOfLengthLEQ(tp, 64)) {
-      ArrayType& arrTp = toArray(tp);
-      return arrTp.getLen();
-    }
-
-    cout << "ERROR: No type width for " << tp.toString() << endl;
-    assert(false);
-  }
-
-  uint containerTypeWidth(Type& tp) {
-    uint w = typeWidth(tp);
-
-    assert(w <= 64);
-
-    if (w <= 8) {
-      return 8;
-    }
-
-    if (w <= 16) {
-      return 16;
-    }
-
-    if (w <= 32) {
-      return 32;
-    }
-
-    if (w <= 64) {
-      return 64;
-    }
-
-    assert(false);
-  }
-
-  string bitMaskString(uint w) {
-    assert(w > 0);
-    return parens(parens("1ULL << " + to_string(w)) + " - 1");    
-  }
-
-  string bitMaskString(Type& tp) {
-    uint w = typeWidth(tp);
-    return bitMaskString(w);
-  }
-
-  bool standardWidth(Type& tp) {
-    uint w = typeWidth(tp);
-
-    if ((w == 8) || (w == 16) || (w == 32) || (w == 64)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  string maskResult(Type& tp, const std::string& expr) {
-    if (standardWidth(tp)) {
-      return expr;
-    }
-
-    return parens( bitMaskString(tp) +  " & " + parens(expr));
-  }
-  
   Wireable* extractSource(Select* sel) {
     Wireable* p = sel->getParent();
 
@@ -154,18 +73,18 @@ namespace sim_core {
     return cv;
   }
   
-  void print_wireable_selects(Wireable* fst_select) {
-    cout << "Wireable selects" << endl;
-    for (auto& s : fst_select->getSelects()) {
-      Wireable* w = s.second;
-      assert(isSelect(w));
-      Select* sel = static_cast<Select*>(w);
-      Type* tp = sel->getType();
+  // void print_wireable_selects(Wireable* fst_select) {
+  //   cout << "Wireable selects" << endl;
+  //   for (auto& s : fst_select->getSelects()) {
+  //     Wireable* w = s.second;
+  //     assert(isSelect(w));
+  //     Select* sel = static_cast<Select*>(w);
+  //     Type* tp = sel->getType();
     
-      cout << s.first << " matches " << sel->wireableKind2Str(sel->getKind()) << " with type = " << tp->toString() << endl;
-    }
-    cout << "End selects" << endl;
-  }
+  //     cout << s.first << " matches " << sel->wireableKind2Str(sel->getKind()) << " with type = " << tp->toString() << endl;
+  //   }
+  //   cout << "End selects" << endl;
+  // }
 
   bool connectionIsOrdered(const Connection& connection) {
     Wireable* fst = connection.first;

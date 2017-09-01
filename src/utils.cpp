@@ -161,4 +161,58 @@ namespace sim_core {
     
   }
 
+  uint typeWidth(CoreIR::Type& tp) {  
+    //cout << "typeWidth = " << tp.toString() << endl;
+
+    assert(isPrimitiveType(tp));
+
+    if ((tp.getKind() == Type::TK_BitIn) ||
+	(tp.getKind() == Type::TK_Bit)) {
+      return 1;
+    }
+
+    if (isBitArrayOfLengthLEQ(tp, 64)) {
+      CoreIR::ArrayType& arrTp = toArray(tp);
+      return arrTp.getLen();
+    }
+
+    cout << "ERROR: No type width for " << tp.toString() << endl;
+    assert(false);
+  }
+
+  uint containerTypeWidth(Type& tp) {
+    uint w = typeWidth(tp);
+
+    assert(w <= 64);
+
+    if (w <= 8) {
+      return 8;
+    }
+
+    if (w <= 16) {
+      return 16;
+    }
+
+    if (w <= 32) {
+      return 32;
+    }
+
+    if (w <= 64) {
+      return 64;
+    }
+
+    assert(false);
+  }
+
+  bool standardWidth(Type& tp) {
+    uint w = typeWidth(tp);
+
+    if ((w == 8) || (w == 16) || (w == 32) || (w == 64)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  
 }
