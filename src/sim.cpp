@@ -1043,6 +1043,8 @@ namespace sim_core {
 
     vector<vdisc> s = vertsWithNoIncomingEdge(g);
 
+    vector<edisc> deleted_edges;
+
     while (s.size() > 0) {
       vdisc vd = s.back();
       topo_order.push_back(vd);
@@ -1050,8 +1052,6 @@ namespace sim_core {
 
       
       auto edge_it_pair = boost::out_edges(vd, g);
-
-      vector<edisc> deleted_edges;
 
       for (auto it = edge_it_pair.first; it != edge_it_pair.second; it++) {
 	edisc ed = *it;
@@ -1081,6 +1081,8 @@ namespace sim_core {
 
 
     }
+
+    assert(topo_order.size() == numVertices(g));
 
     return topo_order;
   }
