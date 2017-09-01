@@ -2,19 +2,11 @@
 
 #include "wire_node.hpp"
 
-#include <boost/graph/directed_graph.hpp>
-#include <boost/graph/adjacency_list.hpp>
-
 namespace sim_core {
 
   typedef WireNode WireableNode;
 
   typedef std::pair<WireableNode, WireableNode> Conn;
-  // typedef boost::property<boost::edge_name_t, Conn > EdgeProp;
-  // typedef boost::directed_graph<boost::property<boost::vertex_name_t, WireableNode>, EdgeProp > ONGraph;
-
-  // typedef boost::graph_traits<ONGraph>::vertex_descriptor vdisc;
-  // typedef boost::graph_traits<ONGraph>::edge_descriptor edisc;
 
   typedef int vdisc;
   typedef int edisc;
@@ -28,8 +20,6 @@ namespace sim_core {
     std::map<edisc, Conn> edgeNames;
     std::map<vdisc, WireNode> vertNames;
 
-
-    //ONGraph g;    
 
   public:
     
