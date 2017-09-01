@@ -73,25 +73,6 @@ namespace sim_core {
     return cv;
   }
 
-  bool connectionIsOrdered(const Connection& connection) {
-    Wireable* fst = connection.first;
-    Wireable* snd = connection.second;
-
-    assert(isSelect(fst));
-    assert(isSelect(snd));
-
-    // Is this the same as fst->getParent()->getType() ?? No, I dont think so
-    Type* fst_tp = fst->getType();
-    Type* snd_tp = snd->getType();
-
-    if ((fst_tp->isInput() && snd_tp->isOutput()) ||
-	(fst_tp->isOutput() && snd_tp->isInput())) {
-      return true;
-    }
-
-    return false;
-  }
-
   vector<Conn> buildOrderedConnections(Module* mod) {
     vector<Conn> conns;
 
@@ -254,11 +235,6 @@ namespace sim_core {
     }
 
     return inputs;
-  }
-
-  std::string getOpName(Instance& inst) {
-    string genRefName = inst.getGeneratorRef()->getName();
-    return genRefName;
   }
 
   std::string getOpString(Instance& inst) {

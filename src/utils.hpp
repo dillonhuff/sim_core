@@ -153,5 +153,9 @@ namespace sim_core {
     return static_cast<CoreIR::ArrayType&>(tp);
   }
 
-  
+
+  bool connectionIsOrdered(const CoreIR::Connection& connection);
+
+  std::string getOpName(CoreIR::Instance& inst);
+
 }
