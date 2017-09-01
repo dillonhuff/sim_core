@@ -21,6 +21,7 @@ namespace sim_core {
     std::vector<edisc> edges;
     std::vector<vdisc> verts;
 
+    std::map<edisc, std::pair<vdisc, vdisc> > edgeVals;
     std::map<edisc, Conn> edgeNames;
     std::map<vdisc, WireNode> vertNames;
 
@@ -43,6 +44,7 @@ namespace sim_core {
       assert(ed.second);
 
       edges.push_back(ed.first);
+      edgeVals.insert({ed.first, {s, e}});
 
       return ed.first;
     }
@@ -57,6 +59,16 @@ namespace sim_core {
       std::vector<edisc> eds;
       for (auto& e : edges) {
 	if (source(e, g) == vd) {
+	  eds.push_back(e);
+	}
+      }
+      return eds;
+    }
+
+    std::vector<edisc> inEdges(const vdisc vd) const {
+      std::vector<edisc> eds;
+      for (auto& e : edges) {
+	if (target(e, g) == vd) {
 	  eds.push_back(e);
 	}
       }

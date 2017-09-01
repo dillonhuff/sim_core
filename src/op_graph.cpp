@@ -160,11 +160,9 @@ namespace sim_core {
       s.pop_back();
 
       
-      auto edge_it_pair = boost::out_edges(vd, g.g);
+      //auto edge_it_pair = boost::out_edges(vd, g.g);
 
-      //for (auto it = edge_it_pair.first; it != edge_it_pair.second; it++) {
       for (auto ed : g.outEdges(vd)) {
-	//edisc ed = *it;
 
 	deleted_edges.push_back(ed);
 	
@@ -173,11 +171,12 @@ namespace sim_core {
 
 	assert(src == vd);
 
-	auto in_edge_pair = boost::in_edges(dest, g.g);
+	//auto in_edge_pair = boost::in_edges(dest, g.g);
 
 	bool noOtherEdges = true;
-	for (auto ie = in_edge_pair.first; ie != in_edge_pair.second; ie++) {
-	  edisc in_ed = *ie;
+	//for (auto ie = in_edge_pair.first; ie != in_edge_pair.second; ie++) {
+	for (auto in_ed : g.inEdges(dest)) {
+	  //edisc in_ed = *ie;
 	  if (!elem(in_ed, deleted_edges)) {
 	    noOtherEdges = false;
 	    break;
