@@ -20,7 +20,7 @@ namespace sim_core {
 
     auto edge_pair = boost::edges(g.g);
     for (auto it = edge_pair.first; it != edge_pair.second; it++) {
-      Conn c = boost::get(boost::edge_name, g.g, *it);
+      Conn c = getConn(g, *it);
 
       cout << (c.first).toString() << " ---> " << (c.second).toString() << endl;
 
@@ -83,12 +83,6 @@ namespace sim_core {
       cout << "About to topological sort" << endl;
       deque<vdisc> topoOrder = topologicalSort(g);
       cout << "Done topological sorting" << endl;
-
-      cout << "Vertices" << endl;
-      for (auto& vd : topoOrder) {
-	WireNode wd = boost::get(boost::vertex_name, g.g, vd);
-	cout << wd.getWire()->toString() << endl;
-      }
 
       REQUIRE(splitNodeEdgesCorrect(g));
 
@@ -165,12 +159,6 @@ namespace sim_core {
       cout << "About to topological sort" << endl;
       deque<vdisc> topoOrder = topologicalSort(g);
       cout << "Done topological sorting" << endl;
-
-      cout << "Vertices" << endl;
-      for (auto& vd : topoOrder) {
-	WireNode wd = boost::get(boost::vertex_name, g.g, vd);
-	cout << wd.getWire()->toString() << endl;
-      }
 
       REQUIRE(splitNodeEdgesCorrect(g));
 
@@ -263,12 +251,6 @@ namespace sim_core {
       deque<vdisc> topoOrder = topologicalSort(g);
       cout << "Done topological sorting" << endl;
 
-      cout << "Vertices" << endl;
-      for (auto& vd : topoOrder) {
-	WireNode wd = boost::get(boost::vertex_name, g.g, vd);
-	cout << wd.getWire()->toString() << endl;
-      }
-
       auto str = printCode(topoOrder, g, regChain);
       cout << "CODE STRING" << endl;
       cout << str << endl;
@@ -320,12 +302,6 @@ namespace sim_core {
       cout << "About to topological sort" << endl;
       deque<vdisc> topoOrder = topologicalSort(g);
       cout << "Done topological sorting" << endl;
-
-      cout << "Vertices" << endl;
-      for (auto& vd : topoOrder) {
-	WireNode wd = boost::get(boost::vertex_name, g.g, vd);
-	cout << wd.getWire()->toString() << endl;
-      }
 
       auto str = printCode(topoOrder, g, regChain);
       cout << "CODE STRING" << endl;
@@ -387,12 +363,6 @@ namespace sim_core {
       }
 
       deque<vdisc> topoOrder = topologicalSort(g);
-
-      cout << "Vertices" << endl;
-      for (auto& vd : topoOrder) {
-      	WireNode wd = boost::get(boost::vertex_name, g.g, vd);
-      	cout << wd.getWire()->toString() << endl;
-      }
 
       auto str = printCode(topoOrder, g, clkArr);
       cout << "CODE STRING" << endl;
