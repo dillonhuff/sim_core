@@ -12,10 +12,15 @@ using namespace CoreIR::Passes;
 
 namespace sim_core {
 
-  //(boost::vertex_name, g, vd).getWire();
   WireNode getNode(const NGraph& g, const vdisc vd) {
     return boost::get(boost::vertex_name, g, vd);
   }
+
+  Conn getConn(const NGraph& g, const edisc ed) {
+    return boost::get(boost::edge_name, g, ed);
+  }
+
+  
 
   Wireable* extractSource(Select* sel) {
     Wireable* p = sel->getParent();
@@ -100,13 +105,13 @@ namespace sim_core {
     vector<Conn> outConns;
 
     auto out_edge_pair = boost::out_edges(vd, g);
-    Wireable* w = boost::get(boost::vertex_name, g, vd).getWire();
+    Wireable* w = getNode( g, vd).getWire();
 
     for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
       auto out_edge_desc = *it;
 
       Conn edge_conn =
-	boost::get(boost::edge_name, g, out_edge_desc);
+	getConn( g, out_edge_desc);
 
       assert(isSelect(edge_conn.first.getWire()));
       Select* sel = static_cast<Select*>(edge_conn.first.getWire());
@@ -133,13 +138,13 @@ namespace sim_core {
     vector<Conn> inConss;
 
     auto out_edge_pair = boost::in_edges(vd, g);
-    Wireable* w = boost::get(boost::vertex_name, g, vd).getWire();
+    Wireable* w = getNode( g, vd).getWire();
 
     for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
       auto out_edge_desc = *it;
 
       Conn edge_conn =
-	boost::get(boost::edge_name, g, out_edge_desc);
+	getConn( g, out_edge_desc);
 
       assert(isSelect(edge_conn.second.getWire()));
 
@@ -157,13 +162,13 @@ namespace sim_core {
     vector<Wireable*> outputs;
 
     auto out_edge_pair = boost::out_edges(vd, g);
-    Wireable* w = boost::get(boost::vertex_name, g, vd).getWire();
+    Wireable* w = getNode( g, vd).getWire();
 
     for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
       auto out_edge_desc = *it;
 
       Conn edge_conn =
-	boost::get(boost::edge_name, g, out_edge_desc);
+	getConn( g, out_edge_desc);
 
       assert(isSelect(edge_conn.first.getWire()));
       Select* sel = static_cast<Select*>(edge_conn.first.getWire());
@@ -178,13 +183,13 @@ namespace sim_core {
 
   std::vector<Wireable*> getInputs(const vdisc vd, const NGraph& g) {
     vector<Wireable*> inputs;
-    Wireable* w = boost::get(boost::vertex_name, g, vd).getWire();
+    Wireable* w = getNode( g, vd).getWire();
     auto in_edge_pair = boost::in_edges(vd, g);
     for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
       auto in_edge_desc = *it;
       //pair<Wireable*, Wireable*> edge_conn =
       Conn edge_conn =
-	boost::get(boost::edge_name, g, in_edge_desc);
+	getConn( g, in_edge_desc);
 
       assert(isSelect(edge_conn.second.getWire()));
       Select* sel = static_cast<Select*>(edge_conn.second.getWire());
@@ -729,7 +734,7 @@ namespace sim_core {
 				Module& mod) {
     string str = "";
     for (auto& vd : topo_order) {
-      WireNode wd = boost::get(boost::vertex_name, g, vd);
+      WireNode wd = getNode( g, vd);
       Wireable* w = wd.getWire();
 
       //auto inSelects = getInputSelects(w);
@@ -777,7 +782,7 @@ namespace sim_core {
     str += "\n// Simulation code\n";
     for (auto& vd : topo_order) {
 
-      WireNode wd = get(boost::vertex_name, g, vd);
+      WireNode wd = getNode(g, vd);
       Wireable* inst = wd.getWire();
 
       if (isInstance(inst)) {
