@@ -16,4 +16,16 @@ namespace sim_core {
   typedef boost::graph_traits<NGraph>::vertex_descriptor vdisc;
   typedef boost::graph_traits<NGraph>::edge_descriptor edisc;
 
+  int numVertices(const NGraph& g);
+  std::deque<vdisc> topologicalSort(const NGraph& g);
+
+  std::vector<Conn> getInputConnections(const vdisc vd, const NGraph& g);
+  std::vector<CoreIR::Wireable*> getInputs(const vdisc vd, const NGraph& g);
+  std::vector<CoreIR::Wireable*> getOutputs(const vdisc vd, const NGraph& g);
+
+  Conn getConn(const NGraph& g, const edisc ed);
+  WireNode getNode(const NGraph& g, const vdisc vd);
+
+  CoreIR::Wireable* extractSource(CoreIR::Select* sel);
+
 }
