@@ -1021,9 +1021,24 @@ namespace sim_core {
 
   }
 
+  vector<vdisc> vertsWithNoIncomingEdge(const NGraph& g) {
+    auto vertex_it_pair = boost::vertices(g);
+
+    vector<vdisc> vs;
+
+    for (auto it = vertex_it_pair.first; it != vertex_it_pair.second; it++) {
+      vdisc v = *it;
+    }
+
+    return vs;
+    
+  }
+
   std::deque<vdisc> topologicalSort(const NGraph& g) {
     deque<vdisc> topo_order;
-    boost::topological_sort(g, std::front_inserter(topo_order));
+    //boost::topological_sort(g, std::front_inserter(topo_order));
+
+    vector<vdisc> s = vertsWithNoIncomingEdge(g);
 
     return topo_order;
   }
