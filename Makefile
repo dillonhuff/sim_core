@@ -29,3 +29,8 @@ simpass: build/simpass.dylib
 build/simpass.dylib: $(SRC_OBJS)
 	$(CXX) -L$(COREIR_LIB_PATH) -install_name "simpass.dylib" -dynamiclib $(LPATH) -lcoreir -o $@ $^
 
+clean:
+	rm -rf ./build
+	mkdir ./build
+	mkdir ./build/src
+	mkdir ./build/test
