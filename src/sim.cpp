@@ -1028,6 +1028,9 @@ namespace sim_core {
 
     for (auto it = vertex_it_pair.first; it != vertex_it_pair.second; it++) {
       vdisc v = *it;
+      if (getInputConnections(v, g).size() == 0) {
+	vs.push_back(v);
+      }
     }
 
     return vs;
@@ -1039,6 +1042,45 @@ namespace sim_core {
     //boost::topological_sort(g, std::front_inserter(topo_order));
 
     vector<vdisc> s = vertsWithNoIncomingEdge(g);
+
+    while (s.size() > 0) {
+      vdisc vd = s.back();
+      topo_order.push_back(vd);
+      s.pop_back();
+
+      
+      auto edge_it_pair = boost::out_edges(vd, g);
+
+      vector<edisc> deleted_edges;
+
+      for (auto it = edge_it_pair.first; it != edge_it_pair.second; it++) {
+	edisc ed = *it;
+
+	deleted_edges.push_back(ed);
+	
+	vdisc src = source(ed, g);
+	vdisc dest = target(ed, g);
+
+	assert(src == vd);
+
+	auto in_edge_pair = boost::in_edges(dest, g);
+
+	bool noOtherEdges = true;
+	for (auto ie = in_edge_pair.first; ie != in_edge_pair.second; ie++) {
+	  edisc in_ed = *ie;
+	  if (!elem(in_ed, deleted_edges)) {
+	    noOtherEdges = false;
+	    break;
+	  }
+	}
+
+	if (noOtherEdges){
+	  s.push_back(dest);
+	}
+      }
+
+
+    }
 
     return topo_order;
   }
