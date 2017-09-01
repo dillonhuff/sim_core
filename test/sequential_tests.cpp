@@ -2,7 +2,7 @@
 
 #include "sim.hpp"
 #include "utils.hpp"
-#include "test_utils.h"
+#include "test_utils.hpp"
 
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"
