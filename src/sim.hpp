@@ -1,6 +1,5 @@
 #pragma once
 
-#include "wire_node.hpp"
 #include "op_graph.hpp"
 
 namespace sim_core {

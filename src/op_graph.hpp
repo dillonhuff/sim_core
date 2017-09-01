@@ -1,8 +1,9 @@
 #pragma once
 
+#include "wire_node.hpp"
+
 #include <boost/graph/directed_graph.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/topological_sort.hpp>
 
 namespace sim_core {
 
