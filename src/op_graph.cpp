@@ -38,11 +38,12 @@ namespace sim_core {
   std::vector<Conn> NGraph::getInputConnections(const vdisc vd) const {
     vector<Conn> inConss;
 
-    auto out_edge_pair = boost::in_edges(vd, g);
+    //auto out_edge_pair = boost::in_edges(vd, g);
     Wireable* w = getNode(vd).getWire();
 
-    for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
-      auto out_edge_desc = *it;
+    //for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
+    for (auto out_edge_desc : inEdges(vd)) {
+      //auto out_edge_desc = *it;
 
       Conn edge_conn =
 	getConn(out_edge_desc);
@@ -63,11 +64,12 @@ namespace sim_core {
   std::vector<Wireable*> NGraph::getOutputs(const vdisc vd) const {
     vector<Wireable*> outputs;
 
-    auto out_edge_pair = boost::out_edges(vd, g);
+    //auto out_edge_pair = boost::out_edges(vd, g);
     Wireable* w = getNode(vd).getWire();
 
-    for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
-      auto out_edge_desc = *it;
+    //for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
+    //auto out_edge_desc = *it;
+    for (auto out_edge_desc : outEdges(vd)) {
 
       Conn edge_conn =
 	getConn(out_edge_desc);
@@ -90,9 +92,10 @@ namespace sim_core {
   std::vector<Wireable*> NGraph::getInputs(const vdisc vd) const {
     vector<Wireable*> inputs;
     Wireable* w = getNode(vd).getWire();
-    auto in_edge_pair = boost::in_edges(vd, g);
-    for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
-      auto in_edge_desc = *it;
+    //auto in_edge_pair = boost::in_edges(vd, g);
+    //for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
+    //auto in_edge_desc = *it;
+    for (auto in_edge_desc : inEdges(vd)) {
 
       Conn edge_conn =
 	getConn(in_edge_desc);
@@ -118,12 +121,13 @@ namespace sim_core {
   }
 
   vector<vdisc> NGraph::vertsWithNoIncomingEdge() const {
-    auto vertex_it_pair = boost::vertices(g);
+    //auto vertex_it_pair = boost::vertices(g);
 
     vector<vdisc> vs;
 
-    for (auto it = vertex_it_pair.first; it != vertex_it_pair.second; it++) {
-      vdisc v = *it;
+    //for (auto it = vertex_it_pair.first; it != vertex_it_pair.second; it++) {
+    for (auto v : getVerts()) {
+      //vdisc v = *it;
       if (getInputConnections(v).size() == 0) {
 	vs.push_back(v);
       }
@@ -138,13 +142,16 @@ namespace sim_core {
   }
 
   int NGraph::numVertices() const {
-    auto vertex_it_pair = boost::vertices(g);
+    //auto vertex_it_pair = boost::vertices(g);
 
-    int numVerts = 0;
-    for (auto it = vertex_it_pair.first; it != vertex_it_pair.second; it++) {
-      numVerts++;
-    }
-    return numVerts;
+    return verts.size();
+
+    //int numVerts = 0;
+    //for (auto it = vertex_it_pair.first; it != vertex_it_pair.second; it++) {
+    // for (auto& v : getVertic
+    //   numVerts++;
+    // }
+    // return numVerts;
   }
 
   std::deque<vdisc> topologicalSort(const NGraph& g) {
@@ -203,11 +210,12 @@ namespace sim_core {
   std::vector<Conn> NGraph::getOutputConnections(const vdisc vd) const {
     vector<Conn> outConns;
 
-    auto out_edge_pair = boost::out_edges(vd, g);
+    //auto out_edge_pair = boost::out_edges(vd, g);
     Wireable* w = getNode(vd).getWire();
 
-    for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
-      auto out_edge_desc = *it;
+    //for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
+    //auto out_edge_desc = *it;
+    for (auto out_edge_desc : outEdges(vd)) {
 
       Conn edge_conn =
 	getConn(out_edge_desc);

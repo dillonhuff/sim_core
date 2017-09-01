@@ -10,11 +10,14 @@ namespace sim_core {
   typedef WireNode WireableNode;
 
   typedef std::pair<WireableNode, WireableNode> Conn;
-  typedef boost::property<boost::edge_name_t, Conn > EdgeProp;
-  typedef boost::directed_graph<boost::property<boost::vertex_name_t, WireableNode>, EdgeProp > ONGraph;
+  // typedef boost::property<boost::edge_name_t, Conn > EdgeProp;
+  // typedef boost::directed_graph<boost::property<boost::vertex_name_t, WireableNode>, EdgeProp > ONGraph;
 
-  typedef boost::graph_traits<ONGraph>::vertex_descriptor vdisc;
-  typedef boost::graph_traits<ONGraph>::edge_descriptor edisc;
+  // typedef boost::graph_traits<ONGraph>::vertex_descriptor vdisc;
+  // typedef boost::graph_traits<ONGraph>::edge_descriptor edisc;
+
+  typedef int vdisc;
+  typedef int edisc;
 
   class NGraph {
   protected:
@@ -26,7 +29,7 @@ namespace sim_core {
     std::map<vdisc, WireNode> vertNames;
 
 
-    ONGraph g;    
+    //ONGraph g;    
 
   public:
     
@@ -56,7 +59,7 @@ namespace sim_core {
     }
 
     void addEdgeLabel(const edisc ed, const Conn& conn) {
-      boost::put(boost::edge_name, g, ed, conn);
+      //boost::put(boost::edge_name, g, ed, conn);
       edgeNames[ed] = conn;
     }
 
@@ -67,20 +70,31 @@ namespace sim_core {
 
       return (*eit).second.second;
     }
+
+    edisc nextEdgeDisc() const {
+      return edges.size();
+    }
+
+    vdisc nextVertexDisc() const {
+      return verts.size();
+    }
     
     edisc addEdge(const vdisc s, const vdisc e) {
-      std::pair<edisc, bool> ed = g.add_edge(s, e);
+      //std::pair<edisc, bool> ed = g.add_edge(s, e);
 
-      assert(ed.second);
+      //assert(ed.second);
 
-      edges.push_back(ed.first);
-      edgeVals.insert({ed.first, {s, e}});
+      edisc ed = nextEdgeDisc();
 
-      return ed.first;
+      edges.push_back(ed);//.first);
+      edgeVals.insert({ed, {s, e}});
+
+      return ed;
     }
 
     vdisc addVertex(const WireNode& w) {
-      vdisc v = g.add_vertex(w);
+      //vdisc v = g.add_vertex(w);
+      vdisc v = nextVertexDisc();
       verts.push_back(v);
       vertNames[v] = w;
       return v;
@@ -110,6 +124,10 @@ namespace sim_core {
       return edges;
     }
 
+    std::vector<vdisc> getVerts() const {
+      return verts;
+    }
+    
     int numVertices() const;
     vector<vdisc> vertsWithNoIncomingEdge() const;
     std::vector<Conn> getInputConnections(const vdisc vd) const;
