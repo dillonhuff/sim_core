@@ -10,25 +10,6 @@
 using namespace CoreIR;
 using namespace CoreIR::Passes;
 
-  namespace std {
-
-  template <>
-  struct hash<sim_core::WireNode>
-  {
-    std::size_t operator()(const sim_core::WireNode& k) const
-    {
-      using std::size_t;
-      using std::hash;
-      using std::string;
-
-      return ((hash<Wireable*>()(k.getWire())) ^
-	      hash<bool>()(k.isSequential) ^
-	      hash<bool>()(k.isReceiver));
-    }
-  };
-
-}  
-
 namespace sim_core {
 
   Wireable* extractSource(Select* sel) {
@@ -47,32 +28,6 @@ namespace sim_core {
     return extractSource(toSelect(p));
   }
   
-  std::string cVar(const WireNode& w) {
-    string cv = cVar(*(w.getWire()));
-    if (w.isSequential) {
-      if (w.isReceiver) {
-	return cv += "_receiver";
-      } else {
-	return cv += "_source";
-      }
-
-    }
-    return cv;
-  }
-
-  std::string cVar(const WireNode& w, const std::string& suffix) {
-    string cv = cVar(*(w.getWire()), suffix);
-    if (w.isSequential) {
-      if (w.isReceiver) {
-	return cv += "_receiver";
-      } else {
-	return cv += "_source";
-      }
-
-    }
-    return cv;
-  }
-
   vector<Conn> buildOrderedConnections(Module* mod) {
     vector<Conn> conns;
 

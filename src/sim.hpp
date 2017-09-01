@@ -1,33 +1,12 @@
 #pragma once
 
-#include "coreir.h"
+#include "wire_node.hpp"
 
 #include <boost/graph/directed_graph.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
 
 namespace sim_core {
-
-  class WireNode {
-  public:
-    CoreIR::Wireable* wire;
-
-    bool isSequential;
-    bool isReceiver;
-
-    CoreIR::Wireable* getWire() const { return wire; }
-
-    bool operator==(const WireNode& other) const {
-      return (wire == other.wire) &&
-	(isSequential == other.isSequential) &&
-	(isReceiver == other.isReceiver);
-    }
-
-    std::string toString() const {
-      return getWire()->toString() + ", sequential ? " + std::to_string(isSequential) + ", isReceiver ? " + std::to_string(isReceiver);
-    }
-
-  };
 
   typedef WireNode WireableNode;
 

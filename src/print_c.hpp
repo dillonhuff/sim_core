@@ -1,7 +1,6 @@
 #pragma once
 
-#include "coreir.h"
-
+#include "wire_node.hpp"
 #include "utils.hpp"
 
 namespace sim_core {
@@ -28,5 +27,9 @@ namespace sim_core {
     return parens( bitMaskString(tp) +  " & " + parens(expr));
   }
   
+
+  std::string cVar(const WireNode& w);
+
+  std::string cVar(const WireNode& w, const std::string& suffix);
 
 }
