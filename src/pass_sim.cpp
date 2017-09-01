@@ -1,10 +1,3 @@
-
-/*
- * Make sure you start at hellomodule.hpp before this one.
- *
- * This is just filling out some function definitions
- */
-
 #include "coreir.h"
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"
