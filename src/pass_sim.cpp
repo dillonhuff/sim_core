@@ -10,7 +10,7 @@
 #include "coreir-passes/transform/rungenerators.h"
 
 #include "pass_sim.hpp"
-#include "sim.h"
+#include "sim.hpp"
 
 //This is For a convenient macro to create the registerPass and deletePass functions
 #include "coreir-macros.h"

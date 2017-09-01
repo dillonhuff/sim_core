@@ -1,4 +1,4 @@
-#include "sim.h"
+#include "sim.hpp"
 
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"

@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include "sim.h"
+#include "sim.hpp"
 #include "utils.hpp"
 #include "test_utils.h"
 
