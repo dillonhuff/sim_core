@@ -24,9 +24,11 @@ namespace sim_core {
     std::map<edisc, Conn> edgeNames;
     std::map<vdisc, WireNode> vertNames;
 
-  public:
-    ONGraph g;
 
+  public:
+
+    ONGraph g;    
+    
     WireNode getNode(const vdisc vd) const {
       return boost::get(boost::vertex_name, g, vd);
     }
@@ -51,6 +53,22 @@ namespace sim_core {
       return v;
     }
 
+    std::vector<edisc> outEdges(const vdisc vd) const {
+      std::vector<edisc> eds;
+      for (auto& e : edges) {
+	if (source(e, g) == vd) {
+	  eds.push_back(e);
+	}
+      }
+      return eds;
+    }
+
+    std::vector<edisc> getEdges() const {
+      return edges;
+    }
+
+    int numVertices() const;
+    vector<vdisc> vertsWithNoIncomingEdge() const;
     std::vector<Conn> getInputConnections(const vdisc vd) const;
     std::vector<Conn> getOutputConnections(const vdisc vd) const;
     std::vector<CoreIR::Wireable*> getInputs(const vdisc vd) const;

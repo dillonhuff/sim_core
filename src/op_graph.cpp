@@ -114,13 +114,17 @@ namespace sim_core {
   }
 
   vector<vdisc> vertsWithNoIncomingEdge(const NGraph& g) {
-    auto vertex_it_pair = boost::vertices(g.g);
+    return g.vertsWithNoIncomingEdge();
+  }
+
+  vector<vdisc> NGraph::vertsWithNoIncomingEdge() const {
+    auto vertex_it_pair = boost::vertices(g);
 
     vector<vdisc> vs;
 
     for (auto it = vertex_it_pair.first; it != vertex_it_pair.second; it++) {
       vdisc v = *it;
-      if (getInputConnections(v, g).size() == 0) {
+      if (getInputConnections(v).size() == 0) {
 	vs.push_back(v);
       }
     }
@@ -130,7 +134,11 @@ namespace sim_core {
   }
 
   int numVertices(const NGraph& g) {
-    auto vertex_it_pair = boost::vertices(g.g);
+    return g.numVertices();
+  }
+
+  int NGraph::numVertices() const {
+    auto vertex_it_pair = boost::vertices(g);
 
     int numVerts = 0;
     for (auto it = vertex_it_pair.first; it != vertex_it_pair.second; it++) {
@@ -154,8 +162,9 @@ namespace sim_core {
       
       auto edge_it_pair = boost::out_edges(vd, g.g);
 
-      for (auto it = edge_it_pair.first; it != edge_it_pair.second; it++) {
-	edisc ed = *it;
+      //for (auto it = edge_it_pair.first; it != edge_it_pair.second; it++) {
+      for (auto ed : g.outEdges(vd)) {
+	//edisc ed = *it;
 
 	deleted_edges.push_back(ed);
 	
