@@ -12,6 +12,11 @@ using namespace CoreIR::Passes;
 
 namespace sim_core {
 
+  //(boost::vertex_name, g, vd).getWire();
+  WireNode getNode(const NGraph& g, const vdisc vd) {
+    return boost::get(boost::vertex_name, g, vd);
+  }
+
   Wireable* extractSource(Select* sel) {
     Wireable* p = sel->getParent();
 
