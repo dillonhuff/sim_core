@@ -3,7 +3,7 @@
 #include "coreir-passes/transform/flatten.h"
 #include "coreir-passes/transform/rungenerators.h"
 
-#include "algorithm.h"
+#include "algorithm.hpp"
 #include "print_c.hpp"
 #include "utils.hpp"
 
