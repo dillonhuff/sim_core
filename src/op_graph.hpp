@@ -17,8 +17,39 @@ namespace sim_core {
   typedef boost::graph_traits<ONGraph>::edge_descriptor edisc;
 
   class NGraph {
+  protected:
+    std::vector<edisc> edges;
+    std::vector<vdisc> verts;
+
+    std::map<edisc, Conn> edgeNames;
+    std::map<vdisc, WireNode> vertNames;
+
   public:
     ONGraph g;
+
+    WireNode getNode(const vdisc vd) const {
+      return boost::get(boost::vertex_name, g, vd);
+    }
+
+    Conn getConn(const edisc ed) const {
+      return boost::get(boost::edge_name, g, ed);
+    }
+    
+    edisc addEdge(const vdisc s, const vdisc e) {
+      std::pair<edisc, bool> ed = g.add_edge(s, e);
+
+      assert(ed.second);
+
+      edges.push_back(ed.first);
+
+      return ed.first;
+    }
+
+    vdisc addVertex(const WireNode& w) {
+      vdisc v = g.add_vertex(w);
+      verts.push_back(v);
+      return v;
+    }
 
     std::vector<Conn> getInputConnections(const vdisc vd) const;
     std::vector<Conn> getOutputConnections(const vdisc vd) const;
