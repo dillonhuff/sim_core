@@ -22,7 +22,8 @@ namespace sim_core {
 
     std::vector<Conn> getInputConnections(const vdisc vd) const;
     std::vector<Conn> getOutputConnections(const vdisc vd) const;
-
+    std::vector<CoreIR::Wireable*> getInputs(const vdisc vd) const;
+    std::vector<CoreIR::Wireable*> getOutputs(const vdisc vd) const;
   };
 
   int numVertices(const NGraph& g);
