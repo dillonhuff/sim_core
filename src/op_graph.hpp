@@ -31,11 +31,20 @@ namespace sim_core {
   public:
     
     WireNode getNode(const vdisc vd) const {
-      return boost::get(boost::vertex_name, g, vd);
+      auto vit = vertNames.find(vd);
+
+      assert(vit != std::end(vertNames));
+
+      return (*vit).second;
     }
 
     Conn getConn(const edisc ed) const {
-      return boost::get(boost::edge_name, g, ed);
+      //return boost::get(boost::edge_name, g, ed);
+      auto eit = edgeNames.find(ed);
+
+      assert(eit != std::end(edgeNames));
+
+      return (*eit).second;
     }
 
     vdisc source(const edisc ed)  const {
