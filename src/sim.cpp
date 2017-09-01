@@ -1039,7 +1039,6 @@ namespace sim_core {
 
   std::deque<vdisc> topologicalSort(const NGraph& g) {
     deque<vdisc> topo_order;
-    //boost::topological_sort(g, std::front_inserter(topo_order));
 
     vector<vdisc> s = vertsWithNoIncomingEdge(g);
 
