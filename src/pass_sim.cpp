@@ -7,7 +7,6 @@
 #include "coreir-macros.h"
 
 using namespace CoreIR;
-using namespace CoreIR;
 
 //Do not forget to set this static variable!!
 string SimModule::ID = "simpass";

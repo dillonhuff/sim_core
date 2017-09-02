@@ -3,8 +3,6 @@
 #include "algorithm.hpp"
 #include "utils.hpp"
 
-using namespace CoreIR;
-
 namespace CoreIR {
 
   Wireable* extractSource(Select* sel) {
@@ -24,11 +22,11 @@ namespace CoreIR {
   }
   
   WireNode getNode(const NGraph& g, const vdisc vd) {
-    return g.getNode(vd);//boost::get(boost::vertex_name, g.g, vd);
+    return g.getNode(vd);
   }
 
   Conn getConn(const NGraph& g, const edisc ed) {
-    return g.getConn(ed);//boost::get(boost::edge_name, g.g, ed);
+    return g.getConn(ed);
   }
 
   std::vector<Conn> getInputConnections(const vdisc vd, const NGraph& g) {
@@ -38,12 +36,9 @@ namespace CoreIR {
   std::vector<Conn> NGraph::getInputConnections(const vdisc vd) const {
     vector<Conn> inConss;
 
-    //auto out_edge_pair = boost::in_edges(vd, g);
     Wireable* w = getNode(vd).getWire();
 
-    //for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
     for (auto out_edge_desc : inEdges(vd)) {
-      //auto out_edge_desc = *it;
 
       Conn edge_conn =
 	getConn(out_edge_desc);
@@ -64,11 +59,8 @@ namespace CoreIR {
   std::vector<Wireable*> NGraph::getOutputs(const vdisc vd) const {
     vector<Wireable*> outputs;
 
-    //auto out_edge_pair = boost::out_edges(vd, g);
     Wireable* w = getNode(vd).getWire();
 
-    //for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
-    //auto out_edge_desc = *it;
     for (auto out_edge_desc : outEdges(vd)) {
 
       Conn edge_conn =
@@ -92,9 +84,7 @@ namespace CoreIR {
   std::vector<Wireable*> NGraph::getInputs(const vdisc vd) const {
     vector<Wireable*> inputs;
     Wireable* w = getNode(vd).getWire();
-    //auto in_edge_pair = boost::in_edges(vd, g);
-    //for (auto it = in_edge_pair.first; it != in_edge_pair.second; it++) {
-    //auto in_edge_desc = *it;
+
     for (auto in_edge_desc : inEdges(vd)) {
 
       Conn edge_conn =
@@ -121,13 +111,11 @@ namespace CoreIR {
   }
 
   vector<vdisc> NGraph::vertsWithNoIncomingEdge() const {
-    //auto vertex_it_pair = boost::vertices(g);
-
     vector<vdisc> vs;
 
-    //for (auto it = vertex_it_pair.first; it != vertex_it_pair.second; it++) {
+
     for (auto v : getVerts()) {
-      //vdisc v = *it;
+
       if (getInputConnections(v).size() == 0) {
 	vs.push_back(v);
       }
@@ -142,16 +130,9 @@ namespace CoreIR {
   }
 
   int NGraph::numVertices() const {
-    //auto vertex_it_pair = boost::vertices(g);
 
     return verts.size();
 
-    //int numVerts = 0;
-    //for (auto it = vertex_it_pair.first; it != vertex_it_pair.second; it++) {
-    // for (auto& v : getVertic
-    //   numVerts++;
-    // }
-    // return numVerts;
   }
 
   std::deque<vdisc> topologicalSort(const NGraph& g) {
@@ -167,8 +148,6 @@ namespace CoreIR {
       s.pop_back();
 
       
-      //auto edge_it_pair = boost::out_edges(vd, g.g);
-
       for (auto ed : g.outEdges(vd)) {
 
 	deleted_edges.push_back(ed);
@@ -178,12 +157,10 @@ namespace CoreIR {
 
 	assert(src == vd);
 
-	//auto in_edge_pair = boost::in_edges(dest, g.g);
-
 	bool noOtherEdges = true;
-	//for (auto ie = in_edge_pair.first; ie != in_edge_pair.second; ie++) {
+
 	for (auto in_ed : g.inEdges(dest)) {
-	  //edisc in_ed = *ie;
+
 	  if (!elem(in_ed, deleted_edges)) {
 	    noOtherEdges = false;
 	    break;
@@ -210,11 +187,8 @@ namespace CoreIR {
   std::vector<Conn> NGraph::getOutputConnections(const vdisc vd) const {
     vector<Conn> outConns;
 
-    //auto out_edge_pair = boost::out_edges(vd, g);
     Wireable* w = getNode(vd).getWire();
 
-    //for (auto it = out_edge_pair.first; it != out_edge_pair.second; it++) {
-    //auto out_edge_desc = *it;
     for (auto out_edge_desc : outEdges(vd)) {
 
       Conn edge_conn =
@@ -283,7 +257,6 @@ namespace CoreIR {
       
     edisc ed = g.addEdge(c1_disc, c2_disc);
 
-    //boost::put(boost::edge_name, g.g, ed, conn);
     g.addEdgeLabel(ed, conn);
     
   }
@@ -318,7 +291,7 @@ namespace CoreIR {
 
     if (imap.find({w1, false, false}) == end(imap)) {
       WireNode w{w1, false, false};
-      vdisc v1 = g.addVertex(w); //g.g.add_vertex(w);
+      vdisc v1 = g.addVertex(w);
       imap.insert({w, v1});
     }
 
