@@ -32,7 +32,7 @@ namespace CoreIR {
     }
 
     Conn getConn(const edisc ed) const {
-      //return boost::get(boost::edge_name, g, ed);
+
       auto eit = edgeNames.find(ed);
 
       assert(eit != std::end(edgeNames));
@@ -49,7 +49,7 @@ namespace CoreIR {
     }
 
     void addEdgeLabel(const edisc ed, const Conn& conn) {
-      //boost::put(boost::edge_name, g, ed, conn);
+
       edgeNames[ed] = conn;
     }
 
@@ -70,20 +70,16 @@ namespace CoreIR {
     }
     
     edisc addEdge(const vdisc s, const vdisc e) {
-      //std::pair<edisc, bool> ed = g.add_edge(s, e);
-
-      //assert(ed.second);
-
       edisc ed = nextEdgeDisc();
 
-      edges.push_back(ed);//.first);
+      edges.push_back(ed);
       edgeVals.insert({ed, {s, e}});
 
       return ed;
     }
 
     vdisc addVertex(const WireNode& w) {
-      //vdisc v = g.add_vertex(w);
+
       vdisc v = nextVertexDisc();
       verts.push_back(v);
       vertNames[v] = w;
