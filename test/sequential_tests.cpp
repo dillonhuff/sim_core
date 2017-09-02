@@ -18,8 +18,6 @@ namespace CoreIR {
 
     cout << "Edges" << endl;
 
-    //auto edge_pair = boost::edges(g.g);
-    //for (auto it = edge_pair.first; it != edge_pair.second; it++) {
     for (auto& ed : g.getEdges()) {
       Conn c = getConn(g, ed);
 
@@ -226,7 +224,6 @@ namespace CoreIR {
       def->connect("r2.out","ai.in0");
 
       def->connect("self.bp", "ai.in1");
-      //def->connect("r2.out", "ai.in1");
 
       def->connect("ai.out","self.out");
 
