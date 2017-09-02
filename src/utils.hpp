@@ -2,7 +2,7 @@
 
 #include "coreir.h"
 
-namespace sim_core {
+namespace CoreIR {
 
   static inline bool isSelect(CoreIR::Wireable* fst) {
     return fst->getKind() == CoreIR::Wireable::WK_Select;

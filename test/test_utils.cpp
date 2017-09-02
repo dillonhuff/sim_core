@@ -5,7 +5,7 @@
 
 using namespace std;
 
-namespace sim_core {
+namespace CoreIR {
 
   int compileCode(const std::string& code, const std::string& outFile) {
     std::ofstream out(outFile);
@@ -40,6 +40,5 @@ namespace sim_core {
     cout << "Test result = " << r << endl;
 
     return s || r;
-  }
-
+  }  
 }

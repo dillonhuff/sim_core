@@ -1,6 +1,6 @@
 #include "print_c.hpp"
 
-namespace sim_core {
+namespace CoreIR {
 
   std::string cVar(const WireNode& w) {
     string cv = cVar(*(w.getWire()));

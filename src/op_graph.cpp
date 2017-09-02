@@ -5,7 +5,7 @@
 
 using namespace CoreIR;
 
-namespace sim_core {
+namespace CoreIR {
 
   Wireable* extractSource(Select* sel) {
     Wireable* p = sel->getParent();

@@ -2,7 +2,7 @@
 
 #include "op_graph.hpp"
 
-namespace sim_core {
+namespace CoreIR {
 
   void buildOrderedGraph(CoreIR::Module* mod, NGraph& g);
 

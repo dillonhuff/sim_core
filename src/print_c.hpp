@@ -3,7 +3,7 @@
 #include "wire_node.hpp"
 #include "utils.hpp"
 
-namespace sim_core {
+namespace CoreIR {
 
   static inline string parens(const std::string& expr) {
     return "(" + expr + ")";

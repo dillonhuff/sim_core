@@ -2,7 +2,7 @@
 
 #include "coreir.h"
 
-namespace sim_core {
+namespace CoreIR {
 
   class WireNode {
   public:
@@ -31,9 +31,9 @@ namespace sim_core {
 namespace std {
 
   template <>
-  struct hash<sim_core::WireNode>
+  struct hash<CoreIR::WireNode>
   {
-    std::size_t operator()(const sim_core::WireNode& k) const
+    std::size_t operator()(const CoreIR::WireNode& k) const
     {
       using std::size_t;
       using std::hash;

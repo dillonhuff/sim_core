@@ -2,7 +2,7 @@
 
 #include "wire_node.hpp"
 
-namespace sim_core {
+namespace CoreIR {
 
   typedef WireNode WireableNode;
 

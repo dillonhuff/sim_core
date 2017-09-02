@@ -10,7 +10,7 @@
 using namespace CoreIR;
 using namespace CoreIR::Passes;
 
-namespace sim_core {
+namespace CoreIR {
 
   vector<Conn> buildOrderedConnections(Module* mod) {
     vector<Conn> conns;

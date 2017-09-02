@@ -16,7 +16,7 @@
 
 #define DBG_ASSERT(x) assert(x)
 
-namespace sim_core {
+namespace CoreIR {
 
   template<typename T>
   int num_elems(std::vector<std::vector<T>>& v) {

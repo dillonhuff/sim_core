@@ -1,6 +1,4 @@
 #include "coreir.h"
-#include "coreir-passes/transform/flatten.h"
-#include "coreir-passes/transform/rungenerators.h"
 
 #include "pass_sim.hpp"
 #include "sim.hpp"
@@ -9,7 +7,7 @@
 #include "coreir-macros.h"
 
 using namespace CoreIR;
-using namespace sim_core;
+using namespace CoreIR;
 
 //Do not forget to set this static variable!!
 string SimModule::ID = "simpass";

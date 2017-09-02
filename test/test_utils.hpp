@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace sim_core {
+namespace CoreIR {
 
   int compileCode(const std::string& code, const std::string& outFile);
 

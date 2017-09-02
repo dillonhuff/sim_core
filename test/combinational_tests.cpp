@@ -11,7 +11,7 @@
 using namespace CoreIR;
 using namespace CoreIR::Passes;
 
-namespace sim_core {
+namespace CoreIR {
 
   TEST_CASE("Combinational logic simulation") {
 

@@ -2,7 +2,7 @@
 
 using namespace CoreIR;
 
-namespace sim_core {
+namespace CoreIR {
 
   bool isBitArrayOfLength(Type& t, const uint len) {
     if (t.getKind() != Type::TK_Array) {
